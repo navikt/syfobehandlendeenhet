@@ -1,0 +1,76 @@
+<PolicySet xmlns="urn:oasis:names:tc:xacml:2.0:policy:schema:os"
+           PolicySetId="urn:xacml:2.0:nav:syfoservice:policysetid:1"
+           PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:deny-overrides">
+    <Target/>
+
+    <Policy PolicyId="urn:xacml:2.0:nav:syfoservice:policyid:1"
+            RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
+        <Target>
+            <Resources>
+                <Resource>
+                    <ResourceMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Ekstern</AttributeValue>
+                        <ResourceAttributeDesignator AttributeId="urn:nav:ikt:tilgangskontroll:xacml:resource:endepunkt"
+                                                     DataType="http://www.w3.org/2001/XMLSchema#string"/>
+                    </ResourceMatch>
+                </Resource>
+            </Resources>
+        </Target>
+        <Rule RuleId="urn:xacml:2.0:nav:syfoservice:ruleid:godkjente-ekstern-system" Effect="Permit">
+            <Description>Kun godkjente system skal kunne hente sykmeldinger.</Description>
+            <Condition>
+                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-at-least-one-member-of">
+                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-bag">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">srvsyforest</AttributeValue>
+                    </Apply>
+                    <SubjectAttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+                                                SubjectCategory="urn:nav:ikt:tilgangskontroll:xacml:subject-category:consumer-subject"
+                                                DataType="http://www.w3.org/2001/XMLSchema#string"/>
+                </Apply>
+            </Condition>
+        </Rule>
+        <Rule RuleId="alle-andre" Effect="Deny"/>
+    </Policy>
+    <Policy PolicyId="urn:xacml:2.0:nav:syfoservice:policyid:2"
+            RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
+        <Target>
+            <Resources>
+                <Resource>
+                    <ResourceMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Ekstern</AttributeValue>
+                        <ResourceAttributeDesignator AttributeId="urn:nav:ikt:tilgangskontroll:xacml:resource:endepunkt"
+                                                     DataType="http://www.w3.org/2001/XMLSchema#string"/>
+                    </ResourceMatch>
+                </Resource>
+            </Resources>
+        </Target>
+        <Rule RuleId="urn:xacml:2.0:nav:syfoservice:ruleid:kan-kun-aksessere-egen-ressurs" Effect="Permit">
+            <Condition>
+                <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
+                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">4</AttributeValue>
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+                            <SubjectAttributeDesignator
+                                    AttributeId="urn:nav:ikt:tilgangskontroll:xacml:subject:authentication-level"
+                                    DataType="http://www.w3.org/2001/XMLSchema#string"/>
+                        </Apply>
+                    </Apply>
+                    <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+                            <SubjectAttributeDesignator
+                                    AttributeId="urn:nav:ikt:tilgangskontroll:xacml:subject:aktor-id"
+                                    DataType="http://www.w3.org/2001/XMLSchema#string"/>
+                        </Apply>
+                        <!-- Hentes fra attributelocator -->
+                        <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
+                            <SubjectAttributeDesignator
+                                    AttributeId="urn:nav:ikt:tilgangskontroll:xacml:resource:owner-id"
+                                    DataType="http://www.w3.org/2001/XMLSchema#string"/>
+                        </Apply>
+                    </Apply>
+                </Apply>
+            </Condition>
+        </Rule>
+        <Rule RuleId="alle-andre" Effect="Deny"/>
+    </Policy>
+</PolicySet>
