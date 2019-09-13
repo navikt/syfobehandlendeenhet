@@ -1,12 +1,10 @@
 package no.nav.syfo.config
 
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.transaction.annotation.EnableTransactionManagement
 
 @Configuration
-@EnableTransactionManagement
+@EnableCaching
 @EnableScheduling
-@EnableAspectJAutoProxy
 class ApplicationConfig

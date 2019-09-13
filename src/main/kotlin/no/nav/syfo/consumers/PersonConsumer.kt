@@ -1,6 +1,7 @@
 package no.nav.syfo.consumers
 
 import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_PERSON_GEOGRAFISK
+import no.nav.syfo.metric.Metric
 import no.nav.tjeneste.virksomhet.person.v3.HentGeografiskTilknytningPersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.HentGeografiskTilknytningSikkerhetsbegrensing
 import no.nav.tjeneste.virksomhet.person.v3.PersonV3
@@ -9,7 +10,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.WSNorskIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.WSPersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.WSHentGeografiskTilknytningRequest
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.Optional.ofNullable
@@ -17,19 +17,14 @@ import javax.inject.Inject
 import javax.ws.rs.ForbiddenException
 
 @Service
-class PersonConsumer @Inject constructor(private val personV3: PersonV3): InitializingBean {
+class PersonConsumer @Inject constructor(private val personV3: PersonV3, private val metric: Metric) {
 
-    private var instance: PersonConsumer? = null
-
-    override fun afterPropertiesSet() {
-        instance = this
-    }
-
-    fun personService() = instance
+    private val LOG = LoggerFactory.getLogger(PersonConsumer::class.java)
 
     @Cacheable(cacheNames = [CACHENAME_PERSON_GEOGRAFISK], key = "#fnr", condition = "#fnr != null")
-    fun hentGeografiskTilknytning(fnr: String): String {
+    fun geografiskTilknytning(fnr: String): String {
         try {
+            metric.countOutgoingRequests("PersonConsumer")
             val geografiskTilknytning = personV3.hentGeografiskTilknytning(
                 WSHentGeografiskTilknytningRequest()
                     .withAktoer(WSPersonIdent().withIdent(WSNorskIdent().withIdent(fnr)))
@@ -38,19 +33,18 @@ class PersonConsumer @Inject constructor(private val personV3: PersonV3): Initia
             return ofNullable(geografiskTilknytning).map(WSGeografiskTilknytning::getGeografiskTilknytning)
                 .orElse("")
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
-            LOG.error("Fikk sikkerhetsbegrensing ved henting av geografiskTilknytning")
+            LOG.error("Recieved security constraint when requesting geografiskTilknytning")
+            metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningSikkerhetsbegrensing")
             throw ForbiddenException()
         } catch (e: HentGeografiskTilknytningPersonIkkeFunnet) {
-            LOG.error("Fant ikke person ved henting av geografiskTilknytning")
+            LOG.error("Couldn't find person when requesting geografiskTilknytning")
+            metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningPersonIkkeFunnet")
             throw RuntimeException()
         } catch (e: RuntimeException) {
-            LOG.error("Fikk RuntimeException ved henting av geografisk tilknytning", e)
+            LOG.error("Recieved RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
+            metric.countOutgoingRequestsFailed("PersonConsumer", "RuntimeException")
             throw e
         }
 
-    }
-
-    companion object {
-        private val LOG = LoggerFactory.getLogger(PersonConsumer::class.java)
     }
 }

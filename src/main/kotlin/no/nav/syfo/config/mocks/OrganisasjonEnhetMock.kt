@@ -1,5 +1,6 @@
 package no.nav.syfo.config.mocks
 
+import no.nav.syfo.config.consumer.OrganisasjonEnhetConfig
 import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.OrganisasjonEnhetV2
 import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.informasjon.WSEnhetsstatus
 import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.informasjon.WSOrganisasjonsenhet
@@ -7,10 +8,8 @@ import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.meldinger.*
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 
-import no.nav.syfo.config.consumer.OrganisasjonEnhetConfig.MOCK_KEY
-
 @Service
-@ConditionalOnProperty(value = MOCK_KEY, havingValue = "true")
+@ConditionalOnProperty(value = [OrganisasjonEnhetConfig.MOCK_KEY], havingValue = "true")
 class OrganisasjonEnhetMock : OrganisasjonEnhetV2 {
 
     override fun ping() {}
@@ -34,7 +33,13 @@ class OrganisasjonEnhetMock : OrganisasjonEnhetV2 {
     }
 
     override fun hentOverordnetEnhetListe(wsHentOverordnetEnhetListeRequest: WSHentOverordnetEnhetListeRequest): WSHentOverordnetEnhetListeResponse? {
-        return null
+        return WSHentOverordnetEnhetListeResponse()
+            .withOverordnetEnhetListe(
+                WSOrganisasjonsenhet()
+                    .withEnhetId("0101")
+                    .withEnhetNavn("X-Files")
+                    .withStatus(WSEnhetsstatus.AKTIV)
+            )
     }
 
 

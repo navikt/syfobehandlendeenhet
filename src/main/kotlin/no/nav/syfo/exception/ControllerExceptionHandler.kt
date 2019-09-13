@@ -1,23 +1,24 @@
 package no.nav.syfo.exception
 
-import lombok.extern.slf4j.Slf4j
 import no.nav.security.spring.oidc.validation.interceptor.OIDCUnauthorizedException
-import no.nav.syfo.metric.Metrikk
-import org.springframework.http.*
+import no.nav.syfo.metric.Metric
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.util.WebUtils
-
 import javax.inject.Inject
 import javax.validation.ConstraintViolationException
 import javax.ws.rs.ForbiddenException
 import javax.ws.rs.NotFoundException
 
-@Slf4j
 @ControllerAdvice
-class ControllerExceptionHandler @Inject
-constructor(private val metrikk: Metrikk) {
+class ControllerExceptionHandler @Inject constructor(private val metric: Metric) {
+
+    private val LOG = LoggerFactory.getLogger(ControllerExceptionHandler::class.java)
 
     private val BAD_REQUEST_MSG = "Vi kunne ikke tolke inndataene"
     private val FORBIDDEN_MSG = "Handling er forbudt"
@@ -115,10 +116,10 @@ constructor(private val metrikk: Metrikk) {
         status: HttpStatus,
         request: WebRequest
     ): ResponseEntity<ApiError> {
-        metrikk.tellHttpKall(status.value())
+        metric.tellHttpKall(status.value())
 
         if (HttpStatus.INTERNAL_SERVER_ERROR == status) {
-            log.error("Uventet feil: {} : {}", ex.javaClass.toString(), ex.message, ex)
+            LOG.error("Uventet feil: {} : {}", ex.javaClass.toString(), ex.message, ex)
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST)
         }
 

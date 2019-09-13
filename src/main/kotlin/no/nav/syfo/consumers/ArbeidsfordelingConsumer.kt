@@ -1,6 +1,8 @@
 package no.nav.syfo.consumers
 
-import no.nav.syfo.domain.model.Enhet
+import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_ARBEIDSFORDELING
+import no.nav.syfo.domain.model.BehandlendeEnhet
+import no.nav.syfo.metric.Metric
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.ArbeidsfordelingV1
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.FinnBehandlendeEnhetListeUgyldigInput
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.informasjon.WSArbeidsfordelingKriterier
@@ -9,22 +11,22 @@ import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.informasjon.WSGeografi
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.informasjon.WSTema
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.meldinger.WSFinnBehandlendeEnhetListeRequest
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.stereotype.Component
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.stereotype.Service
+import javax.inject.Inject
 
-@Component
-class ArbeidsfordelingConsumer(private val arbeidsfordelingV1: ArbeidsfordelingV1): InitializingBean {
+@Service
+class ArbeidsfordelingConsumer @Inject constructor(
+    private val arbeidsfordelingV1: ArbeidsfordelingV1,
+    private val metric: Metric
+) {
 
-    private var instance: ArbeidsfordelingConsumer? = null
+    private val LOG = LoggerFactory.getLogger(ArbeidsfordelingConsumer::class.java)
 
-    override fun afterPropertiesSet() {
-        instance = this
-    }
-
-    fun arbeidsfordelingConsumer() = instance
-
-    fun finnAktivBehandlendeEnhet(geografiskTilknytning: String): Enhet {
+    @Cacheable(value = [CACHENAME_ARBEIDSFORDELING], key = "#geografiskTilknytning", condition = "#geografiskTilknytning != null")
+    fun aktivBehandlendeEnhet(geografiskTilknytning: String): BehandlendeEnhet {
         try {
+            metric.countOutgoingRequests("ArbeidsfordelingConsumer")
             return arbeidsfordelingV1.finnBehandlendeEnhetListe(
                 WSFinnBehandlendeEnhetListeRequest()
                     .withArbeidsfordelingKriterier(
@@ -36,27 +38,27 @@ class ArbeidsfordelingConsumer(private val arbeidsfordelingV1: ArbeidsfordelingV
                 .stream()
                 .filter { wsOrganisasjonsenhet -> AKTIV == wsOrganisasjonsenhet.status }
                 .map { wsOrganisasjonsenhet ->
-                    Enhet(wsOrganisasjonsenhet.enhetId,
-                        wsOrganisasjonsenhet.enhetNavn)
+                    BehandlendeEnhet(
+                        wsOrganisasjonsenhet.enhetId,
+                        wsOrganisasjonsenhet.enhetNavn
+                    )
                 }
                 .findFirst()
                 .orElse(
-                    Enhet(
+                    BehandlendeEnhet(
                         geografiskTilknytning,
-                        geografiskTilknytning)
+                        geografiskTilknytning
+                    )
                 )
         } catch (e: FinnBehandlendeEnhetListeUgyldigInput) {
             LOG.error("Feil ved henting av brukers forvaltningsenhet med geografiskTilknytning: $geografiskTilknytning")
+            metric.countOutgoingRequestsFailed("ArbeidsfordelingConsumer", "FinnBehandlendeEnhetListeUgyldigInput")
             throw RuntimeException("Feil ved henting av brukers forvaltningsenhet", e)
         } catch (e: RuntimeException) {
             LOG.error("Feil ved henting av behandlende enhet for geografiskTilknytning: $geografiskTilknytning")
+            metric.countOutgoingRequestsFailed("ArbeidsfordelingConsumer", "RuntimeException")
             throw e
         }
 
     }
-
-    companion object {
-        private val LOG = LoggerFactory.getLogger(ArbeidsfordelingConsumer::class.java)
-    }
-
 }
