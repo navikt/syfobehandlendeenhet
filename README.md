@@ -1,14 +1,14 @@
 # syfobehandlendeenhet
-Tidligere moteadmin, håndtere dialogmøter
+
+## Om syfobehandlendeenhet
+syfobehandlendeenhet er en Spring Boot-applikasjon skrevet i Kotlin. Hovedoppgaven til syfobehandlendeenhet
+er å finne den enheten som skal behandle en sykmeldt. Appen eksponerer et REST-endepunkt på `/api/{fnr}`.
+
+For å finne behandlende enhet gjøres det WS-kall til `arbeidsfordeling`, `egenAnsatt`, `organisasjonEnhet`, og `person`; resultatet fra disse caches.
 
 ## Lokal utvikling
+Appen bygges med `gradle` 
 Start opp via `LocalApplication.main`. Kjører på port 8999.
 
 ## Veien til prod
 Bygg og Pipeline jobber ligger i jenkins: https://jenkins-digisyfo.adeo.no/job/digisyfo/job/syfobehandlendeenhet/
-
-
-## Database
-Appen kjører med en lokal H2 in-memory database. Den spinnes opp som en del av applikasjonen og er 
-også tilgjengelig i tester. Du kan logge inn og kjøre spørringer på:
-`localhost/h2` med jdbc_url: `jdbc:h2:mem:testdb`

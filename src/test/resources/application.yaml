@@ -1,21 +1,5 @@
 spring:
   profiles.active: local
-  embedded.kafka.brokers: 'localhost:9092'
-  kafka:
-    bootstrap-servers: ${spring.embedded.kafka.brokers}
-    consumer:
-      group-id: 'syfobehandlendeenhet-q1'
-      max-poll-records: 1
-      auto-offset-reset: latest
-      enable-auto-commit: false
-  h2.console:
-    enabled: true
-    path: '/h2'
-  datasource:
-    url: 'jdbc:h2:mem:testdb'
-    driver-class-name: 'org.h2.Driver'
-    username: 'sa'
-    password:
   jta.atomikos.datasource:
     max-pool-size: 32
     min-pool-size: 8
@@ -25,7 +9,6 @@ server:
   port: 8999
   servlet:
     context-path: /syfobehandlendeenhet
-
 
 securitytokenservice.url: "sts.url"
 srvsyfobehandlendeenhet:
@@ -45,66 +28,27 @@ srvsyfobehandlendeenhet:
 #      accepted_audience: aud-localhost
 #      cookie_name: localhost-idtoken
 
-aktoer.v2.endpointurl: "aktoerv2.url"
-brukeroppgave.v1.endpointurl: "brukeroppgavev1.url"
-sykefravaersoppfoelging.v1.endpointurl: "sykefravaeroppfoelgingv1.url"
+no.nav.security.oidc:
+  issuers: sts
+  issuer:
+    sts:
+      discoveryurl: http://metadata
+      accepted_audience: aud-localhost
+      cookie_name: localhost-idtoken
+
 virksomhet:
   arbeidsfordeling.v1.endpointurl: "arbeidsfordelingv1.url"
-  behandlearbeidogaktivitetoppgave.v1.endpointurl: "brukerprofil.url"
-  brukerprofil.v3.endpointurl: "brukerprofil.url"
-  digitalkontakinformasjon.v1.endpointurl: "dkif.url"
-  diskresjonskode.v1.endpointurl: "diskresjonskode.url"
   egenansatt.v1.endpointurl: "egenansattv1.url"
-  organisasjon.v4.endpointurl: "organisasjonv4.url"
   organisasjonEnhet.v2.endpointurl: "organisasjonEnhetv2.url"
-  organisasjonressursenhet.v1.endpointurl: "organisasjonRessursEnhetv1.url"
   person.v3.endpointurl: "personv3.url"
 
 fasit.environment.name: 'local'
 
-aktoer.withmock: true
 arbeidsfordeling.withmock: true
-arena.withmock: true
-brukerprofil.withmock: true
-dkif.withmock: true
 egenansatt.withmock: true
-ereg.withmock: true
-norg.withmock: true
 organisasjonenhet.withmock: true
 person.withmock: true
-sykefravaersoppfoelging.syfoservice.withmock: true
 
 dev: true
-
-syfoveilederoppgaver_system_v1.url: "https://app-q1.adeo.no/syfoveilederoppgaver/api/system/veilederoppgaver/v1"
-syfoveilederoppgaver.systemapi.username: "dummy"
-syfoveilederoppgaver.systemapi.password: "test123"
-
-tilgangskontrollapi.url: "https://www.ikke.no"
-
-## DATABASE ##
-moteadmindb.url: moteadmindburl
-moteadmindb.username: MOTEADMIN_Q1
-moteadmindb.password: 12345
-
-## SMTP ##
-smtpserver.host: smtp.test.local
-smtpserver.port: 25
-
-## LDAP ##
-ldap.url: ldaps\://ldapgw.test.local
-ldap.password: ldappassord
-ldap.username: srvSSOLinux
-ldap.basedn: dc\=test,dc\=local
-
-mqgateway03.name: mq
-mqgateway03.hostname: mq
-mqgateway03.port: "0001"
-syfobehandlendeenhet.channel.name: mq
-henvendelse.oppgave.henvendelse.queuename: mqhenvendelseoppgave
-varselproduksjon.best.varsel.m.handling.queuename: mqbestbarsel
-varselproduksjon.topp.varsel.utsending.queuename: mqstoppvarsel
-varselproduksjon.varslinger.queuename: mqvarslinger
-tredjepartsvarsel.queuename: mqtredjepartsvarsel
 
 tjenester.url: https://tjenester-q1.nav.no

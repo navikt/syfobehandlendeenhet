@@ -1,32 +1,31 @@
 package no.nav.syfo.consumers
 
-import no.nav.syfo.domain.model.Enhet
+import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_ORGANISASJONENHET
+import no.nav.syfo.domain.model.BehandlendeEnhet
+import no.nav.syfo.metric.Metric
 import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.HentOverordnetEnhetListeEnhetIkkeFunnet
 import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.OrganisasjonEnhetV2
 import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.informasjon.WSEnhetRelasjonstyper
-import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.meldinger.WSHentOverordnetEnhetListeRequest
-import org.springframework.stereotype.Component
-
-import javax.inject.Inject
-import java.util.Optional
-
 import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.informasjon.WSEnhetsstatus.AKTIV
+import no.nav.tjeneste.virksomhet.organisasjonenhet.v2.meldinger.WSHentOverordnetEnhetListeRequest
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.InitializingBean
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.stereotype.Service
+import java.util.*
+import javax.inject.Inject
 
-@Component
-class OrganisasjonEnhetConsumer @Inject constructor(private val organisasjonEnhetV2: OrganisasjonEnhetV2): InitializingBean {
+@Service
+class OrganisasjonEnhetConsumer @Inject constructor(
+    private val organisasjonEnhetV2: OrganisasjonEnhetV2,
+    private val metric: Metric
+) {
 
-    private var instance: OrganisasjonEnhetConsumer? = null
+    private val LOG = LoggerFactory.getLogger(OrganisasjonEnhetConsumer::class.java)
 
-    override fun afterPropertiesSet() {
-        instance = this
-    }
-
-    fun organisasjonEnhetConsumer() = instance
-
-    fun finnSetteKontor(enhet: String): Optional<Enhet> {
+    @Cacheable(value = [CACHENAME_ORGANISASJONENHET], key = "#enhet", condition = "#enhet != null")
+    fun setteKontor(enhet: String): Optional<BehandlendeEnhet> {
         try {
+            metric.countOutgoingRequests("OrganisasjonEnhetConsumer")
             return organisasjonEnhetV2.hentOverordnetEnhetListe(
                 WSHentOverordnetEnhetListeRequest()
                     .withEnhetId(enhet).withEnhetRelasjonstype(WSEnhetRelasjonstyper().withValue("HABILITET"))
@@ -35,18 +34,16 @@ class OrganisasjonEnhetConsumer @Inject constructor(private val organisasjonEnhe
                 .stream()
                 .filter { wsOrganisasjonsenhet -> AKTIV == wsOrganisasjonsenhet.status }
                 .map { wsOrganisasjonsenhet ->
-                    Enhet(wsOrganisasjonsenhet.enhetId,
-                        wsOrganisasjonsenhet.enhetNavn)
+                    BehandlendeEnhet(
+                        wsOrganisasjonsenhet.enhetId,
+                        wsOrganisasjonsenhet.enhetNavn
+                    )
                 }
                 .findFirst()
         } catch (e: HentOverordnetEnhetListeEnhetIkkeFunnet) {
-            LOG.error("Fant ingen overordnet enhet for enhet {}", enhet)
+            LOG.error("Couldn't find parent enhet for enhet {}", enhet)
+            metric.countOutgoingRequestsFailed("OrganisasjonEnhetConsumer", "HentOverordnetEnhetListeEnhetIkkeFunnet")
             throw RuntimeException()
         }
     }
-
-    companion object {
-        private val LOG = LoggerFactory.getLogger(OrganisasjonEnhetConsumer::class.java)
-    }
-
 }
