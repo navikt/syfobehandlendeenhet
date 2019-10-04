@@ -54,8 +54,8 @@ repositories {
 }
 
 dependencies {
-    implementation("no.nav.security:oidc-support:0.2.4")
-    implementation("no.nav.security:oidc-spring-support:0.2.4")
+    implementation("no.nav.security:oidc-support:$oidcSpringSupportVersion")
+    implementation("no.nav.security:oidc-spring-support:$oidcSpringSupportVersion")
     implementation("javax.xml.ws:jaxws-api:$jaxWsApiVersion")
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
@@ -90,7 +90,6 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.5")
 
     testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
-    testCompile("no.nav.security:oidc-spring-test:0.2.4")
     testCompile("no.nav.security:oidc-spring-test:$oidcSpringSupportTestVersion")
 }
 
