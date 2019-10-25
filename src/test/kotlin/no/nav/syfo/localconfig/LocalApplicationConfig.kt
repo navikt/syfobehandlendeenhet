@@ -27,11 +27,4 @@ class LocalApplicationConfig(environment: Environment) {
             requireNonNull(environment.getProperty("srvsyfobehandlendeenhet.password"))
         )
     }
-
-    @Bean
-    fun restTemplate(vararg interceptors: ClientHttpRequestInterceptor): RestTemplate {
-        val template = RestTemplate()
-        template.interceptors = listOf(*interceptors)
-        return template
-    }
 }

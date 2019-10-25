@@ -1,9 +1,7 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.consumers.ArbeidsfordelingConsumer
-import no.nav.syfo.consumers.EgenAnsattConsumer
-import no.nav.syfo.consumers.OrganisasjonEnhetConsumer
-import no.nav.syfo.consumers.PersonConsumer
+import no.nav.syfo.consumers.NorgConsumer
+import no.nav.syfo.consumers.*
 import no.nav.syfo.domain.model.BehandlendeEnhet
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -13,7 +11,7 @@ class EnhetService @Autowired
 constructor(
     private val arbeidsfordelingConsumer: ArbeidsfordelingConsumer,
     private val egenAnsattConsumer: EgenAnsattConsumer,
-    private val organisasjonEnhetConsumer: OrganisasjonEnhetConsumer,
+    private val norgConsumer: NorgConsumer,
     private val personConsumer: PersonConsumer
 ) {
 
@@ -21,8 +19,8 @@ constructor(
         val geografiskTilknytning = personConsumer.geografiskTilknytning(arbeidstakerFnr)
         val enhet = arbeidsfordelingConsumer.aktivBehandlendeEnhet(geografiskTilknytning)
         if (egenAnsattConsumer.isEgenAnsatt(arbeidstakerFnr)) {
-            val overordnetEnhet = organisasjonEnhetConsumer.setteKontor(enhet.enhetId).orElse(enhet)
-            return overordnetEnhet
+            val overordnetEnhet = norgConsumer.getSetteKontor(enhet.enhetId)
+            return overordnetEnhet ?: enhet
         }
         return enhet
     }

@@ -39,7 +39,6 @@ no.nav.security.oidc:
 virksomhet:
   arbeidsfordeling.v1.endpointurl: "arbeidsfordelingv1.url"
   egenansatt.v1.endpointurl: "egenansattv1.url"
-  organisasjonEnhet.v2.endpointurl: "organisasjonEnhetv2.url"
   person.v3.endpointurl: "personv3.url"
 
 fasit.environment.name: 'local'
@@ -52,3 +51,5 @@ person.withmock: true
 dev: true
 
 tjenester.url: https://tjenester-q1.nav.no
+
+norg2.url: https://norg2

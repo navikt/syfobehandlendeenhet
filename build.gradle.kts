@@ -9,7 +9,6 @@ version = "1.0.0"
 val springBootVersion = "2.1.8.RELEASE"
 val arbeidsfordelingV1Version = "1.1.0"
 val egenAnsattV1Version = "1.0.1"
-val organisasjonEnhetV2Version = "2.1.0"
 val personV3Version = "3.0.2"
 val cxfVersion = "3.3.3"
 val jaxWsApiVersion = "2.3.1"
@@ -72,7 +71,6 @@ dependencies {
 
     implementation("no.nav.sbl.dialogarena:arbeidsfordeling-v1-tjenestespesifikasjon:$arbeidsfordelingV1Version")
     implementation("no.nav.syfo.tjenester:egenAnsatt-v1-tjenestespesifikasjon:$egenAnsattV1Version")
-    implementation("no.nav.sbl.dialogarena:organisasjonenhet-v2-tjenestespesifikasjon:$organisasjonEnhetV2Version")
     implementation("no.nav.sbl.dialogarena:person-v3-tjenestespesifikasjon:$personV3Version")
     implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
@@ -83,6 +81,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus:1.0.6")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.71")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.2.71")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("net.logstash.logback:logstash-logback-encoder:4.10")
     implementation("org.slf4j:slf4j-api:1.7.25")
     implementation("javax.ws.rs:javax.ws.rs-api:2.0.1")
