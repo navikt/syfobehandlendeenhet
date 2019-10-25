@@ -3,9 +3,7 @@ package no.nav.syfo.exception
 import no.nav.security.spring.oidc.validation.interceptor.OIDCUnauthorizedException
 import no.nav.syfo.metric.Metric
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
@@ -18,7 +16,7 @@ import javax.ws.rs.NotFoundException
 @ControllerAdvice
 class ControllerExceptionHandler @Inject constructor(private val metric: Metric) {
 
-    private val LOG = LoggerFactory.getLogger(ControllerExceptionHandler::class.java)
+    private val log = LoggerFactory.getLogger(ControllerExceptionHandler::class.java)
 
     private val BAD_REQUEST_MSG = "Vi kunne ikke tolke inndataene"
     private val FORBIDDEN_MSG = "Handling er forbudt"
@@ -27,99 +25,91 @@ class ControllerExceptionHandler @Inject constructor(private val metric: Metric)
     private val NOT_FOUND_MSG = "Fant ikke ressurs"
 
     @ExceptionHandler(
-        Exception::class,
-        ConstraintViolationException::class,
-        ForbiddenException::class,
-        IllegalArgumentException::class,
-        OIDCUnauthorizedException::class,
-        NotFoundException::class
+            Exception::class,
+            ConstraintViolationException::class,
+            ForbiddenException::class,
+            IllegalArgumentException::class,
+            OIDCUnauthorizedException::class,
+            NotFoundException::class
     )
     fun handleException(ex: Exception, request: WebRequest): ResponseEntity<ApiError> {
         val headers = HttpHeaders()
 
-        if (ex is OIDCUnauthorizedException) {
+        return when (ex) {
+            is OIDCUnauthorizedException -> handleOIDCUnauthorizedException(ex, headers, request)
+            is ForbiddenException -> handleForbiddenException(ex, headers, request)
+            is IllegalArgumentException -> handleIllegalArgumentException(ex, headers, request)
+            is ConstraintViolationException -> handleConstraintViolationException(ex, headers, request)
+            is NotFoundException -> handleNotFoundException(ex, headers, request)
+            else -> {
+                val status = HttpStatus.INTERNAL_SERVER_ERROR
 
-            return handleOIDCUnauthorizedException(ex, headers, request)
-        } else if (ex is ForbiddenException) {
-
-            return handleForbiddenException(ex, headers, request)
-        } else if (ex is IllegalArgumentException) {
-
-            return handleIllegalArgumentException(ex, headers, request)
-        } else if (ex is ConstraintViolationException) {
-
-            return handleConstraintViolationException(ex, headers, request)
-        } else if (ex is NotFoundException) {
-
-            return handleNotFoundException(ex, headers, request)
-        } else {
-            val status = HttpStatus.INTERNAL_SERVER_ERROR
-
-            return handleExceptionInternal(ex, ApiError(status.value(), INTERNAL_MSG), headers, status, request)
+                handleExceptionInternal(ex, ApiError(status.value(), INTERNAL_MSG), headers, status, request)
+            }
         }
     }
 
     private fun handleConstraintViolationException(
-        ex: ConstraintViolationException,
-        headers: HttpHeaders,
-        request: WebRequest
+            ex: ConstraintViolationException,
+            headers: HttpHeaders,
+            request: WebRequest
     ): ResponseEntity<ApiError> {
         return handleExceptionInternal(
-            ex,
-            ApiError(HttpStatus.BAD_REQUEST.value(), BAD_REQUEST_MSG),
-            headers,
-            HttpStatus.BAD_REQUEST,
-            request
+                ex,
+                ApiError(HttpStatus.BAD_REQUEST.value(), BAD_REQUEST_MSG),
+                headers,
+                HttpStatus.BAD_REQUEST,
+                request
         )
     }
 
     private fun handleForbiddenException(
-        ex: ForbiddenException,
-        headers: HttpHeaders,
-        request: WebRequest
+            ex: ForbiddenException,
+            headers: HttpHeaders,
+            request: WebRequest
     ): ResponseEntity<ApiError> {
         val status = HttpStatus.FORBIDDEN
         return handleExceptionInternal(ex, ApiError(status.value(), FORBIDDEN_MSG), headers, status, request)
     }
 
     private fun handleIllegalArgumentException(
-        ex: IllegalArgumentException,
-        headers: HttpHeaders,
-        request: WebRequest
+            ex: IllegalArgumentException,
+            headers: HttpHeaders,
+            request: WebRequest
     ): ResponseEntity<ApiError> {
         val status = HttpStatus.BAD_REQUEST
         return handleExceptionInternal(ex, ApiError(status.value(), BAD_REQUEST_MSG), headers, status, request)
     }
 
     private fun handleOIDCUnauthorizedException(
-        ex: OIDCUnauthorizedException,
-        headers: HttpHeaders,
-        request: WebRequest
+            ex: OIDCUnauthorizedException,
+            headers: HttpHeaders,
+            request: WebRequest
     ): ResponseEntity<ApiError> {
         val status = HttpStatus.UNAUTHORIZED
         return handleExceptionInternal(ex, ApiError(status.value(), UNAUTHORIZED_MSG), headers, status, request)
     }
 
     private fun handleNotFoundException(
-        ex: NotFoundException,
-        headers: HttpHeaders,
-        request: WebRequest
+            ex: NotFoundException,
+            headers: HttpHeaders,
+            request: WebRequest
     ): ResponseEntity<ApiError> {
         val status = HttpStatus.NOT_FOUND
         return handleExceptionInternal(ex, ApiError(status.value(), NOT_FOUND_MSG), headers, status, request)
     }
 
     private fun handleExceptionInternal(
-        ex: Exception,
-        body: ApiError,
-        headers: HttpHeaders,
-        status: HttpStatus,
-        request: WebRequest
+            ex: Exception,
+            body: ApiError,
+            headers: HttpHeaders,
+            status: HttpStatus,
+            request: WebRequest
     ): ResponseEntity<ApiError> {
         metric.tellHttpKall(status.value())
 
         if (HttpStatus.INTERNAL_SERVER_ERROR == status) {
-            LOG.error("Uventet feil: {} : {}", ex.javaClass.toString(), ex.message, ex)
+            log.error("Uventet feil: {} : {}", ex.javaClass.toString(), ex.message, ex)
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST)
         }
 
