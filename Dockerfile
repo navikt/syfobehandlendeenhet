@@ -1,4 +1,5 @@
-FROM navikt/java:11
+FROM navikt/java:11-appdynamics
+ENV APPD_ENABLED=true
 COPY build/libs/*.jar app.jar
 
 ENV JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom \
