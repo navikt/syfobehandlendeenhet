@@ -13,6 +13,10 @@ no.nav.security.oidc:
     sts:
       discoveryurl: <syfonais>
       accepted_audience: <syfonais>
+    veileder:
+      discoveryurl: <syfonais>
+      accepted_audience: <syfonais>
+      cookie_name: isso-idtoken
 
 spring:
   main.banner-mode: 'off'

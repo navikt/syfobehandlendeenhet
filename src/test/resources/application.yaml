@@ -53,3 +53,4 @@ dev: true
 tjenester.url: https://tjenester-q1.nav.no
 
 norg2.url: https://norg2
+tilgangskontrollapi.url: "http://syfo-tilgangskontroll"
