@@ -1,11 +1,9 @@
 package no.nav.syfo.controller
 
-
 import no.nav.security.oidc.context.OIDCRequestContextHolder
 import no.nav.syfo.LocalApplication
 import no.nav.syfo.api.controllers.BehandlendeEnhetADController
 import no.nav.syfo.consumers.TilgangConsumer.Companion.ACCESS_TO_SYFO_WITH_AZURE_PATH
-import no.nav.syfo.oidc.OIDCIssuer
 import no.nav.syfo.oidc.OIDCIssuer.AZURE
 import no.nav.syfo.testhelper.OidcTestHelper.clearOIDCContext
 import no.nav.syfo.testhelper.OidcTestHelper.logInVeilederAD
