@@ -2,12 +2,8 @@ package no.nav.syfo.consumers
 
 import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_PERSON_GEOGRAFISK
 import no.nav.syfo.metric.Metric
-import no.nav.tjeneste.virksomhet.person.v3.HentGeografiskTilknytningPersonIkkeFunnet
-import no.nav.tjeneste.virksomhet.person.v3.HentGeografiskTilknytningSikkerhetsbegrensing
-import no.nav.tjeneste.virksomhet.person.v3.PersonV3
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.WSGeografiskTilknytning
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.WSNorskIdent
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.WSPersonIdent
+import no.nav.tjeneste.virksomhet.person.v3.*
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.WSHentGeografiskTilknytningRequest
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
@@ -17,7 +13,10 @@ import javax.inject.Inject
 import javax.ws.rs.ForbiddenException
 
 @Service
-class PersonConsumer @Inject constructor(private val personV3: PersonV3, private val metric: Metric) {
+class PersonConsumer @Inject constructor(
+        private val personV3: PersonV3,
+        private val metric: Metric
+) {
 
     private val LOG = LoggerFactory.getLogger(PersonConsumer::class.java)
 
@@ -33,7 +32,7 @@ class PersonConsumer @Inject constructor(private val personV3: PersonV3, private
             return ofNullable(geografiskTilknytning).map(WSGeografiskTilknytning::getGeografiskTilknytning)
                 .orElse("")
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
-            LOG.error("Recieved security constraint when requesting geografiskTilknytning")
+            LOG.error("Received security constraint when requesting geografiskTilknytning")
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningSikkerhetsbegrensing")
             throw ForbiddenException()
         } catch (e: HentGeografiskTilknytningPersonIkkeFunnet) {
@@ -41,7 +40,7 @@ class PersonConsumer @Inject constructor(private val personV3: PersonV3, private
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningPersonIkkeFunnet")
             throw RuntimeException()
         } catch (e: RuntimeException) {
-            LOG.error("Recieved RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
+            LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
             metric.countOutgoingRequestsFailed("PersonConsumer", "RuntimeException")
             throw e
         }
