@@ -9,6 +9,8 @@ import no.nav.syfo.testhelper.OidcTestHelper.clearOIDCContext
 import no.nav.syfo.testhelper.OidcTestHelper.logInVeilederAD
 import no.nav.syfo.testhelper.UserConstants.USER_FNR
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_ID
+import no.nav.syfo.testhelper.generateNorgEnhet
+import no.nav.syfo.testhelper.mockAndExpectNorgArbeidsfordeling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.junit.runner.RunWith
@@ -35,6 +37,9 @@ import javax.ws.rs.ForbiddenException
 @SpringBootTest(classes = [LocalApplication::class])
 class BehandlendeEnhetADControllerTest {
 
+    @Value("\${norg2.url}")
+    private lateinit var norg2Url: String
+
     @Value("\${tilgangskontrollapi.url}")
     private lateinit var tilgangskontrollUrl: String
 
@@ -59,11 +64,14 @@ class BehandlendeEnhetADControllerTest {
     @After
     fun tearDown() {
         clearOIDCContext(oidcRequestContextHolder)
+        mockRestServiceServer.reset()
     }
 
     @Test
     fun getBehandlendeEnhetHasAccess() {
         mockAccessToSYFO(OK)
+
+        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(generateNorgEnhet()))
 
         val behandlendeEnhetResponse = behandlendeEnhetADController.getBehandlendeEnhet(USER_FNR)
         assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(OK)
