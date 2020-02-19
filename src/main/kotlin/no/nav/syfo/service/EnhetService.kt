@@ -14,14 +14,35 @@ constructor(
     private val norgConsumer: NorgConsumer,
     private val personConsumer: PersonConsumer
 ) {
+    private val geografiskTilknytningUtvandret = "NOR"
+    private val enhetnrNAVUtland = "0393"
 
     fun arbeidstakersBehandlendeEnhet(arbeidstakerFnr: String): BehandlendeEnhet? {
         val geografiskTilknytning = personConsumer.geografiskTilknytning(arbeidstakerFnr)
         val enhet = arbeidsfordelingConsumer.aktivBehandlendeEnhet(geografiskTilknytning)
-        if (egenAnsattConsumer.isEgenAnsatt(arbeidstakerFnr)) {
-            val overordnetEnhet = norgConsumer.getSetteKontor(enhet.enhetId)
-            return overordnetEnhet ?: enhet
+        return when {
+            egenAnsattConsumer.isEgenAnsatt(arbeidstakerFnr) -> {
+                val overordnetEnhet = norgConsumer.getSetteKontor(enhet.enhetId)
+                overordnetEnhet ?: enhet
+            }
+            isEnhetUtvandret(enhet) -> {
+                getEnhetNAVUtland(enhet)
+            }
+            else -> {
+                enhet
+            }
         }
-        return enhet
+
+    }
+
+    fun isEnhetUtvandret(enhet: BehandlendeEnhet): Boolean {
+        return enhet.enhetId == geografiskTilknytningUtvandret
+    }
+
+    fun getEnhetNAVUtland(enhet: BehandlendeEnhet): BehandlendeEnhet {
+        return BehandlendeEnhet(
+                enhetId = enhetnrNAVUtland,
+                navn = enhet.navn
+        )
     }
 }
