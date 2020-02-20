@@ -68,13 +68,26 @@ class BehandlendeEnhetADControllerTest {
     }
 
     @Test
-    fun getBehandlendeEnhetHasAccess() {
+    fun getBehandlendeEnhetHasAccessContent() {
         mockAccessToSYFO(OK)
 
-        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(generateNorgEnhet()))
+        val norgEnhet = generateNorgEnhet().copy()
+        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
 
         val behandlendeEnhetResponse = behandlendeEnhetADController.getBehandlendeEnhet(USER_FNR)
         assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(OK)
+        assertThat(behandlendeEnhetResponse.body!!.enhetId).isEqualTo(norgEnhet.enhetNr)
+        assertThat(behandlendeEnhetResponse.body!!.navn).isEqualTo(norgEnhet.navn)
+    }
+
+    @Test
+    fun getBehandlendeEnhetHasAccessNoContent() {
+        mockAccessToSYFO(OK)
+
+        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, emptyList())
+
+        val behandlendeEnhetResponse = behandlendeEnhetADController.getBehandlendeEnhet(USER_FNR)
+        assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(NO_CONTENT)
     }
 
     @Test(expected = ForbiddenException::class)

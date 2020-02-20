@@ -19,7 +19,7 @@ constructor(
         val geografiskTilknytning = personConsumer.geografiskTilknytning(arbeidstakerFnr)
         val isEgenAnsatt = egenAnsattConsumer.isEgenAnsatt(arbeidstakerFnr)
 
-        val behandlendeEnhet = norgConsumer.getArbeidsfordelingEnhet(geografiskTilknytning, isEgenAnsatt)
+        val behandlendeEnhet = norgConsumer.getArbeidsfordelingEnhet(geografiskTilknytning, isEgenAnsatt) ?: return null
 
         return if (isEnhetUtvandret(behandlendeEnhet)) {
             getEnhetNAVUtland(behandlendeEnhet)
