@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
+val kotlinLibVersion = "1.3.60"
 val springBootVersion = "2.2.4.RELEASE"
 val egenAnsattV1Version = "1.0.1"
 val personV3Version = "3.0.2"
@@ -22,9 +23,9 @@ val tokenSupportVersion = "1.0.1"
 
 
 plugins {
-    kotlin("jvm") version "1.3.31"
+    kotlin("jvm") version "1.3.60"
     id("com.github.johnrengelman.shadow") version "4.0.3"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.3.50"
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.3.60"
 }
 
 buildscript {
@@ -77,8 +78,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:1.0.6")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.2.71")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.2.71")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinLibVersion")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinLibVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("net.logstash.logback:logstash-logback-encoder:4.10")
     implementation("org.slf4j:slf4j-api:1.7.25")
