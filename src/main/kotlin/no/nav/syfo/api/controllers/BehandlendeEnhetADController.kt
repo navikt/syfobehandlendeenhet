@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
 import javax.inject.Inject
 
-
 @RestController
 @ProtectedWithClaims(issuer = AZURE)
 @RequestMapping(value = ["/api/internad"])
@@ -26,14 +25,19 @@ constructor(
 ) {
 
     @GetMapping(value = ["/{fnr}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getBehandlendeEnhet(@PathVariable fnr: String): ResponseEntity<BehandlendeEnhet?> {
+    fun getBehandlendeEnhet(@PathVariable fnr: String): ResponseEntity<BehandlendeEnhet> {
         metric.countIncomingRequests("internad_behandlendeEnhet")
 
         tilgangConsumer.throwExceptionIfVeilederWithoutAccessToSYFO()
 
-        return ok()
-                .contentType(APPLICATION_JSON)
-                .body(enhetService.arbeidstakersBehandlendeEnhet(fnr))
-                ?: noContent().build()
+        return createResponse(enhetService.arbeidstakersBehandlendeEnhet(fnr))
+    }
+
+    private fun createResponse(behandlendeEnhet: BehandlendeEnhet?): ResponseEntity<BehandlendeEnhet> {
+        return if (behandlendeEnhet == null) {
+            noContent().build()
+        } else {
+            ok().contentType(APPLICATION_JSON).body(behandlendeEnhet)
+        }
     }
 }

@@ -18,8 +18,12 @@ constructor(
         private val metric: Metric,
         private val restTemplate: RestTemplate
 ) {
-    fun getArbeidsfordelingEnhet(geografiskTilknytning: String, isEgenAnsatt: Boolean): BehandlendeEnhet {
-        return getArbeidsfordelingEnheter(geografiskTilknytning, isEgenAnsatt)
+    fun getArbeidsfordelingEnhet(geografiskTilknytning: String, isEgenAnsatt: Boolean): BehandlendeEnhet? {
+        val enheter = getArbeidsfordelingEnheter(geografiskTilknytning, isEgenAnsatt)
+        if (enheter.isEmpty()) {
+            return null
+        }
+        return enheter
                 .filter { it.status == Enhetsstatus.AKTIV.formattedName }
                 .map {
                     BehandlendeEnhet(
