@@ -86,8 +86,8 @@ dependencies {
     implementation("javax.inject:javax.inject:1")
     implementation("org.apache.commons:commons-lang3:3.5")
 
-    testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
-    testCompile("no.nav.security:oidc-spring-test:$oidcSpringSupportTestVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+    testImplementation("no.nav.security:oidc-spring-test:$oidcSpringSupportTestVersion")
 }
 
 tasks {
