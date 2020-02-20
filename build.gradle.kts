@@ -7,7 +7,6 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 val springBootVersion = "2.1.8.RELEASE"
-val arbeidsfordelingV1Version = "1.1.0"
 val egenAnsattV1Version = "1.0.1"
 val personV3Version = "3.0.2"
 val cxfVersion = "3.3.3"
@@ -69,7 +68,6 @@ dependencies {
     implementation("org.apache.cxf:cxf-rt-transports-http:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")
 
-    implementation("no.nav.sbl.dialogarena:arbeidsfordeling-v1-tjenestespesifikasjon:$arbeidsfordelingV1Version")
     implementation("no.nav.syfo.tjenester:egenAnsatt-v1-tjenestespesifikasjon:$egenAnsattV1Version")
     implementation("no.nav.sbl.dialogarena:person-v3-tjenestespesifikasjon:$personV3Version")
     implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")

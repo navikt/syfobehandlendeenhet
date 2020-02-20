@@ -13,9 +13,16 @@ data class NorgEnhet(
         var orgNrTilKommunaltNavKontor: String?,
         var organisasjonsnummer: String?,
         var sosialeTjenester: String?,
-        var status: String?,
+        var status: String,
         var type: String?,
         var underAvviklingDato: String?,
         var underEtableringDato: String?,
         var versjon: String?
 )
+
+enum class Enhetsstatus(val formattedName: String) {
+    UNDER_ETABLERING("Under etablering"),
+    AKTIV("Aktiv"),
+    UNDER_AVVIKLING("Under avvikling"),
+    NEDLAGT("Nedlagt");
+}
