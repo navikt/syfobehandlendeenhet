@@ -8,8 +8,8 @@ version = "1.0.0"
 
 val kotlinLibVersion = "1.3.60"
 val springBootVersion = "2.2.4.RELEASE"
-val egenAnsattV1Version = "1.0.1"
-val personV3Version = "3.0.2"
+val egenAnsattV1Version = "1.2019.09.25-00.21-49b69f0625e0"
+val personV3Version = "1.2019.07.11-06.47-b55f47790a9d"
 val cxfVersion = "3.3.3"
 val jaxWsApiVersion = "2.3.1"
 val javaxAnnotationApiVersion = "1.3.2"
@@ -69,8 +69,8 @@ dependencies {
     implementation("org.apache.cxf:cxf-rt-transports-http:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")
 
-    implementation("no.nav.syfo.tjenester:egenAnsatt-v1-tjenestespesifikasjon:$egenAnsattV1Version")
-    implementation("no.nav.sbl.dialogarena:person-v3-tjenestespesifikasjon:$personV3Version")
+    implementation("no.nav.tjenestespesifikasjoner:egenansatt-v1-tjenestespesifikasjon:$egenAnsattV1Version")
+    implementation("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:$personV3Version")
     implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-jersey:$springBootVersion")
