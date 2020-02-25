@@ -2,9 +2,9 @@ package no.nav.syfo.consumers
 
 import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_PERSON_GEOGRAFISK
 import no.nav.syfo.metric.Metric
-import no.nav.tjeneste.virksomhet.person.v3.*
+import no.nav.tjeneste.virksomhet.person.v3.binding.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.WSHentGeografiskTilknytningRequest
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentGeografiskTilknytningRequest
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
@@ -25,11 +25,11 @@ class PersonConsumer @Inject constructor(
         try {
             metric.countOutgoingRequests("PersonConsumer")
             val geografiskTilknytning = personV3.hentGeografiskTilknytning(
-                WSHentGeografiskTilknytningRequest()
-                    .withAktoer(WSPersonIdent().withIdent(WSNorskIdent().withIdent(fnr)))
+                HentGeografiskTilknytningRequest()
+                    .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
             )
                 .geografiskTilknytning
-            return ofNullable(geografiskTilknytning).map(WSGeografiskTilknytning::getGeografiskTilknytning)
+            return ofNullable(geografiskTilknytning).map(GeografiskTilknytning::getGeografiskTilknytning)
                 .orElse("")
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
             LOG.error("Received security constraint when requesting geografiskTilknytning")

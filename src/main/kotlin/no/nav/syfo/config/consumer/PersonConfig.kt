@@ -4,7 +4,7 @@ import no.nav.syfo.config.EnvironmentUtil.getEnvVar
 import no.nav.syfo.ws.util.LogErrorHandler
 import no.nav.syfo.ws.util.STSClientConfig
 import no.nav.syfo.ws.util.WsClient
-import no.nav.tjeneste.virksomhet.person.v3.PersonV3
+import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
