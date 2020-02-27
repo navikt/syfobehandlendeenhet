@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 import javax.inject.Inject
@@ -40,22 +41,23 @@ constructor(
                 geografiskOmraade = geografiskTilknytning,
                 skjermet = isEgenAnsatt
         )
-        val result = restTemplate
-                .exchange<List<NorgEnhet>>(
-                        getArbeidsfordelingUrl(),
-                        HttpMethod.POST,
-                        createRequestEntity(requestBody),
-                        object : ParameterizedTypeReference<List<NorgEnhet>>() {}
-                )
+        try {
+            val result = restTemplate
+                    .exchange<List<NorgEnhet>>(
+                            getArbeidsfordelingUrl(),
+                            HttpMethod.POST,
+                            createRequestEntity(requestBody),
+                            object : ParameterizedTypeReference<List<NorgEnhet>>() {}
+                    )
 
-        if (result.statusCode != HttpStatus.OK) {
-            metric.countOutgoingRequestsFailed("getArbeidsfordelingEnheter", result.statusCode.toString())
-            log.error("Kall mot NORG2 feiler med HTTP-{} for geografisk tilknytning {}", result.statusCode, geografiskTilknytning)
-            throw RuntimeException("Henting av behandlendeenhet feilet med HTTP-" + result.statusCode)
+            val enhetList = Objects.requireNonNull<List<NorgEnhet>>(result.body)
+            metric.countOutgoingRequests("getArbeidsfordelingEnheter")
+            return enhetList
+        } catch (e: RestClientResponseException) {
+            metric.countOutgoingRequestsFailed("getArbeidsfordelingEnheter", e.rawStatusCode.toString())
+            log.error("Call to NORG2-arbeidsfordeling failed with status HTTP-{} for GeografiskTilknytning {}", e.rawStatusCode, geografiskTilknytning)
+            throw e
         }
-        val enhetList = Objects.requireNonNull<List<NorgEnhet>>(result.body)
-        metric.countOutgoingRequests("getArbeidsfordelingEnheter")
-        return enhetList
     }
 
     private fun getArbeidsfordelingUrl(): String {
