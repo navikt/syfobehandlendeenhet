@@ -17,6 +17,7 @@ val jaxbApiVersion = "2.4.0-b180830.0359"
 val jaxbRuntimeVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val jaxwsToolsVersion = "2.3.1"
+val oidcSupportVersion = "0.2.18"
 val oidcSpringSupportVersion = "0.2.4"
 val oidcSpringSupportTestVersion = "0.2.4"
 val tokenSupportVersion = "1.0.1"
@@ -53,8 +54,7 @@ repositories {
 }
 
 dependencies {
-    implementation("no.nav.security:oidc-support:$oidcSpringSupportVersion")
-    implementation("no.nav.security:oidc-spring-support:$oidcSpringSupportVersion")
+    implementation("no.nav.security:oidc-spring-support:$oidcSupportVersion")
     implementation("javax.xml.ws:jaxws-api:$jaxWsApiVersion")
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
@@ -88,7 +88,7 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.5")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
-    testImplementation("no.nav.security:oidc-spring-test:$oidcSpringSupportTestVersion")
+    testImplementation("no.nav.security:oidc-test-support:$oidcSupportVersion")
 }
 
 tasks {

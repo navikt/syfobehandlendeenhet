@@ -1,10 +1,8 @@
 package no.nav.syfo.selftest
 
-import no.nav.security.spring.oidc.validation.api.Unprotected
+import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 const val APPLICATION_LIVENESS = "Application is alive!"
 const val APPLICATION_READY = "Application is ready!"

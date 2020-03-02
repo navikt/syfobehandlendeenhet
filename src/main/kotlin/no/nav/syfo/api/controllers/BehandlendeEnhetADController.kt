@@ -1,6 +1,6 @@
 package no.nav.syfo.api.controllers
 
-import no.nav.security.spring.oidc.validation.api.ProtectedWithClaims
+import no.nav.security.oidc.api.ProtectedWithClaims
 import no.nav.syfo.consumers.TilgangConsumer
 import no.nav.syfo.domain.model.BehandlendeEnhet
 import no.nav.syfo.metric.Metric

@@ -1,6 +1,6 @@
 package no.nav.syfo.api.controllers
 
-import no.nav.security.spring.oidc.validation.api.ProtectedWithClaims
+import no.nav.security.oidc.api.ProtectedWithClaims
 import no.nav.syfo.domain.model.BehandlendeEnhet
 import no.nav.syfo.metric.Metric
 import no.nav.syfo.oidc.OIDCIssuer.STS
@@ -30,7 +30,7 @@ constructor(
 
     private fun createResponse(behandlendeEnhet: BehandlendeEnhet?): ResponseEntity<BehandlendeEnhet> {
         return if (behandlendeEnhet == null) {
-            metric.countOutgoingReponses("get_behandlendeenhet_sts",204)
+            metric.countOutgoingReponses("get_behandlendeenhet_sts", 204)
             noContent().build()
         } else {
             ok().contentType(MediaType.APPLICATION_JSON).body(behandlendeEnhet)
