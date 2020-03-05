@@ -8,6 +8,7 @@ version = "1.0.0"
 
 val kotlinLibVersion = "1.3.60"
 val springBootVersion = "2.2.5.RELEASE"
+val springRetryVersion = "1.2.4.RELEASE"
 val egenAnsattV1Version = "1.2019.09.25-00.21-49b69f0625e0"
 val personV3Version = "1.2019.07.11-06.47-b55f47790a9d"
 val cxfVersion = "3.3.3"
@@ -67,12 +68,17 @@ dependencies {
 
     implementation("no.nav.tjenestespesifikasjoner:egenansatt-v1-tjenestespesifikasjon:$egenAnsattV1Version")
     implementation("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:$personV3Version")
+
     implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-jersey:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-cache:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
+
+    implementation("org.springframework.retry:spring-retry:$springRetryVersion")
+
     implementation("io.micrometer:micrometer-registry-prometheus:1.0.6")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinLibVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinLibVersion")

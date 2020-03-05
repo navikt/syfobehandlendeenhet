@@ -7,19 +7,24 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentGeografiskTilknytningRequest
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.retry.annotation.*
 import org.springframework.stereotype.Service
 import java.util.Optional.ofNullable
 import javax.inject.Inject
 import javax.ws.rs.ForbiddenException
+import javax.xml.ws.soap.SOAPFaultException
 
 @Service
 class PersonConsumer @Inject constructor(
         private val personV3: PersonV3,
         private val metric: Metric
 ) {
-
     private val LOG = LoggerFactory.getLogger(PersonConsumer::class.java)
 
+    @Retryable(
+            value = [SOAPFaultException::class],
+            backoff = Backoff(delay = 200, maxDelay = 1000)
+    )
     @Cacheable(cacheNames = [CACHENAME_PERSON_GEOGRAFISK], key = "#fnr", condition = "#fnr != null")
     fun geografiskTilknytning(fnr: String): String {
         try {
@@ -44,6 +49,11 @@ class PersonConsumer @Inject constructor(
             metric.countOutgoingRequestsFailed("PersonConsumer", "RuntimeException")
             throw e
         }
+    }
 
+    @Recover
+    fun recover(e: SOAPFaultException) {
+        LOG.error("Failed to request Geografisk Tilknytning from TPS after max retry attempts", e)
+        throw e
     }
 }
