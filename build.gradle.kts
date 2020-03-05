@@ -18,8 +18,7 @@ val jaxbRuntimeVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val jaxwsToolsVersion = "2.3.1"
 val oidcSupportVersion = "0.2.18"
-val oidcSpringSupportVersion = "0.2.4"
-val oidcSpringSupportTestVersion = "0.2.4"
+val oidcSpringSupportVersion = "0.2.12"
 val tokenSupportVersion = "1.0.1"
 
 
@@ -88,7 +87,7 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.5")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
-    testImplementation("no.nav.security:oidc-test-support:$oidcSupportVersion")
+    testImplementation("no.nav.security:oidc-test-support:$oidcSpringSupportVersion")
 }
 
 tasks {
