@@ -45,9 +45,13 @@ class PersonConsumer @Inject constructor(
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningPersonIkkeFunnet")
             throw RuntimeException()
         } catch (e: RuntimeException) {
-            LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
-            metric.countOutgoingRequestsFailed("PersonConsumer", "RuntimeException")
-            throw e
+            if (e is SOAPFaultException) {
+                throw e
+            } else {
+                LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
+                metric.countOutgoingRequestsFailed("PersonConsumer", "RuntimeException")
+                throw e
+            }
         }
     }
 
