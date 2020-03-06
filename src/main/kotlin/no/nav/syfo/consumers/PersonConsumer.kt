@@ -1,6 +1,7 @@
 package no.nav.syfo.consumers
 
 import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_PERSON_GEOGRAFISK
+import no.nav.syfo.exception.RequestInvalid
 import no.nav.syfo.metric.Metric
 import no.nav.tjeneste.virksomhet.person.v3.binding.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
@@ -34,7 +35,8 @@ class PersonConsumer @Inject constructor(
                             .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
             )
                     .geografiskTilknytning
-            return geografiskTilknytning?.geografiskTilknytning ?: ""
+            return geografiskTilknytning?.geografiskTilknytning
+                    ?: throw RequestInvalid("Bad request to TPS to get Geografisk Tilknytning")
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
             LOG.error("Received security constraint when requesting geografiskTilknytning")
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningSikkerhetsbegrensing")
