@@ -47,6 +47,7 @@ class PersonConsumer @Inject constructor(
             throw RuntimeException()
         } catch (e: RuntimeException) {
             if (e is SOAPFaultException) {
+                LOG.error("Received SOAPFaultException when requesting geografiskTilknytning: ${e.message}", e)
                 throw e
             } else {
                 LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
