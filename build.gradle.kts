@@ -18,6 +18,7 @@ val jaxbApiVersion = "2.4.0-b180830.0359"
 val jaxbRuntimeVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val jaxwsToolsVersion = "2.3.1"
+val nimbusSDKVersion = "7.0.3"
 val oidcSupportVersion = "0.2.18"
 
 plugins {
@@ -51,6 +52,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.nimbusds:oauth2-oidc-sdk:$nimbusSDKVersion")
     implementation("no.nav.security:oidc-spring-support:$oidcSupportVersion")
     implementation("javax.xml.ws:jaxws-api:$jaxWsApiVersion")
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
