@@ -37,13 +37,11 @@ no.nav.security.oidc:
       cookie_name: localhost-idtoken
 
 virksomhet:
-  arbeidsfordeling.v1.endpointurl: "arbeidsfordelingv1.url"
   egenansatt.v1.endpointurl: "egenansattv1.url"
   person.v3.endpointurl: "personv3.url"
 
 fasit.environment.name: 'local'
 
-arbeidsfordeling.withmock: true
 egenansatt.withmock: true
 organisasjonenhet.withmock: true
 person.withmock: true
