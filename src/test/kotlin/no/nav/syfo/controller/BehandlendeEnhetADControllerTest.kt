@@ -4,18 +4,19 @@ import no.nav.security.oidc.context.OIDCRequestContextHolder
 import no.nav.syfo.LocalApplication
 import no.nav.syfo.api.controllers.BehandlendeEnhetADController
 import no.nav.syfo.consumers.TilgangConsumer.Companion.ACCESS_TO_SYFO_WITH_AZURE_PATH
+import no.nav.syfo.consumers.getSkjermedePersonerPipUrl
 import no.nav.syfo.oidc.OIDCIssuer.AZURE
+import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.OidcTestHelper.clearOIDCContext
 import no.nav.syfo.testhelper.OidcTestHelper.logInVeilederAD
 import no.nav.syfo.testhelper.UserConstants.USER_FNR
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_ID
-import no.nav.syfo.testhelper.generateNorgEnhet
-import no.nav.syfo.testhelper.mockAndExpectNorgArbeidsfordeling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cache.CacheManager
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -52,6 +53,9 @@ class BehandlendeEnhetADControllerTest {
     @Inject
     private lateinit var restTemplate: RestTemplate
 
+    @Inject
+    private lateinit var cacheManager: CacheManager
+
     private lateinit var mockRestServiceServer: MockRestServiceServer
 
     @Before
@@ -65,11 +69,18 @@ class BehandlendeEnhetADControllerTest {
     fun tearDown() {
         clearOIDCContext(oidcRequestContextHolder)
         mockRestServiceServer.reset()
+        cacheManager.cacheNames
+            .forEach { cacheName: String ->
+                val cache = cacheManager.getCache(cacheName)
+                cache?.clear()
+            }
     }
 
     @Test
     fun getBehandlendeEnhetHasAccessContent() {
         mockAccessToSYFO(OK)
+
+        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
 
         val norgEnhet = generateNorgEnhet().copy()
         mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
@@ -83,6 +94,8 @@ class BehandlendeEnhetADControllerTest {
     @Test
     fun getBehandlendeEnhetHasAccessNoContent() {
         mockAccessToSYFO(OK)
+
+        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
 
         mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, emptyList())
 
@@ -106,14 +119,14 @@ class BehandlendeEnhetADControllerTest {
 
     private fun mockAccessToSYFO(status: HttpStatus) {
         val uriString = fromHttpUrl(tilgangskontrollUrl)
-                .path(ACCESS_TO_SYFO_WITH_AZURE_PATH)
-                .toUriString()
+            .path(ACCESS_TO_SYFO_WITH_AZURE_PATH)
+            .toUriString()
 
         val idToken = oidcRequestContextHolder.oidcValidationContext.getToken(AZURE).idToken
 
         mockRestServiceServer.expect(manyTimes(), requestTo(uriString))
-                .andExpect(method(HttpMethod.GET))
-                .andExpect(header(AUTHORIZATION, "Bearer $idToken"))
-                .andRespond(withStatus(status))
+            .andExpect(method(HttpMethod.GET))
+            .andExpect(header(AUTHORIZATION, "Bearer $idToken"))
+            .andRespond(withStatus(status))
     }
 }

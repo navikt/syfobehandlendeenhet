@@ -4,7 +4,7 @@
 syfobehandlendeenhet er en Spring Boot-applikasjon skrevet i Kotlin. Hovedoppgaven til syfobehandlendeenhet
 er å finne den enheten som skal behandle en sykmeldt. Appen eksponerer et REST-endepunkt på `/api/{fnr}`.
 
-For å finne behandlende enhet gjøres det WS-kall til `egenAnsatt` og `person`, og REST-kall til NORG; resultatet fra disse caches.
+For å finne behandlende enhet gjøres det WS-kall til `person`, og REST-kall skjermed-personer-pip(`egenAnsatt`) til NORG; resultatet fra disse caches.
 
 ## Lokal utvikling
 Appen bygges med `gradle` 

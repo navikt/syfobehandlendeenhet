@@ -56,8 +56,6 @@ spec:
       value: 38e07d31-659d-4595-939a-f18dce3446c5
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
-    - name: EGENANSATT_V1_URL
-      value: https://wasapp-q1.adeo.no/tpsws/EgenAnsatt_v1
     - name: PERSON_V3_URL
       value: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
     - name: NORG2_URL

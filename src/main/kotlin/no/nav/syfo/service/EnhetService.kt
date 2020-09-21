@@ -8,16 +8,16 @@ import org.springframework.stereotype.Service
 @Service
 class EnhetService @Autowired
 constructor(
-        private val egenAnsattConsumer: EgenAnsattConsumer,
-        private val norgConsumer: NorgConsumer,
-        private val personConsumer: PersonConsumer
+    private val norgConsumer: NorgConsumer,
+    private val personConsumer: PersonConsumer,
+    private val skjermedePersonerPipConsumer: SkjermedePersonerPipConsumer
 ) {
     private val geografiskTilknytningUtvandret = "NOR"
     private val enhetnrNAVUtland = "0393"
 
     fun arbeidstakersBehandlendeEnhet(arbeidstakerFnr: String): BehandlendeEnhet? {
         val geografiskTilknytning = personConsumer.geografiskTilknytning(arbeidstakerFnr)
-        val isEgenAnsatt = egenAnsattConsumer.isEgenAnsatt(arbeidstakerFnr)
+        val isEgenAnsatt = skjermedePersonerPipConsumer.erSkjermet(arbeidstakerFnr)
 
         val behandlendeEnhet = norgConsumer.getArbeidsfordelingEnhet(geografiskTilknytning, isEgenAnsatt) ?: return null
 
@@ -34,8 +34,8 @@ constructor(
 
     fun getEnhetNAVUtland(enhet: BehandlendeEnhet): BehandlendeEnhet {
         return BehandlendeEnhet(
-                enhetId = enhetnrNAVUtland,
-                navn = enhet.navn
+            enhetId = enhetnrNAVUtland,
+            navn = enhet.navn
         )
     }
 }
