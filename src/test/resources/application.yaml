@@ -43,7 +43,6 @@ virksomhet:
 fasit.environment.name: 'local'
 
 egenansatt.withmock: true
-organisasjonenhet.withmock: true
 person.withmock: true
 
 dev: true
