@@ -18,7 +18,7 @@ val jaxRiVersion = "2.3.2"
 val jaxwsToolsVersion = "2.3.1"
 val nimbusSDKVersion = "7.0.3"
 val oidcSupportVersion = "0.2.18"
-val prometheusVersion = "1.0.11"
+val prometheusVersion = "1.3.14"
 
 plugins {
     kotlin("jvm") version "1.4.10"
