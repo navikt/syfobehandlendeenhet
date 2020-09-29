@@ -20,7 +20,7 @@ val nimbusSDKVersion = "7.0.3"
 val oidcSupportVersion = "0.2.18"
 
 plugins {
-    kotlin("jvm") version "1.3.60"
+    kotlin("jvm") version "1.4.10"
     id("com.github.johnrengelman.shadow") version "4.0.3"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.3.60"
 }
