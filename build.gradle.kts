@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val kotlinLibVersion = "1.3.60"
 val springBootVersion = "2.2.5.RELEASE"
 val springRetryVersion = "1.2.4.RELEASE"
 val personV3Version = "1.2019.07.11-06.47-b55f47790a9d"
@@ -51,6 +50,9 @@ repositories {
 }
 
 dependencies {
+    implementation(kotlin("stdlib"))
+    implementation(kotlin("reflect"))
+
     implementation("com.nimbusds:oauth2-oidc-sdk:$nimbusSDKVersion")
     implementation("no.nav.security:oidc-spring-support:$oidcSupportVersion")
     implementation("javax.xml.ws:jaxws-api:$jaxWsApiVersion")
@@ -80,8 +82,6 @@ dependencies {
     implementation("org.springframework.retry:spring-retry:$springRetryVersion")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.0.6")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinLibVersion")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinLibVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("net.logstash.logback:logstash-logback-encoder:4.10")
     implementation("org.slf4j:slf4j-api:1.7.25")
