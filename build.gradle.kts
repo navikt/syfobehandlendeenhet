@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val springBootVersion = "2.2.5.RELEASE"
 val springRetryVersion = "1.2.4.RELEASE"
 val personV3Version = "1.2019.07.11-06.47-b55f47790a9d"
 val cxfVersion = "3.3.3"
@@ -23,6 +22,8 @@ plugins {
     kotlin("jvm") version "1.4.10"
     id("com.github.johnrengelman.shadow") version "4.0.3"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.3.60"
+    id("org.springframework.boot") version "2.2.5.RELEASE"
+    id("io.spring.dependency-management") version "1.0.9.RELEASE"
 }
 
 buildscript {
@@ -71,13 +72,13 @@ dependencies {
 
     implementation("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:$personV3Version")
 
-    implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-jersey:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-cache:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
-    implementation("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-jersey")
+    implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-starter-jetty")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
 
     implementation("org.springframework.retry:spring-retry:$springRetryVersion")
 
@@ -89,7 +90,7 @@ dependencies {
     implementation("javax.inject:javax.inject:1")
     implementation("org.apache.commons:commons-lang3:3.5")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("no.nav.security:oidc-test-support:$oidcSupportVersion")
 }
 
