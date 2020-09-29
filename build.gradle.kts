@@ -18,12 +18,13 @@ val jaxRiVersion = "2.3.2"
 val jaxwsToolsVersion = "2.3.1"
 val nimbusSDKVersion = "7.0.3"
 val oidcSupportVersion = "0.2.18"
+val prometheusVersion = "1.0.11"
 
 plugins {
     kotlin("jvm") version "1.4.10"
     id("com.github.johnrengelman.shadow") version "4.0.3"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.3.60"
-    id("org.springframework.boot") version "2.2.5.RELEASE"
+    id("org.springframework.boot") version "2.2.10.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
 }
 
@@ -81,7 +82,7 @@ dependencies {
     implementation("com.sun.xml.ws:jaxws-ri:$jaxRiVersion")
     implementation("com.sun.activation:javax.activation:$javaxActivationVersion")
 
-    implementation("io.micrometer:micrometer-registry-prometheus:1.0.6")
+    implementation("io.micrometer:micrometer-registry-prometheus:$prometheusVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("net.logstash.logback:logstash-logback-encoder:4.10")
     implementation("org.slf4j:slf4j-api:1.7.25")
