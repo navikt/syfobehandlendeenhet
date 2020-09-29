@@ -13,7 +13,8 @@ val jaxWsApiVersion = "2.3.1"
 val javaxAnnotationApiVersion = "1.3.2"
 val jaxbApiVersion = "2.4.0-b180830.0359"
 val jaxbRuntimeVersion = "2.4.0-b180830.0438"
-val javaxActivationVersion = "1.1.1"
+val javaxActivationVersion = "1.2.0"
+val jaxRiVersion = "2.3.2"
 val jaxwsToolsVersion = "2.3.1"
 val nimbusSDKVersion = "7.0.3"
 val oidcSupportVersion = "0.2.18"
@@ -30,7 +31,6 @@ buildscript {
     dependencies {
         classpath("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
         classpath("org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438")
-        classpath("com.sun.activation:javax.activation:1.2.0")
         classpath("com.sun.xml.ws:jaxws-tools:2.3.1") {
             exclude(group = "com.sun.xml.ws", module = "policy")
         }
@@ -57,7 +57,6 @@ dependencies {
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
     implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbRuntimeVersion")
-    implementation("javax.activation:activation:$javaxActivationVersion")
     implementation("com.sun.xml.ws:jaxws-tools:$jaxwsToolsVersion") {
         exclude(group = "com.sun.xml.ws", module = "policy")
     }
@@ -78,6 +77,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-aop")
 
     implementation("org.springframework.retry:spring-retry:$springRetryVersion")
+
+    implementation("com.sun.xml.ws:jaxws-ri:$jaxRiVersion")
+    implementation("com.sun.activation:javax.activation:$javaxActivationVersion")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.0.6")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
@@ -115,10 +117,10 @@ tasks {
     }
 
     named<KotlinCompile>("compileKotlin") {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "11"
     }
 
     named<KotlinCompile>("compileTestKotlin") {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "11"
     }
 }
