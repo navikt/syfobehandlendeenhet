@@ -23,7 +23,7 @@ val prometheusVersion = "1.3.14"
 plugins {
     kotlin("jvm") version "1.4.10"
     id("com.github.johnrengelman.shadow") version "6.0.0"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.3.60"
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.4.10"
     id("org.springframework.boot") version "2.2.10.RELEASE"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
 }
