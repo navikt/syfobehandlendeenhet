@@ -1,6 +1,6 @@
 package no.nav.syfo.consumers
 
-import no.nav.security.oidc.context.OIDCRequestContextHolder
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.config.EnvironmentUtil
 import no.nav.syfo.oidc.OIDCIssuer.AZURE
 import no.nav.syfo.oidc.OIDCUtil.tokenFraOIDC
@@ -19,7 +19,7 @@ import javax.ws.rs.ForbiddenException
 @Service
 class TilgangConsumer @Inject constructor(
         val template: RestTemplate,
-        val contextHolder: OIDCRequestContextHolder
+        val contextHolder: TokenValidationContextHolder
 ) : InitializingBean {
     private var instance: TilgangConsumer? = null
 
