@@ -18,8 +18,8 @@ val jaxRiVersion = "2.3.2"
 val jaxwsToolsVersion = "2.3.1"
 val kotlinJacksonVersion = "2.11.2"
 val nimbusSDKVersion = "7.0.3"
-val oidcSupportVersion = "0.2.18"
 val prometheusVersion = "1.3.14"
+val tokenValidationSpringSupportVersion = "1.3.0"
 
 plugins {
     kotlin("jvm") version "1.4.10"
@@ -53,8 +53,6 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-    implementation("com.nimbusds:oauth2-oidc-sdk:$nimbusSDKVersion")
-    implementation("no.nav.security:oidc-spring-support:$oidcSupportVersion")
     implementation("javax.xml.ws:jaxws-api:$jaxWsApiVersion")
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationApiVersion")
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
@@ -80,6 +78,8 @@ dependencies {
 
     implementation("org.springframework.retry:spring-retry:$springRetryVersion")
 
+    implementation("no.nav.security:token-validation-spring:$tokenValidationSpringSupportVersion")
+
     implementation("com.sun.xml.ws:jaxws-ri:$jaxRiVersion")
     implementation("com.sun.activation:javax.activation:$javaxActivationVersion")
 
@@ -91,7 +91,7 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.5")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("no.nav.security:oidc-test-support:$oidcSupportVersion")
+    testImplementation("no.nav.security:token-validation-test-support:$tokenValidationSpringSupportVersion")
 }
 
 tasks {

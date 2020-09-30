@@ -7,7 +7,7 @@ management:
     exposure.include: prometheus
     path-mapping.prometheus: /prometheus
 
-no.nav.security.oidc:
+no.nav.security.jwt:
   issuers: sts
   issuer:
     sts:

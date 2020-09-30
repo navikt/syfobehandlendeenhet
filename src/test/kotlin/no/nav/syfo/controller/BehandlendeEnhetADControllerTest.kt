@@ -1,6 +1,6 @@
 package no.nav.syfo.controller
 
-import no.nav.security.oidc.context.OIDCRequestContextHolder
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.LocalApplication
 import no.nav.syfo.api.controllers.BehandlendeEnhetADController
 import no.nav.syfo.consumers.TilgangConsumer.Companion.ACCESS_TO_SYFO_WITH_AZURE_PATH
@@ -45,7 +45,7 @@ class BehandlendeEnhetADControllerTest {
     private lateinit var tilgangskontrollUrl: String
 
     @Inject
-    private lateinit var oidcRequestContextHolder: OIDCRequestContextHolder
+    private lateinit var oidcRequestContextHolder: TokenValidationContextHolder
 
     @Inject
     private lateinit var behandlendeEnhetADController: BehandlendeEnhetADController
@@ -122,7 +122,7 @@ class BehandlendeEnhetADControllerTest {
             .path(ACCESS_TO_SYFO_WITH_AZURE_PATH)
             .toUriString()
 
-        val idToken = oidcRequestContextHolder.oidcValidationContext.getToken(AZURE).idToken
+        val idToken = oidcRequestContextHolder.tokenValidationContext.getJwtToken(AZURE).tokenAsString
 
         mockRestServiceServer.expect(manyTimes(), requestTo(uriString))
             .andExpect(method(HttpMethod.GET))

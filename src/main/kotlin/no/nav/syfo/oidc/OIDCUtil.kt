@@ -1,14 +1,11 @@
 package no.nav.syfo.oidc
 
-import no.nav.security.oidc.OIDCConstants
-import no.nav.security.oidc.context.OIDCRequestContextHolder
-import no.nav.security.oidc.context.OIDCValidationContext
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 
 object OIDCUtil {
 
-    fun tokenFraOIDC(contextHolder: OIDCRequestContextHolder, issuer: String): String {
-        val context = contextHolder
-                .getRequestAttribute(OIDCConstants.OIDC_VALIDATION_CONTEXT) as OIDCValidationContext
-        return context.getToken(issuer).idToken
+    fun tokenFraOIDC(contextHolder: TokenValidationContextHolder, issuer: String): String {
+        val context = contextHolder.tokenValidationContext
+        return context.getJwtToken(issuer).tokenAsString
     }
 }

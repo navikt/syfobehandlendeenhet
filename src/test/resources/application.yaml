@@ -28,7 +28,7 @@ srvsyfobehandlendeenhet:
 #      accepted_audience: aud-localhost
 #      cookie_name: localhost-idtoken
 
-no.nav.security.oidc:
+no.nav.security.jwt:
   issuers: sts
   issuer:
     sts:
