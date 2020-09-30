@@ -49,7 +49,7 @@ spec:
     - name: NO_NAV_SECURITY_JWT_ISSUER_STS_DISCOVERYURL
       value: http://security-token-service/rest/v1/sts/.well-known/openid-configuration
     - name: NO_NAV_SECURITY_JWT_ISSUER_STS_ACCEPTEDAUDIENCE
-      value: srvispersonoppgave,srvsyfooversikthen,srvsyfomotebehov,srvsyfomoteadmin,srvsyfooversiktsrv,srvsyfooppfolgings
+      value: srvispersonoppgave,srvsyfooversikthen,srvsyfomotebehov,srvsyfomoteadmin,srvsyfooversiktsrv,srvsyfooppfolgings,srvsyfo-tilgangsko
     - name: NO_NAV_SECURITY_JWT_ISSUER_VEILEDER_DISCOVERYURL
       value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
     - name: NO_NAV_SECURITY_JWT_ISSUER_VEILEDER_ACCEPTEDAUDIENCE
