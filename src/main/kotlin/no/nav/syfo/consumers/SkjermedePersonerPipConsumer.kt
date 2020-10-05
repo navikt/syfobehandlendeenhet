@@ -48,5 +48,5 @@ class SkjermedePersonerPipConsumer @Inject constructor(
 }
 
 fun getSkjermedePersonerPipUrl(personIdent: String): String {
-    return "http://skjermede-personer-pip/skjermet?personident=${personIdent}"
+    return "http://skjermede-personer-pip.svc.nais.local/skjermet?personident=${personIdent}"
 }
