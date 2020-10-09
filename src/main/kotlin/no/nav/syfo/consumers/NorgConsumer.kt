@@ -15,7 +15,7 @@ import javax.inject.Inject
 @Service
 class NorgConsumer @Inject
 constructor(
-        @param:Value("\${norg2.url}") private val norg2BaseUrl: String,
+        @Value("\${norg2.url}") private val norg2BaseUrl: String,
         private val metric: Metric,
         private val restTemplate: RestTemplate
 ) {
