@@ -19,8 +19,10 @@ class Metric @Inject constructor(private val registry: MeterRegistry) {
         registry.counter(
             addPrefix("httpstatus"),
             Tags.of(
-                "type", "info",
-                "kode", kode.toString()
+                "type",
+                "info",
+                "kode",
+                kode.toString()
             )
         ).increment()
     }
@@ -29,8 +31,10 @@ class Metric @Inject constructor(private val registry: MeterRegistry) {
         registry.counter(
             addPrefix("outgoingResponse_$name"),
             Tags.of(
-                "type", "info",
-                "status", statusCode.toString()
+                "type",
+                "info",
+                "status",
+                statusCode.toString()
             )
         ).increment()
     }
@@ -46,8 +50,10 @@ class Metric @Inject constructor(private val registry: MeterRegistry) {
         registry.counter(
             addPrefix("outgoingRequest_${name}_failed"),
             Tags.of(
-                "type", "info",
-                "errorType", errorType
+                "type",
+                "info",
+                "errorType",
+                errorType
             )
         ).increment()
     }

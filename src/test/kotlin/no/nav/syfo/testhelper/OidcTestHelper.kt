@@ -10,7 +10,6 @@ import no.nav.syfo.oidc.OIDCIssuer
 import java.text.ParseException
 import java.util.*
 
-
 object OidcTestHelper {
 
     @Throws(ParseException::class)

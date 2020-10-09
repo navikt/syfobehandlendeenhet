@@ -43,7 +43,6 @@ class PersonMock : PersonV3 {
     }
 
     override fun ping() {
-
     }
 
     override fun hentPersonhistorikk(request: HentPersonhistorikkRequest?): HentPersonhistorikkResponse? {

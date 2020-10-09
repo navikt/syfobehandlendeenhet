@@ -31,7 +31,6 @@ class LogErrorHandler : SOAPHandler<SOAPMessageContext> {
 
             var exception: Throwable = message.getContent(Exception::class.java)
 
-
             if (exception is Fault && exception.cause != null) {
                 exception = exception.cause ?: Throwable("Det oppstod en feil i WS-kallet")
             }
@@ -61,5 +60,4 @@ class LogErrorHandler : SOAPHandler<SOAPMessageContext> {
     }
 
     override fun close(context: MessageContext) {}
-
 }

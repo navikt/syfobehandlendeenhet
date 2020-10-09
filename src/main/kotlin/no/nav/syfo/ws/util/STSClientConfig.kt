@@ -32,8 +32,12 @@ object STSClientConfig {
         configureStsWithPolicyForClient(stsClient, client, STS_REQUEST_SAML_POLICY, cacheTokenInEndpoint)
     }
 
-    private fun configureStsWithPolicyForClient(stsClient: STSClient, client: Client, policyReference: String,
-                                                cacheTokenInEndpoint: Boolean) {
+    private fun configureStsWithPolicyForClient(
+        stsClient: STSClient,
+        client: Client,
+        policyReference: String,
+        cacheTokenInEndpoint: Boolean
+    ) {
         val location = getEnvVar("SECURITYTOKENSERVICE_URL")
         val username = getEnvVar("srv_username")
         val password = getEnvVar("srv_password")
@@ -58,8 +62,12 @@ object STSClientConfig {
         return STSClientWSTrust13and14(bus)
     }
 
-    private fun configureSTSClient(stsClient: STSClient, location: String, username: String,
-                                   password: String): STSClient {
+    private fun configureSTSClient(
+        stsClient: STSClient,
+        location: String,
+        username: String,
+        password: String
+    ): STSClient {
         stsClient.isEnableAppliesTo = false
         stsClient.isAllowRenewing = false
         stsClient.location = location
@@ -77,22 +85,31 @@ object STSClientConfig {
         return stsClient
     }
 
-    private fun setEndpointPolicyReference(client: Client, uri: String) {
+    private fun setEndpointPolicyReference(
+        client: Client,
+        uri: String
+    ) {
         val policy = resolvePolicyReference(client, uri)
         setClientEndpointPolicy(client, policy)
     }
 
-    private fun resolvePolicyReference(client: Client, uri: String): Policy {
-        val policyBuilder = client.bus.getExtension<PolicyBuilder>(PolicyBuilder::class.java)
+    private fun resolvePolicyReference(
+        client: Client,
+        uri: String
+    ): Policy {
+        val policyBuilder = client.bus.getExtension(PolicyBuilder::class.java)
         val resolver = RemoteReferenceResolver("", policyBuilder)
         return resolver.resolveReference(uri)
     }
 
-    private fun setClientEndpointPolicy(client: Client, policy: Policy) {
+    private fun setClientEndpointPolicy(
+        client: Client,
+        policy: Policy
+    ) {
         val endpoint = client.endpoint
         val endpointInfo = endpoint.endpointInfo
 
-        val policyEngine = client.bus.getExtension<PolicyEngine>(PolicyEngine::class.java)
+        val policyEngine = client.bus.getExtension(PolicyEngine::class.java)
         val message = SoapMessage(Soap12.getInstance())
         val endpointPolicy = policyEngine.getClientEndpointPolicy(endpointInfo, null, message)
         policyEngine.setClientEndpointPolicy(endpointInfo, endpointPolicy.updatePolicy(policy, message))

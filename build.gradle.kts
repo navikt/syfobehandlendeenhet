@@ -1,6 +1,6 @@
-import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
-import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.syfo"
@@ -23,6 +23,7 @@ val tokenValidationSpringSupportVersion = "1.3.0"
 
 plugins {
     kotlin("jvm") version "1.4.10"
+    id("org.jlleitschuh.gradle.ktlint") version "9.4.0"
     id("com.github.johnrengelman.shadow") version "6.0.0"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.4.10"
     id("org.springframework.boot") version "2.2.10.RELEASE"
