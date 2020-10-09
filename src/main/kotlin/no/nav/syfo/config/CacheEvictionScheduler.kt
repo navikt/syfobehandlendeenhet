@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component
 import javax.inject.Inject
 
 @Component
-class CacheEvictionScheduler @Inject constructor(private val cachemanager: CacheManager) {
+class CacheEvictionScheduler @Inject constructor(
+    private val cachemanager: CacheManager
+) {
 
     @Scheduled(fixedRate = HOUR_MS.toLong())
     fun evictAllCachesAtInteval() {

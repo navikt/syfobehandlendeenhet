@@ -15,9 +15,9 @@ import javax.inject.Inject
 @Service
 class NorgConsumer @Inject
 constructor(
-        @Value("\${norg2.url}") private val norg2BaseUrl: String,
-        private val metric: Metric,
-        private val restTemplate: RestTemplate
+    @Value("\${norg2.url}") private val norg2BaseUrl: String,
+    private val metric: Metric,
+    private val restTemplate: RestTemplate
 ) {
     fun getArbeidsfordelingEnhet(geografiskTilknytning: String, isEgenAnsatt: Boolean): BehandlendeEnhet? {
         val enheter = getArbeidsfordelingEnheter(geografiskTilknytning, isEgenAnsatt)
@@ -25,30 +25,30 @@ constructor(
             return null
         }
         return enheter
-                .filter { it.status == Enhetsstatus.AKTIV.formattedName }
-                .map {
-                    BehandlendeEnhet(
-                            it.enhetNr,
-                            it.navn
-                    )
-                }
-                .first()
+            .filter { it.status == Enhetsstatus.AKTIV.formattedName }
+            .map {
+                BehandlendeEnhet(
+                    it.enhetNr,
+                    it.navn
+                )
+            }
+            .first()
     }
 
     fun getArbeidsfordelingEnheter(geografiskTilknytning: String, isEgenAnsatt: Boolean): List<NorgEnhet> {
         val requestBody = ArbeidsfordelingCriteria(
-                tema = "OPP",
-                geografiskOmraade = geografiskTilknytning,
-                skjermet = isEgenAnsatt
+            tema = "OPP",
+            geografiskOmraade = geografiskTilknytning,
+            skjermet = isEgenAnsatt
         )
         try {
             val result = restTemplate
-                    .exchange<List<NorgEnhet>>(
-                            getArbeidsfordelingUrl(),
-                            HttpMethod.POST,
-                            createRequestEntity(requestBody),
-                            object : ParameterizedTypeReference<List<NorgEnhet>>() {}
-                    )
+                .exchange(
+                    getArbeidsfordelingUrl(),
+                    HttpMethod.POST,
+                    createRequestEntity(requestBody),
+                    object : ParameterizedTypeReference<List<NorgEnhet>>() {}
+                )
 
             val enhetList = Objects.requireNonNull<List<NorgEnhet>>(result.body)
             metric.countOutgoingRequests("getArbeidsfordelingEnheter")
@@ -71,7 +71,6 @@ constructor(
     }
 
     companion object {
-
         private val log = getLogger(NorgConsumer::class.java)
 
         const val ARBEIDSFORDELING_BESTMATCH_PATH = "/arbeidsfordeling/enheter/bestmatch"

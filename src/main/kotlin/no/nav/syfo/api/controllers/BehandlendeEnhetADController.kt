@@ -19,9 +19,9 @@ import javax.inject.Inject
 @RequestMapping(value = ["/api/internad"])
 class BehandlendeEnhetADController @Inject
 constructor(
-        private val enhetService: EnhetService,
-        private val metric: Metric,
-        private val tilgangConsumer: TilgangConsumer
+    private val enhetService: EnhetService,
+    private val metric: Metric,
+    private val tilgangConsumer: TilgangConsumer
 ) {
 
     @GetMapping(value = ["/{fnr}"], produces = [MediaType.APPLICATION_JSON_VALUE])

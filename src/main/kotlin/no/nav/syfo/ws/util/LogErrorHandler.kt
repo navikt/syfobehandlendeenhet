@@ -5,13 +5,11 @@ import org.apache.cxf.jaxws.handler.soap.SOAPMessageContextImpl
 import org.apache.cxf.message.Message
 import org.apache.cxf.service.Service
 import org.apache.cxf.service.model.OperationInfo
-
+import org.slf4j.LoggerFactory.getLogger
 import javax.xml.namespace.QName
 import javax.xml.ws.handler.MessageContext
 import javax.xml.ws.handler.soap.SOAPHandler
 import javax.xml.ws.handler.soap.SOAPMessageContext
-
-import org.slf4j.LoggerFactory.getLogger
 
 class LogErrorHandler : SOAPHandler<SOAPMessageContext> {
 

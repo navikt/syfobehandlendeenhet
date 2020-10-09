@@ -17,26 +17,26 @@ import javax.xml.ws.soap.SOAPFaultException
 
 @Service
 class PersonConsumer @Inject constructor(
-        private val personV3: PersonV3,
-        private val metric: Metric
+    private val personV3: PersonV3,
+    private val metric: Metric
 ) {
     private val LOG = LoggerFactory.getLogger(PersonConsumer::class.java)
 
     @Retryable(
-            value = [SOAPFaultException::class],
-            backoff = Backoff(delay = 200, maxDelay = 1000)
+        value = [SOAPFaultException::class],
+        backoff = Backoff(delay = 200, maxDelay = 1000)
     )
     @Cacheable(cacheNames = [CACHENAME_PERSON_GEOGRAFISK], key = "#fnr", condition = "#fnr != null")
     fun geografiskTilknytning(fnr: String): String {
         try {
             metric.countOutgoingRequests("PersonConsumer")
             val geografiskTilknytning = personV3.hentGeografiskTilknytning(
-                    HentGeografiskTilknytningRequest()
-                            .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
+                HentGeografiskTilknytningRequest()
+                    .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
             )
-                    .geografiskTilknytning
+                .geografiskTilknytning
             return geografiskTilknytning?.geografiskTilknytning
-                    ?: throw RequestInvalid("Bad request to TPS to get Geografisk Tilknytning")
+                ?: throw RequestInvalid("Bad request to TPS to get Geografisk Tilknytning")
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
             LOG.error("Received security constraint when requesting geografiskTilknytning")
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningSikkerhetsbegrensing")

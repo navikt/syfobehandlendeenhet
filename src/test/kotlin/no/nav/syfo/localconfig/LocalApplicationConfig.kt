@@ -12,16 +12,16 @@ class LocalApplicationConfig(environment: Environment) {
 
     init {
         System.setProperty(
-                "SECURITYTOKENSERVICE_URL",
-                requireNonNull(environment.getProperty("securitytokenservice.url"))
+            "SECURITYTOKENSERVICE_URL",
+            requireNonNull(environment.getProperty("securitytokenservice.url"))
         )
         System.setProperty(
-                "SRVSYFOBEHANDLENDEENHET_USERNAME",
-                requireNonNull(environment.getProperty("srvsyfobehandlendeenhet.username"))
+            "SRVSYFOBEHANDLENDEENHET_USERNAME",
+            requireNonNull(environment.getProperty("srvsyfobehandlendeenhet.username"))
         )
         System.setProperty(
-                "SRVSYFOBEHANDLENDEENHET_PASSWORD",
-                requireNonNull(environment.getProperty("srvsyfobehandlendeenhet.password"))
+            "SRVSYFOBEHANDLENDEENHET_PASSWORD",
+            requireNonNull(environment.getProperty("srvsyfobehandlendeenhet.password"))
         )
     }
 }

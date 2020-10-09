@@ -19,8 +19,7 @@ class WsClient<T> {
         val port = jaxWsProxyFactoryBean.create() as T
         (port as BindingProvider).binding.handlerChain = handlers
         val client = ClientProxy.getClient(port)
-        Arrays.stream(interceptors).forEach{ client.outInterceptors.add(it) }
+        Arrays.stream(interceptors).forEach { client.outInterceptors.add(it) }
         return port
     }
-
 }

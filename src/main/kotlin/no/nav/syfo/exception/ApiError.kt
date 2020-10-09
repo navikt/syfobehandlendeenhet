@@ -1,3 +1,6 @@
 package no.nav.syfo.exception
 
-class ApiError(val status: Int, val message: String)
+class ApiError(
+    val status: Int,
+    val message: String
+)

@@ -1,8 +1,8 @@
 package no.nav.syfo.provider.rs.filter
 
+import java.io.IOException
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
-import java.io.IOException
 
 class FakeLoginFilter : Filter {
 
@@ -27,5 +27,4 @@ class FakeLoginFilter : Filter {
     override fun destroy() {
         this.filterConfig = null
     }
-
 }

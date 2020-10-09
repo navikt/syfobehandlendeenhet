@@ -18,8 +18,8 @@ import javax.ws.rs.ForbiddenException
 
 @Service
 class TilgangConsumer @Inject constructor(
-        val template: RestTemplate,
-        val contextHolder: TokenValidationContextHolder
+    val template: RestTemplate,
+    val contextHolder: TokenValidationContextHolder
 ) : InitializingBean {
     private var instance: TilgangConsumer? = null
 
@@ -33,7 +33,7 @@ class TilgangConsumer @Inject constructor(
 
     init {
         accessToSYFOUriTemplate = fromHttpUrl(tilgangskontrollUrl)
-                .path(ACCESS_TO_SYFO_WITH_AZURE_PATH)
+            .path(ACCESS_TO_SYFO_WITH_AZURE_PATH)
     }
 
     fun throwExceptionIfVeilederWithoutAccessToSYFO() {
@@ -50,10 +50,10 @@ class TilgangConsumer @Inject constructor(
     private fun callUriWithTemplate(uri: URI): Boolean {
         return try {
             val response = template.exchange(
-                    uri,
-                    HttpMethod.GET,
-                    createEntity(),
-                    String::class.java
+                uri,
+                HttpMethod.GET,
+                createEntity(),
+                String::class.java
             )
             return response.statusCode.is2xxSuccessful
         } catch (e: HttpClientErrorException) {

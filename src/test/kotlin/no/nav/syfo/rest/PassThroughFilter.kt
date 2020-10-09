@@ -1,7 +1,7 @@
 package no.nav.syfo.rest
 
-import javax.servlet.*
 import java.io.IOException
+import javax.servlet.*
 
 class PassThroughFilter : Filter {
     @Throws(ServletException::class)

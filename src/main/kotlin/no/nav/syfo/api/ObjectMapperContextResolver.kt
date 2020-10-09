@@ -9,10 +9,9 @@ import javax.ws.rs.ext.Provider
 
 @Provider
 class ObjectMapperContextResolver : ContextResolver<ObjectMapper> {
-    private val mapper: ObjectMapper
+    private val mapper: ObjectMapper = ObjectMapper()
 
     init {
-        mapper = ObjectMapper()
         mapper.registerModule(JavaTimeModule())
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     }

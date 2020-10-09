@@ -27,11 +27,11 @@ class Metric @Inject constructor(private val registry: MeterRegistry) {
 
     fun countOutgoingReponses(name: String, statusCode: Int) {
         registry.counter(
-                addPrefix("outgoingResponse_$name"),
-                Tags.of(
-                        "type", "info",
-                        "status", statusCode.toString()
-                )
+            addPrefix("outgoingResponse_$name"),
+            Tags.of(
+                "type", "info",
+                "status", statusCode.toString()
+            )
         ).increment()
     }
 

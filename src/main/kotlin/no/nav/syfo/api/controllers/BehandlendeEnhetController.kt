@@ -16,8 +16,8 @@ import javax.inject.Inject
 @RequestMapping(value = ["/api"])
 class BehandlendeEnhetController @Inject
 constructor(
-        private val enhetService: EnhetService,
-        private val metric: Metric
+    private val enhetService: EnhetService,
+    private val metric: Metric
 ) {
 
     @ProtectedWithClaims(issuer = STS)

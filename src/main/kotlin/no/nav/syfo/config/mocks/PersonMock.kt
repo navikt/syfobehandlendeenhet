@@ -19,10 +19,10 @@ class PersonMock : PersonV3 {
     @Throws(HentGeografiskTilknytningSikkerhetsbegrensing::class, HentGeografiskTilknytningPersonIkkeFunnet::class)
     override fun hentGeografiskTilknytning(wsHentGeografiskTilknytningRequest: HentGeografiskTilknytningRequest): HentGeografiskTilknytningResponse {
         return HentGeografiskTilknytningResponse()
-                .withDiskresjonskode(null)
-                .withGeografiskTilknytning(
-                        Kommune().withGeografiskTilknytning("0314")
-                )
+            .withDiskresjonskode(null)
+            .withGeografiskTilknytning(
+                Kommune().withGeografiskTilknytning("0314")
+            )
     }
 
     @Throws(HentSikkerhetstiltakPersonIkkeFunnet::class)
