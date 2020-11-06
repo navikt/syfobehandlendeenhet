@@ -55,20 +55,20 @@ class PersonConsumer @Inject constructor(
                 }
                 is RequestInvalid -> {
                     val isDnr = isPersonNumberDnr(fnr)
-                    val appendMessage = if (isDnr) {
+                    val personNumberType = if (isDnr) {
                         metric.countEvent("empty_gt_dnr")
-                        "isDnr=$isDnr"
+                        "dnr"
                     } else {
                         val isFnr = isPersonNumberFnr(fnr)
                         if (isFnr) {
                             metric.countEvent("empty_gt_fnr")
-                            "isFnr=$isFnr"
+                            "fnr"
                         } else {
                             metric.countEvent("empty_gt_uknown")
-                            "isUnknown=true"
+                            "uknown"
                         }
                     }
-                    LOG.error("Received RequestInvalid when requesting geografiskTilknytning due to empty response and $appendMessage ${e.message}", e)
+                    LOG.error("Received RequestInvalid when requesting geografiskTilknytning due to empty response and type=$personNumberType ${e.message}", e)
                     throw e
                 }
                 else -> {
