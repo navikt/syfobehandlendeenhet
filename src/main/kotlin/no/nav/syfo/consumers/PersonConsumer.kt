@@ -3,6 +3,7 @@ package no.nav.syfo.consumers
 import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_PERSON_GEOGRAFISK
 import no.nav.syfo.exception.RequestInvalid
 import no.nav.syfo.metric.Metric
+import no.nav.syfo.util.isPersonNumberDnr
 import no.nav.tjeneste.virksomhet.person.v3.binding.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
@@ -46,13 +47,22 @@ class PersonConsumer @Inject constructor(
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningPersonIkkeFunnet")
             throw RuntimeException()
         } catch (e: RuntimeException) {
-            if (e is SOAPFaultException) {
-                LOG.error("Received SOAPFaultException when requesting geografiskTilknytning: ${e.message}", e)
-                throw e
-            } else {
-                LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
-                metric.countOutgoingRequestsFailed("PersonConsumer", "RuntimeException")
-                throw e
+            when (e) {
+                is SOAPFaultException -> {
+                    LOG.error("Received SOAPFaultException when requesting geografiskTilknytning: ${e.message}", e)
+                    throw e
+                }
+                is RequestInvalid -> {
+                    val isDnr = isPersonNumberDnr(fnr)
+                    LOG.info("GT-TRACE: Received empty geografisk tilkytning PersonNumber where PersonNumber isDnr=$isDnr")
+                    LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
+                    throw e
+                }
+                else -> {
+                    LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
+                    metric.countOutgoingRequestsFailed("PersonConsumer", "RuntimeException")
+                    throw e
+                }
             }
         }
     }
