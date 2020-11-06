@@ -4,6 +4,7 @@ import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_PERSON_GEOGRAFISK
 import no.nav.syfo.exception.RequestInvalid
 import no.nav.syfo.metric.Metric
 import no.nav.syfo.util.isPersonNumberDnr
+import no.nav.syfo.util.isPersonNumberFnr
 import no.nav.tjeneste.virksomhet.person.v3.binding.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
@@ -54,13 +55,20 @@ class PersonConsumer @Inject constructor(
                 }
                 is RequestInvalid -> {
                     val isDnr = isPersonNumberDnr(fnr)
-                    if (isDnr) {
+                    val appendMessage = if (isDnr) {
                         metric.countEvent("empty_gt_dnr")
+                        "isDnr=$isDnr"
                     } else {
-                        metric.countEvent("empty_gt_fnr")
+                        val isFnr = isPersonNumberFnr(fnr)
+                        if (isFnr) {
+                            metric.countEvent("empty_gt_fnr")
+                            "isFnr=$isFnr"
+                        } else {
+                            metric.countEvent("empty_gt_uknown")
+                            "isUnknown=true"
+                        }
                     }
-                    LOG.info("GT-TRACE: Received empty geografisk tilkytning PersonNumber where PersonNumber isDnr=$isDnr")
-                    LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
+                    LOG.error("Received RequestInvalid when requesting geografiskTilknytning due to empty response and $appendMessage ${e.message}", e)
                     throw e
                 }
                 else -> {
