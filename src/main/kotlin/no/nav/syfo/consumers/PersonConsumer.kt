@@ -54,6 +54,11 @@ class PersonConsumer @Inject constructor(
                 }
                 is RequestInvalid -> {
                     val isDnr = isPersonNumberDnr(fnr)
+                    if (isDnr) {
+                        metric.countEvent("empty_gt_dnr")
+                    } else {
+                        metric.countEvent("empty_gt_fnr")
+                    }
                     LOG.info("GT-TRACE: Received empty geografisk tilkytning PersonNumber where PersonNumber isDnr=$isDnr")
                     LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
                     throw e

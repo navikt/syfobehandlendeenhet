@@ -8,6 +8,13 @@ import javax.inject.Inject
 @Controller
 class Metric @Inject constructor(private val registry: MeterRegistry) {
 
+    fun countEvent(navn: String) {
+        registry.counter(
+            addPrefix(navn),
+            Tags.of("type", "info")
+        ).increment()
+    }
+
     fun countIncomingRequests(name: String) {
         registry.counter(
             addPrefix("incomingRequest_$name"),
