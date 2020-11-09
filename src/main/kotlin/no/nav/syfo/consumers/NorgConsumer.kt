@@ -63,7 +63,7 @@ constructor(
                     object : ParameterizedTypeReference<List<NorgEnhet>>() {}
                 )
 
-            val enhetList = Objects.requireNonNull<List<NorgEnhet>>(result.body)
+            val enhetList = Objects.requireNonNull(result.body)
             metric.countOutgoingRequests("getArbeidsfordelingEnheter")
             return enhetList
         } catch (e: RestClientResponseException) {
