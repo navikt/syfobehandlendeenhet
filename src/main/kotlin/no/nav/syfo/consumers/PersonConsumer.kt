@@ -3,8 +3,7 @@ package no.nav.syfo.consumers
 import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_PERSON_GEOGRAFISK
 import no.nav.syfo.exception.RequestInvalid
 import no.nav.syfo.metric.Metric
-import no.nav.syfo.util.isPersonNumberDnr
-import no.nav.syfo.util.isPersonNumberFnr
+import no.nav.syfo.util.*
 import no.nav.tjeneste.virksomhet.person.v3.binding.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
@@ -29,28 +28,30 @@ class PersonConsumer @Inject constructor(
         backoff = Backoff(delay = 200, maxDelay = 1000)
     )
     @Cacheable(cacheNames = [CACHENAME_PERSON_GEOGRAFISK], key = "#fnr", condition = "#fnr != null")
-    fun geografiskTilknytning(fnr: String): String {
+    fun geografiskTilknytning(
+        callId: String,
+        fnr: String
+    ): String {
         try {
             metric.countOutgoingRequests("PersonConsumer")
             val geografiskTilknytning = personV3.hentGeografiskTilknytning(
                 HentGeografiskTilknytningRequest()
                     .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
-            )
-                .geografiskTilknytning
+            ).geografiskTilknytning
             return geografiskTilknytning?.geografiskTilknytning
                 ?: throw RequestInvalid("Bad request to TPS to get Geografisk Tilknytning")
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
-            LOG.error("Received security constraint when requesting geografiskTilknytning")
+            LOG.error("Received security constraint when requesting geografiskTilknytning. {}", callIdArgument(callId))
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningSikkerhetsbegrensing")
             throw ForbiddenException()
         } catch (e: HentGeografiskTilknytningPersonIkkeFunnet) {
-            LOG.error("Couldn't find person when requesting geografiskTilknytning")
-            metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningPersonIkkeFunnet")
+            LOG.error("Couldn't find person when requesting geografiskTilknytning. {}", callIdArgument(callId))
+            metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningPersonIkkeFunnet/")
             throw RuntimeException()
         } catch (e: RuntimeException) {
             when (e) {
                 is SOAPFaultException -> {
-                    LOG.error("Received SOAPFaultException when requesting geografiskTilknytning: ${e.message}", e)
+                    LOG.error("Received SOAPFaultException when requesting geografiskTilknytning: ${e.message}, {}", e, callIdArgument(callId))
                     throw e
                 }
                 is RequestInvalid -> {
@@ -68,11 +69,19 @@ class PersonConsumer @Inject constructor(
                             "uknown"
                         }
                     }
-                    LOG.error("Received RequestInvalid when requesting geografiskTilknytning due to empty response and type=$personNumberType ${e.message}", e)
+                    LOG.error(
+                        "Received RequestInvalid when requesting geografiskTilknytning due to empty response and type=$personNumberType ${e.message}. {}, {}",
+                        callIdArgument(callId),
+                        e
+                    )
                     throw e
                 }
                 else -> {
-                    LOG.error("Received RunTimeException when requesting geografiskTilknytning: ${e.message}", e)
+                    LOG.error(
+                        "Received RunTimeException when requesting geografiskTilknytning: ${e.message}. {}, {}",
+                        callIdArgument(callId),
+                        e
+                    )
                     metric.countOutgoingRequestsFailed("PersonConsumer", "RuntimeException")
                     throw e
                 }
@@ -82,7 +91,7 @@ class PersonConsumer @Inject constructor(
 
     @Recover
     fun recover(e: SOAPFaultException) {
-        LOG.error("Failed to request Geografisk Tilknytning from TPS after max retry attempts", e)
+        LOG.error("Failed to request Geografisk Tilknytning from TPS after max retry attempts. {}", e)
         throw e
     }
 }

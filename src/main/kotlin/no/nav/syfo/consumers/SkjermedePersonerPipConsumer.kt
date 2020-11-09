@@ -19,7 +19,10 @@ class SkjermedePersonerPipConsumer @Inject constructor(
     private val log = LoggerFactory.getLogger(SkjermedePersonerPipConsumer::class.java)
 
     @Cacheable(cacheNames = [CACHENAME_EGENANSATT], key = "#personIdent", condition = "#personIdent != null")
-    fun erSkjermet(personIdent: String): Boolean {
+    fun erSkjermet(
+        callId: String,
+        personIdent: String
+    ): Boolean {
         try {
             val response = restTemplate.exchange(
                 getSkjermedePersonerPipUrl(personIdent),
@@ -32,8 +35,12 @@ class SkjermedePersonerPipConsumer @Inject constructor(
             return skjermedePersonerResponse.toBoolean()
         } catch (e: RestClientResponseException) {
             metric.countOutgoingRequestsFailed("erSkjermet", e.rawStatusCode.toString())
-            val message = "Call to get response from Skjermede Person failed with status: ${e.rawStatusCode} and message: ${e.responseBodyAsString}"
-            log.error(message)
+            log.error(
+                "Call to get response from Skjermede Person failed with status: {} and message: {}. {}",
+                e.rawStatusCode,
+                e.responseBodyAsString,
+                callIdArgument(callId)
+            )
             throw e
         }
     }
