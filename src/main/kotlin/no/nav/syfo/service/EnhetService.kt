@@ -15,11 +15,14 @@ constructor(
     private val geografiskTilknytningUtvandret = "NOR"
     private val enhetnrNAVUtland = "0393"
 
-    fun arbeidstakersBehandlendeEnhet(arbeidstakerFnr: String): BehandlendeEnhet? {
-        val geografiskTilknytning = personConsumer.geografiskTilknytning(arbeidstakerFnr)
-        val isEgenAnsatt = skjermedePersonerPipConsumer.erSkjermet(arbeidstakerFnr)
+    fun arbeidstakersBehandlendeEnhet(
+        callId: String,
+        arbeidstakerFnr: String
+    ): BehandlendeEnhet? {
+        val geografiskTilknytning = personConsumer.geografiskTilknytning(callId, arbeidstakerFnr)
+        val isEgenAnsatt = skjermedePersonerPipConsumer.erSkjermet(callId, arbeidstakerFnr)
 
-        val behandlendeEnhet = norgConsumer.getArbeidsfordelingEnhet(geografiskTilknytning, isEgenAnsatt)
+        val behandlendeEnhet = norgConsumer.getArbeidsfordelingEnhet(callId, geografiskTilknytning, isEgenAnsatt)
             ?: return null
 
         return if (isEnhetUtvandret(behandlendeEnhet)) {

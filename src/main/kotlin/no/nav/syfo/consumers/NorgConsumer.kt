@@ -2,6 +2,7 @@ package no.nav.syfo.consumers
 
 import no.nav.syfo.domain.model.*
 import no.nav.syfo.metric.Metric
+import no.nav.syfo.util.callIdArgument
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
@@ -19,8 +20,16 @@ constructor(
     private val metric: Metric,
     private val restTemplate: RestTemplate
 ) {
-    fun getArbeidsfordelingEnhet(geografiskTilknytning: String, isEgenAnsatt: Boolean): BehandlendeEnhet? {
-        val enheter = getArbeidsfordelingEnheter(geografiskTilknytning, isEgenAnsatt)
+    fun getArbeidsfordelingEnhet(
+        callId: String,
+        geografiskTilknytning: String,
+        isEgenAnsatt: Boolean
+    ): BehandlendeEnhet? {
+        val enheter = getArbeidsfordelingEnheter(
+            callId,
+            geografiskTilknytning,
+            isEgenAnsatt
+        )
         if (enheter.isEmpty()) {
             return null
         }
@@ -35,7 +44,11 @@ constructor(
             .first()
     }
 
-    fun getArbeidsfordelingEnheter(geografiskTilknytning: String, isEgenAnsatt: Boolean): List<NorgEnhet> {
+    fun getArbeidsfordelingEnheter(
+        callId: String,
+        geografiskTilknytning: String,
+        isEgenAnsatt: Boolean
+    ): List<NorgEnhet> {
         val requestBody = ArbeidsfordelingCriteria(
             tema = "OPP",
             geografiskOmraade = geografiskTilknytning,
@@ -55,7 +68,12 @@ constructor(
             return enhetList
         } catch (e: RestClientResponseException) {
             metric.countOutgoingRequestsFailed("getArbeidsfordelingEnheter", e.rawStatusCode.toString())
-            log.error("Call to NORG2-arbeidsfordeling failed with status HTTP-{} for GeografiskTilknytning {}", e.rawStatusCode, geografiskTilknytning)
+            log.error(
+                "Call to NORG2-arbeidsfordeling failed with status HTTP-{} for GeografiskTilknytning {}. {}",
+                e.rawStatusCode,
+                geografiskTilknytning,
+                callIdArgument(callId)
+            )
             throw e
         }
     }

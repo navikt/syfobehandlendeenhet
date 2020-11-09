@@ -27,6 +27,8 @@ import org.springframework.test.web.client.ExpectedCount.manyTimes
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.*
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder.fromHttpUrl
 import java.text.ParseException
@@ -85,7 +87,9 @@ class BehandlendeEnhetADControllerTest {
         val norgEnhet = generateNorgEnhet().copy()
         mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
 
-        val behandlendeEnhetResponse = behandlendeEnhetADController.getBehandlendeEnhet(USER_FNR)
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+
+        val behandlendeEnhetResponse = behandlendeEnhetADController.getBehandlendeEnhet(headers, USER_FNR)
         assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(OK)
         assertThat(behandlendeEnhetResponse.body!!.enhetId).isEqualTo(norgEnhet.enhetNr)
         assertThat(behandlendeEnhetResponse.body!!.navn).isEqualTo(norgEnhet.navn)
@@ -99,7 +103,9 @@ class BehandlendeEnhetADControllerTest {
 
         mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, emptyList())
 
-        val behandlendeEnhetResponse = behandlendeEnhetADController.getBehandlendeEnhet(USER_FNR)
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+
+        val behandlendeEnhetResponse = behandlendeEnhetADController.getBehandlendeEnhet(headers, USER_FNR)
         assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(NO_CONTENT)
     }
 
@@ -107,14 +113,18 @@ class BehandlendeEnhetADControllerTest {
     fun getBehandlendeEnhetAccessForbidden() {
         mockAccessToSYFO(FORBIDDEN)
 
-        behandlendeEnhetADController.getBehandlendeEnhet(USER_FNR)
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+
+        behandlendeEnhetADController.getBehandlendeEnhet(headers, USER_FNR)
     }
 
     @Test(expected = RuntimeException::class)
     fun getBehandlendeEnhetAccessServerError() {
         mockAccessToSYFO(INTERNAL_SERVER_ERROR)
 
-        behandlendeEnhetADController.getBehandlendeEnhet(USER_FNR)
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+
+        behandlendeEnhetADController.getBehandlendeEnhet(headers, USER_FNR)
     }
 
     private fun mockAccessToSYFO(status: HttpStatus) {
