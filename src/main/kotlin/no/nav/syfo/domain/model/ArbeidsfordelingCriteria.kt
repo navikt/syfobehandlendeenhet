@@ -7,7 +7,7 @@ data class ArbeidsfordelingCriteria(
     var behandlingstema: String? = null,
     var tema: String,
     var temagruppe: String? = null,
-    var geografiskOmraade: String,
+    var geografiskOmraade: String? = null,
     var enhetNummer: String? = null,
     var skjermet: Boolean
 )
