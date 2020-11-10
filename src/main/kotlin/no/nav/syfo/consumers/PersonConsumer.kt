@@ -69,14 +69,19 @@ class PersonConsumer @Inject constructor(
                             "uknown"
                         }
                     }
-                    LOG.error(
-                        "${e.message} for type=$personNumberType. {}, {}",
-                        callIdArgument(callId),
-                        e
-                    )
                     if (isDnr) {
+                        LOG.warn(
+                            "${e.message} for type=$personNumberType. {}, {}",
+                            callIdArgument(callId),
+                            e
+                        )
                         return null
                     } else {
+                        LOG.error(
+                            "${e.message} for type=$personNumberType. {}, {}",
+                            callIdArgument(callId),
+                            e
+                        )
                         throw e
                     }
                 }
