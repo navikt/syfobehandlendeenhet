@@ -39,7 +39,7 @@ class PersonConsumer @Inject constructor(
                     .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
             ).geografiskTilknytning
             return geografiskTilknytning?.geografiskTilknytning
-                ?: throw EmptyGTResponse("Bad request to TPS to get Geografisk Tilknytning")
+                ?: throw EmptyGTResponse()
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
             LOG.error("Received security constraint when requesting geografiskTilknytning. {}", callIdArgument(callId))
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningSikkerhetsbegrensing")
@@ -70,7 +70,7 @@ class PersonConsumer @Inject constructor(
                         }
                     }
                     LOG.error(
-                        "Received RequestInvalid when requesting geografiskTilknytning due to empty response and type=$personNumberType ${e.message}. {}, {}",
+                        "${e.message} for type=$personNumberType. {}, {}",
                         callIdArgument(callId),
                         e
                     )
