@@ -22,7 +22,7 @@ constructor(
 ) {
     fun getArbeidsfordelingEnhet(
         callId: String,
-        geografiskTilknytning: String,
+        geografiskTilknytning: String?,
         isEgenAnsatt: Boolean
     ): BehandlendeEnhet? {
         val enheter = getArbeidsfordelingEnheter(
@@ -46,7 +46,7 @@ constructor(
 
     fun getArbeidsfordelingEnheter(
         callId: String,
-        geografiskTilknytning: String,
+        geografiskTilknytning: String?,
         isEgenAnsatt: Boolean
     ): List<NorgEnhet> {
         val requestBody = ArbeidsfordelingCriteria(

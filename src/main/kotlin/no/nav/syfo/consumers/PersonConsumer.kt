@@ -1,7 +1,7 @@
 package no.nav.syfo.consumers
 
 import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_PERSON_GEOGRAFISK
-import no.nav.syfo.exception.RequestInvalid
+import no.nav.syfo.exception.EmptyGTResponse
 import no.nav.syfo.metric.Metric
 import no.nav.syfo.util.*
 import no.nav.tjeneste.virksomhet.person.v3.binding.*
@@ -31,7 +31,7 @@ class PersonConsumer @Inject constructor(
     fun geografiskTilknytning(
         callId: String,
         fnr: String
-    ): String {
+    ): String? {
         try {
             metric.countOutgoingRequests("PersonConsumer")
             val geografiskTilknytning = personV3.hentGeografiskTilknytning(
@@ -39,7 +39,7 @@ class PersonConsumer @Inject constructor(
                     .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
             ).geografiskTilknytning
             return geografiskTilknytning?.geografiskTilknytning
-                ?: throw RequestInvalid("Bad request to TPS to get Geografisk Tilknytning")
+                ?: throw EmptyGTResponse("Bad request to TPS to get Geografisk Tilknytning")
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
             LOG.error("Received security constraint when requesting geografiskTilknytning. {}", callIdArgument(callId))
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningSikkerhetsbegrensing")
@@ -54,7 +54,7 @@ class PersonConsumer @Inject constructor(
                     LOG.error("Received SOAPFaultException when requesting geografiskTilknytning: ${e.message}, {}", e, callIdArgument(callId))
                     throw e
                 }
-                is RequestInvalid -> {
+                is EmptyGTResponse -> {
                     val isDnr = isPersonNumberDnr(fnr)
                     val personNumberType = if (isDnr) {
                         metric.countEvent("empty_gt_dnr")
@@ -74,7 +74,11 @@ class PersonConsumer @Inject constructor(
                         callIdArgument(callId),
                         e
                     )
-                    throw e
+                    if (isDnr) {
+                        return null
+                    } else {
+                        throw e
+                    }
                 }
                 else -> {
                     LOG.error(
