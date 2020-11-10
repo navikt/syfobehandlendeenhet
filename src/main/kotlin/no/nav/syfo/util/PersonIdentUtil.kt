@@ -6,5 +6,6 @@ fun isPersonNumberDnr(personIdent: String): Boolean {
 }
 
 fun isPersonNumberFnr(personIdent: String): Boolean {
-    return personIdent.toInt() in 1..31
+    val personIdentBornDay = personIdent.substring(0, 2)
+    return personIdentBornDay.toInt() in 1..31
 }
