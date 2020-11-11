@@ -17,7 +17,6 @@ val javaxActivationVersion = "1.2.0"
 val jaxRiVersion = "2.3.2"
 val jaxwsToolsVersion = "2.3.1"
 val kotlinJacksonVersion = "2.11.2"
-val nimbusSDKVersion = "7.0.3"
 val prometheusVersion = "1.3.14"
 val tokenValidationSpringSupportVersion = "1.3.0"
 
