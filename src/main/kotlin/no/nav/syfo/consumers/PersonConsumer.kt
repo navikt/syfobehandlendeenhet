@@ -10,7 +10,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentGeografiskTilknytningRequest
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.retry.annotation.*
 import org.springframework.stereotype.Service
 import javax.inject.Inject
 import javax.ws.rs.ForbiddenException
@@ -23,10 +22,6 @@ class PersonConsumer @Inject constructor(
 ) {
     private val LOG = LoggerFactory.getLogger(PersonConsumer::class.java)
 
-    @Retryable(
-        value = [SOAPFaultException::class],
-        backoff = Backoff(delay = 200, maxDelay = 1000)
-    )
     @Cacheable(cacheNames = [CACHENAME_PERSON_GEOGRAFISK], key = "#fnr", condition = "#fnr != null")
     fun geografiskTilknytning(
         callId: String,
@@ -38,8 +33,18 @@ class PersonConsumer @Inject constructor(
                 HentGeografiskTilknytningRequest()
                     .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
             ).geografiskTilknytning
-            return geografiskTilknytning?.geografiskTilknytning
-                ?: throw EmptyGTResponse()
+            val gt: String? = geografiskTilknytning?.geografiskTilknytning
+            return if (gt.isNullOrEmpty()) {
+                val personNumberType = personIdentType(fnr).toString().toLowerCase()
+                metric.countEvent("empty_gt_$personNumberType")
+                LOG.info(
+                    "TPS returned empty response for Geografisk Tilknytningfor type=$personNumberType. {}",
+                    callIdArgument(callId)
+                )
+                null
+            } else {
+                gt
+            }
         } catch (e: HentGeografiskTilknytningSikkerhetsbegrensing) {
             LOG.error("Received security constraint when requesting geografiskTilknytning. {}", callIdArgument(callId))
             metric.countOutgoingRequestsFailed("PersonConsumer", "HentGeografiskTilknytningSikkerhetsbegrensing")
@@ -55,35 +60,14 @@ class PersonConsumer @Inject constructor(
                     throw e
                 }
                 is EmptyGTResponse -> {
-                    val isDnr = isPersonNumberDnr(fnr)
-                    val personNumberType = if (isDnr) {
-                        metric.countEvent("empty_gt_dnr")
-                        "dnr"
-                    } else {
-                        val isFnr = isPersonNumberFnr(fnr)
-                        if (isFnr) {
-                            metric.countEvent("empty_gt_fnr")
-                            "fnr"
-                        } else {
-                            metric.countEvent("empty_gt_uknown")
-                            "uknown"
-                        }
-                    }
-                    if (isDnr) {
-                        LOG.warn(
-                            "${e.message} for type=$personNumberType. {}, {}",
-                            callIdArgument(callId),
-                            e
-                        )
-                        return null
-                    } else {
-                        LOG.error(
-                            "${e.message} for type=$personNumberType. {}, {}",
-                            callIdArgument(callId),
-                            e
-                        )
-                        throw e
-                    }
+                    val personNumberType = personIdentType(fnr).toString().toLowerCase()
+                    metric.countEvent("empty_gt_$personNumberType")
+                    LOG.info(
+                        "${e.message} for type=$personNumberType. {}, {}",
+                        callIdArgument(callId),
+                        e
+                    )
+                    return null
                 }
                 else -> {
                     LOG.error(
@@ -96,11 +80,5 @@ class PersonConsumer @Inject constructor(
                 }
             }
         }
-    }
-
-    @Recover
-    fun recover(e: SOAPFaultException) {
-        LOG.error("Failed to request Geografisk Tilknytning from TPS after max retry attempts. {}", e)
-        throw e
     }
 }

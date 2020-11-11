@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val springRetryVersion = "1.2.4.RELEASE"
 val personV3Version = "1.2019.07.11-06.47-b55f47790a9d"
 val cxfVersion = "3.3.3"
 val jaxWsApiVersion = "2.3.1"
@@ -75,8 +74,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-jetty")
     implementation("org.springframework.boot:spring-boot-starter-aop")
-
-    implementation("org.springframework.retry:spring-retry:$springRetryVersion")
 
     implementation("no.nav.security:token-validation-spring:$tokenValidationSpringSupportVersion")
 

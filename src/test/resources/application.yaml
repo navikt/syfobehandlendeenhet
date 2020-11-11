@@ -15,6 +15,9 @@ srvsyfobehandlendeenhet:
   username: "username"
   password: "1234"
 
+srv:
+  username: "username"
+  password: "password"
 
 #no.nav.security.oidc:
 #  issuers: selvbetjening,intern
@@ -48,4 +51,6 @@ dev: true
 tjenester.url: https://tjenester-q1.nav.no
 
 norg2.url: https://norg2
+security.token.service.rest.url: "http://sts"
+pdl.url: "http://pdl"
 tilgangskontrollapi.url: "http://syfo-tilgangskontroll"

@@ -5,6 +5,8 @@ import no.nav.syfo.LocalApplication
 import no.nav.syfo.api.controllers.BehandlendeEnhetADController
 import no.nav.syfo.consumers.TilgangConsumer.Companion.ACCESS_TO_SYFO_WITH_AZURE_PATH
 import no.nav.syfo.consumers.getSkjermedePersonerPipUrl
+import no.nav.syfo.consumers.pdl.PdlConsumer
+import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.oidc.OIDCIssuer.AZURE
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.OidcTestHelper.clearOIDCContext
@@ -14,8 +16,10 @@ import no.nav.syfo.testhelper.UserConstants.VEILEDER_ID
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.junit.runner.RunWith
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.CacheManager
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
@@ -46,6 +50,9 @@ class BehandlendeEnhetADControllerTest {
     @Value("\${tilgangskontrollapi.url}")
     private lateinit var tilgangskontrollUrl: String
 
+    @MockBean
+    private lateinit var pdlConsumer: PdlConsumer
+
     @Inject
     private lateinit var oidcRequestContextHolder: TokenValidationContextHolder
 
@@ -65,6 +72,9 @@ class BehandlendeEnhetADControllerTest {
     fun setup() {
         this.mockRestServiceServer = MockRestServiceServer.bindTo(restTemplate).build()
         logInVeilederAD(oidcRequestContextHolder, VEILEDER_ID)
+
+        val pdlResponse = generatePdlHentPerson()
+        Mockito.`when`(pdlConsumer.person(PersonIdentNumber(USER_FNR))).thenReturn(pdlResponse)
     }
 
     @After
