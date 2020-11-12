@@ -5,6 +5,10 @@ import net.logstash.logback.argument.StructuredArguments
 import org.springframework.util.MultiValueMap
 import java.util.*
 
+const val TEMA_HEADER = "Tema"
+const val ALLE_TEMA_HEADERVERDI = "GEN"
+const val NAV_CONSUMER_TOKEN_HEADER = "Nav-Consumer-Token"
+
 const val NAV_CONSUMER_ID_HEADER = "Nav-Consumer-Id"
 const val APP_CONSUMER_ID = "syfobehandlendeenhet"
 const val NAV_CALL_ID_HEADER = "Nav-Call-Id"

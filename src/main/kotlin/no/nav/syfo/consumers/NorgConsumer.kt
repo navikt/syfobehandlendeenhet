@@ -22,11 +22,13 @@ constructor(
 ) {
     fun getArbeidsfordelingEnhet(
         callId: String,
+        diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: String?,
         isEgenAnsatt: Boolean
     ): BehandlendeEnhet? {
         val enheter = getArbeidsfordelingEnheter(
             callId,
+            diskresjonskode,
             geografiskTilknytning,
             isEgenAnsatt
         )
@@ -46,10 +48,12 @@ constructor(
 
     fun getArbeidsfordelingEnheter(
         callId: String,
+        diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: String?,
         isEgenAnsatt: Boolean
     ): List<NorgEnhet> {
         val requestBody = ArbeidsfordelingCriteria(
+            diskresjonskode = diskresjonskode?.name,
             tema = "OPP",
             geografiskOmraade = geografiskTilknytning,
             skjermet = isEgenAnsatt

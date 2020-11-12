@@ -11,3 +11,8 @@ data class ArbeidsfordelingCriteria(
     var enhetNummer: String? = null,
     var skjermet: Boolean
 )
+
+enum class ArbeidsfordelingCriteriaDiskresjonskode {
+    SPSF,
+    SPFO
+}

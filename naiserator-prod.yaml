@@ -56,6 +56,10 @@ spec:
       value: 9b4e07a3-4f4c-4bab-b866-87f62dff480d
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
+    - name: SECURITY_TOKEN_SERVICE_REST_URL
+      value: https://security-token-service.nais.adeo.no
+    - name: PDL_URL
+      value: https://pdl-api.nais.adeo.no/graphql
     - name: PERSON_V3_URL
       value: https://wasapp.adeo.no/tpsws/ws/Person/v3
     - name: NORG2_URL

@@ -1,6 +1,8 @@
 package no.nav.syfo.service
 
 import no.nav.syfo.consumers.*
+import no.nav.syfo.consumers.pdl.*
+import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.domain.model.BehandlendeEnhet
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service
 class EnhetService @Autowired
 constructor(
     private val norgConsumer: NorgConsumer,
+    private val pdlConsumer: PdlConsumer,
     private val personConsumer: PersonConsumer,
     private val skjermedePersonerPipConsumer: SkjermedePersonerPipConsumer
 ) {
@@ -22,8 +25,14 @@ constructor(
         val geografiskTilknytning = personConsumer.geografiskTilknytning(callId, arbeidstakerFnr)
         val isEgenAnsatt = skjermedePersonerPipConsumer.erSkjermet(callId, arbeidstakerFnr)
 
-        val behandlendeEnhet = norgConsumer.getArbeidsfordelingEnhet(callId, geografiskTilknytning, isEgenAnsatt)
-            ?: return null
+        val graderingList = pdlConsumer.person(PersonIdentNumber(arbeidstakerFnr))?.gradering()
+
+        val behandlendeEnhet = norgConsumer.getArbeidsfordelingEnhet(
+            callId,
+            graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
+            geografiskTilknytning,
+            isEgenAnsatt
+        ) ?: return null
 
         return if (isEnhetUtvandret(behandlendeEnhet)) {
             getEnhetNAVUtland(behandlendeEnhet)
