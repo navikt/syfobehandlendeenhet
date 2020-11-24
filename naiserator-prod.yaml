@@ -37,6 +37,11 @@ spec:
     - "https://syfobehandlendeenhet.nais.adeo.no"
   vault:
     enabled: true
+    paths:
+      - kvPath: "/serviceuser/data/prod/srvsyfobehandlendeenhet"
+        mountPath: "/secrets/serviceuser/syfobehandlendeenhet"
+      - kvPath: "/kv/prod/fss/syfobehandlendeenhet/default"
+        mountPath: "/secrets/vault"
   env:
     - name: APP_NAME
       value: "syfobehandlendeenhet"
