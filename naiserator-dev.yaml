@@ -37,6 +37,11 @@ spec:
     - "https://syfobehandlendeenhet.nais.preprod.local"
   vault:
     enabled: true
+    paths:
+      - kvPath: "/serviceuser/data/dev/srvsyfobehandlendeenhet"
+        mountPath: "/secrets/serviceuser/syfobehandlendeenhet"
+      - kvPath: "/kv/preprod/fss/syfobehandlendeenhet/default"
+        mountPath: "/secrets/vault"
   env:
     - name: APP_NAME
       value: "syfobehandlendeenhet"

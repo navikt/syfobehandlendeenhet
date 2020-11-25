@@ -20,27 +20,41 @@ object STSClientConfig {
     private const val STS_REQUEST_SAML_POLICY = "classpath:policy/requestSamlPolicy.xml"
     private const val STS_CLIENT_AUTHENTICATION_POLICY = "classpath:policy/untPolicy.xml"
 
-    fun <T> configureRequestSamlToken(port: T): T {
+    fun <T> configureRequestSamlToken(
+        port: T,
+        serviceuserCredentials: ServiceuserCredentials
+    ): T {
         val client = ClientProxy.getClient(port)
         // do not have onbehalfof token so cache token in endpoint
-        configureStsRequestSamlToken(client, true)
+        configureStsRequestSamlToken(client, true, serviceuserCredentials)
         return port
     }
 
-    private fun configureStsRequestSamlToken(client: Client, cacheTokenInEndpoint: Boolean) {
+    private fun configureStsRequestSamlToken(
+        client: Client,
+        cacheTokenInEndpoint: Boolean,
+        serviceuserCredentials: ServiceuserCredentials
+    ) {
         val stsClient = createCustomSTSClient(client.bus)
-        configureStsWithPolicyForClient(stsClient, client, STS_REQUEST_SAML_POLICY, cacheTokenInEndpoint)
+        configureStsWithPolicyForClient(
+            stsClient,
+            client,
+            STS_REQUEST_SAML_POLICY,
+            cacheTokenInEndpoint,
+            serviceuserCredentials
+        )
     }
 
     private fun configureStsWithPolicyForClient(
         stsClient: STSClient,
         client: Client,
         policyReference: String,
-        cacheTokenInEndpoint: Boolean
+        cacheTokenInEndpoint: Boolean,
+        serviceuserCredentials: ServiceuserCredentials
     ) {
         val location = getEnvVar("SECURITYTOKENSERVICE_URL")
-        val username = getEnvVar("srv_username")
-        val password = getEnvVar("srv_password")
+        val username = serviceuserCredentials.username
+        val password = serviceuserCredentials.password
 
         configureSTSClient(stsClient, location, username, password)
 
