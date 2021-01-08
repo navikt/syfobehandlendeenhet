@@ -1,7 +1,10 @@
 package no.nav.syfo.service
 
-import no.nav.syfo.consumers.*
-import no.nav.syfo.consumers.pdl.*
+import no.nav.syfo.consumers.NorgConsumer
+import no.nav.syfo.consumers.SkjermedePersonerPipConsumer
+import no.nav.syfo.consumers.pdl.PdlConsumer
+import no.nav.syfo.consumers.pdl.gradering
+import no.nav.syfo.consumers.pdl.toArbeidsfordelingCriteriaDiskresjonskode
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.domain.model.BehandlendeEnhet
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,7 +15,6 @@ class EnhetService @Autowired
 constructor(
     private val norgConsumer: NorgConsumer,
     private val pdlConsumer: PdlConsumer,
-    private val personConsumer: PersonConsumer,
     private val skjermedePersonerPipConsumer: SkjermedePersonerPipConsumer
 ) {
     private val geografiskTilknytningUtvandret = "NOR"
@@ -20,12 +22,12 @@ constructor(
 
     fun arbeidstakersBehandlendeEnhet(
         callId: String,
-        arbeidstakerFnr: String
+        personIdentNumber: PersonIdentNumber
     ): BehandlendeEnhet? {
-        val geografiskTilknytning = personConsumer.geografiskTilknytning(callId, arbeidstakerFnr)
-        val isEgenAnsatt = skjermedePersonerPipConsumer.erSkjermet(callId, arbeidstakerFnr)
+        val geografiskTilknytning = pdlConsumer.geografiskTilknytning(personIdentNumber)
+        val isEgenAnsatt = skjermedePersonerPipConsumer.erSkjermet(callId, personIdentNumber.value)
 
-        val graderingList = pdlConsumer.person(PersonIdentNumber(arbeidstakerFnr))?.gradering()
+        val graderingList = pdlConsumer.person(personIdentNumber)?.gradering()
 
         val behandlendeEnhet = norgConsumer.getArbeidsfordelingEnhet(
             callId,

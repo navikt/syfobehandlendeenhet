@@ -14,7 +14,9 @@ import no.nav.syfo.testhelper.OidcTestHelper.logInVeilederAD
 import no.nav.syfo.testhelper.UserConstants.USER_FNR
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_ID
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Value
@@ -75,6 +77,9 @@ class BehandlendeEnhetADControllerTest {
 
         val pdlResponse = generatePdlHentPerson()
         Mockito.`when`(pdlConsumer.person(PersonIdentNumber(USER_FNR))).thenReturn(pdlResponse)
+
+        val pdlGTResponse = generatePdlHentGeografiskTilknytning()
+        Mockito.`when`(pdlConsumer.geografiskTilknytningResponse(PersonIdentNumber(USER_FNR))).thenReturn(pdlGTResponse)
     }
 
     @After

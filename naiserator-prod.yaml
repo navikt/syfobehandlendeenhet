@@ -65,8 +65,6 @@ spec:
       value: https://security-token-service.nais.adeo.no
     - name: PDL_URL
       value: https://pdl-api.nais.adeo.no/graphql
-    - name: PERSON_V3_URL
-      value: https://wasapp.adeo.no/tpsws/ws/Person/v3
     - name: NORG2_URL
       value: https://app.adeo.no/norg2/api/v1
     - name: TILGANGSKONTROLLAPI_URL

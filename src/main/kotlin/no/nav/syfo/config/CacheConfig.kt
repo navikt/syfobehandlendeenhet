@@ -19,7 +19,6 @@ class CacheConfig {
                 ConcurrentMapCache(CACHENAME_ARBEIDSFORDELING),
                 ConcurrentMapCache(CACHENAME_EGENANSATT),
                 ConcurrentMapCache(CACHENAME_ORGANISASJONENHET),
-                ConcurrentMapCache(CACHENAME_PERSON_GEOGRAFISK)
             )
         )
         return cacheManager
@@ -29,6 +28,5 @@ class CacheConfig {
         const val CACHENAME_ARBEIDSFORDELING = "arbeidsfordeling"
         const val CACHENAME_EGENANSATT = "egenansatt"
         const val CACHENAME_ORGANISASJONENHET = "organisasjonenhet"
-        const val CACHENAME_PERSON_GEOGRAFISK = "persongeografisk"
     }
 }
