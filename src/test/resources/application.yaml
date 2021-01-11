@@ -39,12 +39,7 @@ no.nav.security.jwt:
       accepted_audience: aud-localhost
       cookie_name: localhost-idtoken
 
-virksomhet:
-  person.v3.endpointurl: "personv3.url"
-
 fasit.environment.name: 'local'
-
-person.withmock: true
 
 dev: true
 

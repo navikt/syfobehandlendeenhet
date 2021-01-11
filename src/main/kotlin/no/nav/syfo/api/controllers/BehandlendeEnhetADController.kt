@@ -2,6 +2,7 @@ package no.nav.syfo.api.controllers
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.syfo.consumers.TilgangConsumer
+import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.domain.model.BehandlendeEnhet
 import no.nav.syfo.metric.Metric
 import no.nav.syfo.oidc.OIDCIssuer.AZURE
@@ -37,7 +38,9 @@ constructor(
 
         tilgangConsumer.throwExceptionIfVeilederWithoutAccessToSYFO()
 
-        return createResponse(enhetService.arbeidstakersBehandlendeEnhet(callId, fnr))
+        val personIdentNumber = PersonIdentNumber(fnr)
+
+        return createResponse(enhetService.arbeidstakersBehandlendeEnhet(callId, personIdentNumber))
     }
 
     private fun createResponse(behandlendeEnhet: BehandlendeEnhet?): ResponseEntity<BehandlendeEnhet> {
