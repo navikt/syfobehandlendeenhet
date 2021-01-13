@@ -4,6 +4,7 @@ metadata:
   labels:
     team: teamsykefravr
   name: syfobehandlendeenhet-redis
+  namespace: default
 spec:
   image: redis:5-alpine
   port: 6379
