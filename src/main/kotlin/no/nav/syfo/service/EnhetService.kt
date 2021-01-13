@@ -1,5 +1,6 @@
 package no.nav.syfo.service
 
+import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_BEHANDLENDEENHET
 import no.nav.syfo.consumers.NorgConsumer
 import no.nav.syfo.consumers.SkjermedePersonerPipConsumer
 import no.nav.syfo.consumers.pdl.PdlConsumer
@@ -8,6 +9,7 @@ import no.nav.syfo.consumers.pdl.toArbeidsfordelingCriteriaDiskresjonskode
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.domain.model.BehandlendeEnhet
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
@@ -20,6 +22,7 @@ constructor(
     private val geografiskTilknytningUtvandret = "NOR"
     private val enhetnrNAVUtland = "0393"
 
+    @Cacheable(cacheNames = [CACHENAME_BEHANDLENDEENHET], key = "#personIdent", condition = "#personIdent != null")
     fun arbeidstakersBehandlendeEnhet(
         callId: String,
         personIdentNumber: PersonIdentNumber

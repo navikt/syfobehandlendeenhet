@@ -86,11 +86,6 @@ class BehandlendeEnhetADControllerTest {
     fun tearDown() {
         clearOIDCContext(oidcRequestContextHolder)
         mockRestServiceServer.reset()
-        cacheManager.cacheNames
-            .forEach { cacheName: String ->
-                val cache = cacheManager.getCache(cacheName)
-                cache?.clear()
-            }
     }
 
     @Test
