@@ -7,7 +7,7 @@ on:
       - 'redis-config.yaml'
       - '.github/workflows/redis.yaml'
 jobs:
-  apply-alerts:
+  apply-redis:
     name: Apply Redis cache to cluster
     runs-on: ubuntu-latest
     steps:
