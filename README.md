@@ -13,6 +13,9 @@ Start opp via `LocalApplication.main`. Kjører på port 8999.
 ## Lint
 Kjør `./gradlew --continue ktlintCheck`
 
+## Cache
+For caching brukes Redis. Redis deployes automatisk til NAIS ved endringer i workflow eller i config. Redis kan også deployes manuelt ved å kjøre følgdende kommando: `kubectl apply -f redis-config.yaml`.
+
 ## Pipeline
 Pipeline er på Github Action.
 Commits til Master-branch deployes automatisk til dev-fss og prod-fss.

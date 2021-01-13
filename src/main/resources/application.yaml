@@ -19,6 +19,10 @@ no.nav.security.jwt:
       cookie_name: isso-idtoken
 
 spring:
+  cache.type: redis
+  redis:
+    host: syfobehandlendeenhet-redis
+    port: 6379
   main.banner-mode: 'off'
   jta.atomikos.datasource:
     max-pool-size: 32
