@@ -9,7 +9,7 @@ version = "1.0.0"
 val javaxActivationVersion = "1.2.0"
 val jaxRiVersion = "2.3.2"
 val kotlinJacksonVersion = "2.11.2"
-val prometheusVersion = "1.3.14"
+val prometheusVersion = "1.5.5"
 val tokenValidationSpringSupportVersion = "1.3.0"
 
 plugins {
@@ -17,7 +17,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "9.4.0"
     id("com.github.johnrengelman.shadow") version "6.0.0"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.4.10"
-    id("org.springframework.boot") version "2.2.10.RELEASE"
+    id("org.springframework.boot") version "2.3.7.RELEASE"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
 }
 
