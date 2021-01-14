@@ -13,6 +13,7 @@ import no.nav.syfo.testhelper.OidcTestHelper.clearOIDCContext
 import no.nav.syfo.testhelper.OidcTestHelper.logInVeilederAD
 import no.nav.syfo.testhelper.UserConstants.USER_FNR
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_ID
+import no.nav.syfo.util.bearerHeader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
@@ -146,7 +147,7 @@ class BehandlendeEnhetADControllerTest {
 
         mockRestServiceServer.expect(manyTimes(), requestTo(uriString))
             .andExpect(method(HttpMethod.GET))
-            .andExpect(header(AUTHORIZATION, "Bearer $idToken"))
+            .andExpect(header(AUTHORIZATION, bearerHeader(idToken)))
             .andRespond(withStatus(status))
     }
 }
