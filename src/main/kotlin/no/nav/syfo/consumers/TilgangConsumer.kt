@@ -1,16 +1,18 @@
 package no.nav.syfo.consumers
 
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.syfo.config.EnvironmentUtil
 import no.nav.syfo.oidc.OIDCIssuer.AZURE
 import no.nav.syfo.oidc.OIDCUtil.tokenFraOIDC
+import no.nav.syfo.util.bearerHeader
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.http.*
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.util.UriComponentsBuilder
 import org.springframework.web.util.UriComponentsBuilder.fromHttpUrl
 import java.net.URI
 import javax.inject.Inject
@@ -18,22 +20,17 @@ import javax.ws.rs.ForbiddenException
 
 @Service
 class TilgangConsumer @Inject constructor(
-    val template: RestTemplate,
-    val contextHolder: TokenValidationContextHolder
-) : InitializingBean {
-    private var instance: TilgangConsumer? = null
-
-    override fun afterPropertiesSet() {
-        instance = this
-    }
-
-    private val tilgangskontrollUrl = EnvironmentUtil.getEnvVar("TILGANGSKONTROLLAPI_URL", "http://syfo-tilgangskontroll")
-
-    private val accessToSYFOUriTemplate: UriComponentsBuilder
+    @Value("\${tilgangskontrollapi.url}") private val tilgangskontrollUrl: String,
+    private val template: RestTemplate,
+    private val contextHolder: TokenValidationContextHolder
+) {
+    private val accessToSYFOURI: URI
 
     init {
-        accessToSYFOUriTemplate = fromHttpUrl(tilgangskontrollUrl)
+        accessToSYFOURI = fromHttpUrl(tilgangskontrollUrl)
             .path(ACCESS_TO_SYFO_WITH_AZURE_PATH)
+            .build()
+            .toUri()
     }
 
     fun throwExceptionIfVeilederWithoutAccessToSYFO() {
@@ -43,8 +40,7 @@ class TilgangConsumer @Inject constructor(
     }
 
     fun isVeilederGrantedAccessToSYFO(): Boolean {
-        val accessToSyfoUriWith = accessToSYFOUriTemplate.build().toUri()
-        return callUriWithTemplate(accessToSyfoUriWith)
+        return callUriWithTemplate(accessToSYFOURI)
     }
 
     private fun callUriWithTemplate(uri: URI): Boolean {
@@ -60,7 +56,7 @@ class TilgangConsumer @Inject constructor(
             if (e.rawStatusCode == 403) {
                 false
             } else {
-                LOG.error("HttpClientErrorException mot uri {}", uri, e)
+                LOG.error("HttpClientErrorException mot URI {}", uri.toString(), e)
                 return false
             }
         }
@@ -69,7 +65,7 @@ class TilgangConsumer @Inject constructor(
     private fun createEntity(): HttpEntity<String> {
         val headers = HttpHeaders()
         headers.accept = listOf(MediaType.APPLICATION_JSON)
-        headers.set("Authorization", "Bearer " + tokenFraOIDC(contextHolder, AZURE))
+        headers.set(HttpHeaders.AUTHORIZATION, bearerHeader(tokenFraOIDC(contextHolder, AZURE)))
         return HttpEntity(headers)
     }
 
