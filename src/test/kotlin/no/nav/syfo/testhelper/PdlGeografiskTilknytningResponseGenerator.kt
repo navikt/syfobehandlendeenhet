@@ -1,8 +1,8 @@
 package no.nav.syfo.testhelper
 
-import no.nav.syfo.consumers.pdl.PdlGeografiskTilknytning
-import no.nav.syfo.consumers.pdl.PdlGeografiskTilknytningType
-import no.nav.syfo.consumers.pdl.PdlHentGeografiskTilknytning
+import no.nav.syfo.consumer.pdl.PdlGeografiskTilknytning
+import no.nav.syfo.consumer.pdl.PdlGeografiskTilknytningType
+import no.nav.syfo.consumer.pdl.PdlHentGeografiskTilknytning
 
 const val geografiskTilknytningKommune = "0330"
 

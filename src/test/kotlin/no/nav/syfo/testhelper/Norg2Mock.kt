@@ -2,9 +2,9 @@ package no.nav.syfo.testhelper
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.syfo.consumers.NorgConsumer
-import no.nav.syfo.domain.model.Enhetsstatus
-import no.nav.syfo.domain.model.NorgEnhet
+import no.nav.syfo.consumer.norg.NorgConsumer
+import no.nav.syfo.consumer.norg.Enhetsstatus
+import no.nav.syfo.consumer.norg.NorgEnhet
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.test.web.client.ExpectedCount

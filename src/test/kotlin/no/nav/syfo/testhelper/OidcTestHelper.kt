@@ -6,7 +6,7 @@ import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.test.JwtTokenGenerator
-import no.nav.syfo.oidc.OIDCIssuer
+import no.nav.syfo.api.auth.OIDCIssuer
 import java.text.ParseException
 import java.util.*
 
