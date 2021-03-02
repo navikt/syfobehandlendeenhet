@@ -21,7 +21,8 @@ data class PdlGeografiskTilknytning(
 enum class PdlGeografiskTilknytningType {
     BYDEL,
     KOMMUNE,
-    LAND
+    UTLAND,
+    UDEFINERT
 }
 
 fun PdlHentGeografiskTilknytning.geografiskTilknytning(): String? {
@@ -34,8 +35,11 @@ fun PdlHentGeografiskTilknytning.geografiskTilknytning(): String? {
             PdlGeografiskTilknytningType.KOMMUNE.name -> {
                 gt.gtKommune
             }
-            PdlGeografiskTilknytningType.LAND.name -> {
+            PdlGeografiskTilknytningType.UTLAND.name -> {
                 gt.gtLand
+            }
+            PdlGeografiskTilknytningType.UDEFINERT.name -> {
+                null
             }
             else -> null
         }
