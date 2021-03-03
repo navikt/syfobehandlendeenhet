@@ -25,21 +25,33 @@ enum class PdlGeografiskTilknytningType {
     UDEFINERT
 }
 
-fun PdlHentGeografiskTilknytning.geografiskTilknytning(): String? {
+fun PdlHentGeografiskTilknytning.geografiskTilknytning(): GeografiskTilknytning? {
     val geografiskTilknytning = this.hentGeografiskTilknytning
     geografiskTilknytning?.let { gt ->
         return when (gt.gtType) {
             PdlGeografiskTilknytningType.BYDEL.name -> {
-                gt.gtBydel
+                GeografiskTilknytning(
+                    type = GeografiskTilknytningType.valueOf(PdlGeografiskTilknytningType.BYDEL.name),
+                    value = gt.gtBydel
+                )
             }
             PdlGeografiskTilknytningType.KOMMUNE.name -> {
-                gt.gtKommune
+                GeografiskTilknytning(
+                    type = GeografiskTilknytningType.valueOf(PdlGeografiskTilknytningType.KOMMUNE.name),
+                    value = gt.gtKommune
+                )
             }
             PdlGeografiskTilknytningType.UTLAND.name -> {
-                gt.gtLand
+                GeografiskTilknytning(
+                    type = GeografiskTilknytningType.valueOf(PdlGeografiskTilknytningType.UTLAND.name),
+                    value = gt.gtLand
+                )
             }
             PdlGeografiskTilknytningType.UDEFINERT.name -> {
-                null
+                GeografiskTilknytning(
+                    type = GeografiskTilknytningType.valueOf(PdlGeografiskTilknytningType.UDEFINERT.name),
+                    value = null
+                )
             }
             else -> null
         }

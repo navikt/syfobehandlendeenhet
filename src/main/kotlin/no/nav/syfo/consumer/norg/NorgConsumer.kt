@@ -1,6 +1,7 @@
 package no.nav.syfo.consumer.norg
 
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import no.nav.syfo.consumer.pdl.GeografiskTilknytning
 import no.nav.syfo.metric.Metric
 import no.nav.syfo.util.callIdArgument
 import org.slf4j.LoggerFactory.getLogger
@@ -23,7 +24,7 @@ constructor(
     fun getArbeidsfordelingEnhet(
         callId: String,
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
-        geografiskTilknytning: String?,
+        geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean
     ): BehandlendeEnhet? {
         val enheter = getArbeidsfordelingEnheter(
@@ -49,13 +50,13 @@ constructor(
     fun getArbeidsfordelingEnheter(
         callId: String,
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
-        geografiskTilknytning: String?,
+        geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean
     ): List<NorgEnhet> {
         val requestBody = ArbeidsfordelingCriteria(
             diskresjonskode = diskresjonskode?.name,
             tema = "OPP",
-            geografiskOmraade = geografiskTilknytning,
+            geografiskOmraade = geografiskTilknytning.value,
             skjermet = isEgenAnsatt
         )
         try {

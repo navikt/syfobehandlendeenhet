@@ -2,12 +2,13 @@ package no.nav.syfo.behanlendeenhet
 
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.LocalApplication
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhetADController
-import no.nav.syfo.consumer.veiledertilgang.TilgangConsumer.Companion.ACCESS_TO_SYFO_WITH_AZURE_PATH
-import no.nav.syfo.consumer.skjermedepersonerpip.getSkjermedePersonerPipUrl
-import no.nav.syfo.consumer.pdl.PdlConsumer
-import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.api.auth.OIDCIssuer.AZURE
+import no.nav.syfo.behandlendeenhet.BehandlendeEnhetADController
+import no.nav.syfo.consumer.pdl.PdlConsumer
+import no.nav.syfo.consumer.pdl.geografiskTilknytning
+import no.nav.syfo.consumer.skjermedepersonerpip.getSkjermedePersonerPipUrl
+import no.nav.syfo.consumer.veiledertilgang.TilgangConsumer.Companion.ACCESS_TO_SYFO_WITH_AZURE_PATH
+import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.OidcTestHelper.clearOIDCContext
 import no.nav.syfo.testhelper.OidcTestHelper.logInVeilederAD
@@ -15,9 +16,7 @@ import no.nav.syfo.testhelper.UserConstants.USER_FNR
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_ID
 import no.nav.syfo.util.bearerHeader
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Value
@@ -81,6 +80,9 @@ class BehandlendeEnhetADControllerTest {
 
         val pdlGTResponse = generatePdlHentGeografiskTilknytning()
         Mockito.`when`(pdlConsumer.geografiskTilknytningResponse(PersonIdentNumber(USER_FNR))).thenReturn(pdlGTResponse)
+        Mockito.`when`(pdlConsumer.geografiskTilknytning(PersonIdentNumber(USER_FNR))).thenReturn(
+            pdlGTResponse.geografiskTilknytning()
+        )
     }
 
     @After
