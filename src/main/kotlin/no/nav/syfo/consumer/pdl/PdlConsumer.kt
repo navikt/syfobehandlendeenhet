@@ -3,21 +3,13 @@ package no.nav.syfo.consumer.pdl
 import no.nav.syfo.consumer.sts.StsConsumer
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.metric.Metric
-import no.nav.syfo.util.ALLE_TEMA_HEADERVERDI
-import no.nav.syfo.util.NAV_CONSUMER_TOKEN_HEADER
-import no.nav.syfo.util.TEMA_HEADER
-import no.nav.syfo.util.bearerHeader
+import no.nav.syfo.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
+import org.springframework.http.*
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestClientResponseException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.*
 
 @Service
 class PdlConsumer(
@@ -26,8 +18,9 @@ class PdlConsumer(
     private val stsConsumer: StsConsumer,
     private val restTemplate: RestTemplate
 ) {
-    fun geografiskTilknytning(personIdentNumber: PersonIdentNumber): String? {
+    fun geografiskTilknytning(personIdentNumber: PersonIdentNumber): GeografiskTilknytning {
         return geografiskTilknytningResponse(personIdentNumber)?.geografiskTilknytning()
+            ?: throw PdlRequestFailedException("No Geografisk Tilknytning was found in response from PDL")
     }
 
     fun geografiskTilknytningResponse(personIdentNumber: PersonIdentNumber): PdlHentGeografiskTilknytning? {
