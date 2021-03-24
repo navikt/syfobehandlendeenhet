@@ -4,8 +4,8 @@ on:
     branches:
       - master
     paths:
-      - 'redis-config.yaml'
       - '.github/workflows/redis.yaml'
+      - '.nais/redis-config.yaml'
 jobs:
   apply-redis:
     name: Apply Redis cache to cluster
@@ -24,4 +24,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
-          RESOURCE: redis-config.yaml
+          RESOURCE: .nais/redis-config.yaml
