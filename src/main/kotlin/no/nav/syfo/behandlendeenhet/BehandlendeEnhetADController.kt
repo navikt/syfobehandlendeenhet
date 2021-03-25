@@ -25,23 +25,6 @@ constructor(
     private val metric: Metric,
     private val tilgangConsumer: TilgangConsumer
 ) {
-
-    @GetMapping(value = ["/{fnr}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getBehandlendeEnhet(
-        @RequestHeader headers: MultiValueMap<String, String>,
-        @PathVariable fnr: String
-    ): ResponseEntity<BehandlendeEnhet> {
-        val callId = getOrCreateCallId(headers)
-
-        metric.countIncomingRequests("internad_behandlendeEnhet")
-
-        tilgangConsumer.throwExceptionIfVeilederWithoutAccessToSYFO()
-
-        val personIdentNumber = PersonIdentNumber(fnr)
-
-        return createResponse(enhetService.arbeidstakersBehandlendeEnhet(callId, personIdentNumber))
-    }
-
     @GetMapping(value = ["/personident"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getBehandlendeEnhet(
         @RequestHeader headers: MultiValueMap<String, String>,
