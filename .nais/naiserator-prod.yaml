@@ -34,6 +34,7 @@ spec:
     enabled: true
     path: /internal/prometheus
   ingresses:
+    - "https://syfobehandlendeenhet.intern.nav.no"
     - "https://syfobehandlendeenhet.prod-fss-pub.nais.io"
     - "https://syfobehandlendeenhet.nais.adeo.no"
   vault:
