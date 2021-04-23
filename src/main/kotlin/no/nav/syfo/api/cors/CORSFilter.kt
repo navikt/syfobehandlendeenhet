@@ -31,7 +31,6 @@ class CORSFilter : Filter {
             )
             httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
         }
-
         filterChain.doFilter(servletRequest, httpResponse)
     }
 
