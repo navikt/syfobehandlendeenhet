@@ -3,7 +3,7 @@ package no.nav.syfo.consumer.norg
 data class ArbeidsfordelingCriteria(
     var diskresjonskode: String? = null,
     var oppgavetype: String? = null,
-    var behandlingstype: String? = null,
+    var behandlingstype: String,
     var behandlingstema: String? = null,
     var tema: String,
     var temagruppe: String? = null,
@@ -15,4 +15,10 @@ data class ArbeidsfordelingCriteria(
 enum class ArbeidsfordelingCriteriaDiskresjonskode {
     SPSF,
     SPFO
+}
+
+enum class ArbeidsfordelingCriteriaBehandlingstype(
+    val behandlingstype: String,
+) {
+    SYKEFRAVAERSOPPFØLGING("ae0257"),
 }

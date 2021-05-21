@@ -55,6 +55,7 @@ constructor(
     ): List<NorgEnhet> {
         val requestBody = ArbeidsfordelingCriteria(
             diskresjonskode = diskresjonskode?.name,
+            behandlingstype = ArbeidsfordelingCriteriaBehandlingstype.SYKEFRAVAERSOPPFØLGING.behandlingstype,
             tema = "OPP",
             geografiskOmraade = geografiskTilknytning.value,
             skjermet = isEgenAnsatt
