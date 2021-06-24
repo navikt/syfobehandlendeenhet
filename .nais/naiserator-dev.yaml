@@ -54,7 +54,7 @@ spec:
     - name: APPDYNAMICS_CONTROLLER_SSL_ENABLED
       value: "true"
     - name: NO_NAV_SECURITY_JWT_ISSUER_STS_DISCOVERYURL
-      value: http://security-token-service/rest/v1/sts/.well-known/openid-configuration
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
     - name: NO_NAV_SECURITY_JWT_ISSUER_STS_ACCEPTEDAUDIENCE
       value: srvispersonoppgave,srvsyfooversikthen,srvsyfomotebehov,srvsyfomoteadmin,srvsyfooversiktsrv,srvsyfooppfolgings,srvsyfo-tilgangsko
     - name: NO_NAV_SECURITY_JWT_ISSUER_VEILEDER_DISCOVERYURL
