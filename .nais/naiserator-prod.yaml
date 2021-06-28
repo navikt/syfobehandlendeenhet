@@ -37,6 +37,21 @@ spec:
     - "https://syfobehandlendeenhet.intern.nav.no"
     - "https://syfobehandlendeenhet.prod-fss-pub.nais.io"
     - "https://syfobehandlendeenhet.nais.adeo.no"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: syfomodiaperson
+          namespace: teamsykefravr
+          cluster: prod-fss
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+      replyURLs:
+        - "https://syfobehandlendeenhet.intern.nav.no/oauth2/callback"
+      claims:
+        extra:
+          - "NAVident"
   vault:
     enabled: true
     paths:
