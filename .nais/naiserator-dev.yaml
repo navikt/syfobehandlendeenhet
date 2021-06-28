@@ -40,7 +40,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: syfobehandlendeenhet
+        - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: dev-fss
   azure:
