@@ -3,7 +3,7 @@ package no.nav.syfo.behanlendeenhet
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.LocalApplication
 import no.nav.syfo.api.auth.OIDCIssuer.AZURE
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhetADController
+import no.nav.syfo.behandlendeenhet.api.internad.v1.BehandlendeEnhetADController
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.pdl.geografiskTilknytning
 import no.nav.syfo.consumer.skjermedepersonerpip.getSkjermedePersonerPipUrl

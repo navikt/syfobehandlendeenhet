@@ -1,7 +1,9 @@
-package no.nav.syfo.behandlendeenhet
+package no.nav.syfo.behandlendeenhet.api.internad.v1
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.syfo.api.auth.OIDCIssuer.AZURE
+import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.consumer.veiledertilgang.TilgangConsumer
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.metric.Metric

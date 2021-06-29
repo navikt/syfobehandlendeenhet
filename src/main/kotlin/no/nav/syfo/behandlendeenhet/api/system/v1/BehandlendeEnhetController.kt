@@ -1,9 +1,11 @@
-package no.nav.syfo.behandlendeenhet
+package no.nav.syfo.behandlendeenhet.api.system.v1
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.metric.Metric
 import no.nav.syfo.api.auth.OIDCIssuer.STS
+import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.util.getOrCreateCallId
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
