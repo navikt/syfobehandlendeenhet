@@ -1,22 +1,40 @@
-# syfobehandlendeenhet
+# Syfobehandlendeenhet
 
-## Om syfobehandlendeenhet
-syfobehandlendeenhet er en Spring Boot-applikasjon skrevet i Kotlin. Hovedoppgaven til syfobehandlendeenhet
-er å finne den enheten som skal behandle en sykmeldt. Appen eksponerer et REST-endepunkt på `/api/{fnr}`.
+## About
+Syfobehandlendeenhet is a Spring Boot application written in Kotlin. 
+Syfobehandlendeenhet takes a person's PersonIdent as input and outputs a NAV-enhet.
+This NAV-enhet is the BehandlendeEnhet of the person in the context of SYFO(Sykefraværsoppfølging)
 
-For å finne behandlende enhet gjøres det WS-kall til `person`, og REST-kall skjermed-personer-pip(`egenAnsatt`) til NORG; resultatet fra disse caches.
+To find BehandlendeEnhet, the application makes requests to PersonDataLøsningen(PDL), to skjermed-personer-pip(`egenAnsatt`) til NORG; resultatet fra disse caches.
+
+## Technologies Used
+* Docker
+* Gradle
+* Kotlin
+* Spring Boot
+* Redis
+* Vault
 
 ## Lokal utvikling
-Appen bygges med `gradle` 
-Start opp via `LocalApplication.main`. Kjører på port 8999.
+Build the application with `gradle` 
+Start the application with `LocalApplication.main`. The local application runs on port 8999.
 
-## Lint
-Kjør `./gradlew --continue ktlintCheck`
+### Lint (Ktlint)
+##### Command line
+Run checking: `./gradlew --continue ktlintCheck`
+
+Run formatting: `./gradlew ktlintFormat`
+##### Git Hooks
+Apply checking: `./gradlew addKtlintCheckGitPreCommitHook`
+
+Apply formatting: `./gradlew addKtlintFormatGitPreCommitHook`
 
 ## Cache
-For caching brukes Redis. Redis deployes automatisk til NAIS ved endringer i workflow eller i config. Redis kan også deployes manuelt ved å kjøre følgdende kommando: `kubectl apply -f .nais/redis-config.yaml`.
+A single Redis pod is responsible for caching.
+The Redis pod is deployed automatically to NAIS after changes are made to the workflow or config file.
+The Redis can also be deployed manually with the following command: `kubectl apply -f .nais/redis-config.yaml`.
 
-## Pipeline
-Pipeline er på Github Action.
-Commits til Master-branch deployes automatisk til dev-fss og prod-fss.
-Commits til ikke-master-branch bygges uten automatisk deploy.
+### Pipeline
+Pipeline is run with Github Action workflows.
+Commits to Master-branch is deployed automatically to dev-fss and prod-fss.
+Commits to non-master-branch is built without automatic deploy.
