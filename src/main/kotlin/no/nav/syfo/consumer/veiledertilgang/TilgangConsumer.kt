@@ -3,13 +3,9 @@ package no.nav.syfo.consumer.veiledertilgang
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.api.auth.OIDCIssuer.AZURE
 import no.nav.syfo.api.auth.OIDCUtil.tokenFraOIDC
-import no.nav.syfo.util.bearerHeader
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
@@ -40,15 +36,21 @@ class TilgangConsumer @Inject constructor(
     }
 
     fun isVeilederGrantedAccessToSYFO(): Boolean {
-        return callUriWithTemplate(accessToSYFOURI)
+        return callUriWithTemplate(
+            token = tokenFraOIDC(contextHolder, AZURE),
+            uri = accessToSYFOURI
+        )
     }
 
-    private fun callUriWithTemplate(uri: URI): Boolean {
+    private fun callUriWithTemplate(
+        token: String,
+        uri: URI
+    ): Boolean {
         return try {
             val response = template.exchange(
                 uri,
                 HttpMethod.GET,
-                createEntity(),
+                createEntity(token),
                 String::class.java
             )
             return response.statusCode.is2xxSuccessful
@@ -62,10 +64,10 @@ class TilgangConsumer @Inject constructor(
         }
     }
 
-    private fun createEntity(): HttpEntity<String> {
+    private fun createEntity(token: String): HttpEntity<String> {
         val headers = HttpHeaders()
         headers.accept = listOf(MediaType.APPLICATION_JSON)
-        headers.set(HttpHeaders.AUTHORIZATION, bearerHeader(tokenFraOIDC(contextHolder, AZURE)))
+        headers.setBearerAuth(token)
         return HttpEntity(headers)
     }
 
