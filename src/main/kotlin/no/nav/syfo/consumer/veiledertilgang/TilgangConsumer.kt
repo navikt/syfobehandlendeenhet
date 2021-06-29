@@ -1,8 +1,10 @@
 package no.nav.syfo.consumer.veiledertilgang
 
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import no.nav.syfo.api.auth.OIDCIssuer
 import no.nav.syfo.api.auth.OIDCIssuer.AZURE
 import no.nav.syfo.api.auth.OIDCUtil.tokenFraOIDC
+import no.nav.syfo.consumer.azuread.v2.AzureAdV2TokenConsumer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
@@ -16,17 +18,42 @@ import javax.ws.rs.ForbiddenException
 
 @Service
 class TilgangConsumer @Inject constructor(
+    @Value("\${syfotilgangskontroll.client.id}") private val syfotilgangskontrollClientId: String,
     @Value("\${tilgangskontrollapi.url}") private val tilgangskontrollUrl: String,
+    private val azureAdV2TokenConsumer: AzureAdV2TokenConsumer,
     private val template: RestTemplate,
     private val contextHolder: TokenValidationContextHolder
 ) {
     private val accessToSYFOURI: URI
+    private val accessToSYFOV2URI: URI
 
     init {
         accessToSYFOURI = fromHttpUrl(tilgangskontrollUrl)
             .path(ACCESS_TO_SYFO_WITH_AZURE_PATH)
             .build()
             .toUri()
+        accessToSYFOV2URI = fromHttpUrl(tilgangskontrollUrl)
+            .path(ACCESS_TO_SYFO_WITH_AZURE_V2_PATH)
+            .build()
+            .toUri()
+    }
+
+    fun throwExceptionIfVeilederWithoutAccessToSYFOWithOBO() {
+        if (!isVeilederGrantedAccessToSYFOWithOBO()) {
+            throw ForbiddenException()
+        }
+    }
+
+    fun isVeilederGrantedAccessToSYFOWithOBO(): Boolean {
+        val token = tokenFraOIDC(contextHolder, OIDCIssuer.VEILEDER_AZURE_V2)
+        val oboToken = azureAdV2TokenConsumer.getOnBehalfOfToken(
+            scopeClientId = syfotilgangskontrollClientId,
+            token = token
+        )
+        return callUriWithTemplate(
+            token = oboToken,
+            uri = accessToSYFOV2URI
+        )
     }
 
     fun throwExceptionIfVeilederWithoutAccessToSYFO() {
@@ -75,5 +102,6 @@ class TilgangConsumer @Inject constructor(
 
         private val LOG = LoggerFactory.getLogger(TilgangConsumer::class.java)
         const val ACCESS_TO_SYFO_WITH_AZURE_PATH = "/syfo"
+        const val ACCESS_TO_SYFO_WITH_AZURE_V2_PATH = "/navident/syfo"
     }
 }

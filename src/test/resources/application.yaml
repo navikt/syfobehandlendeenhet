@@ -39,6 +39,18 @@ no.nav.security.jwt:
       accepted_audience: aud-localhost
       cookie_name: localhost-idtoken
 
+azure:
+  app:
+    client:
+      id: "1345678"
+      secret: "secret"
+  openid:
+    config:
+      token:
+        endpoint: "https://login.microsoftonline.com/id/oauth2/v2.0/token"
+
+syfotilgangskontroll.client.id: "syfotilgangskontrollId"
+
 fasit.environment.name: 'local'
 
 dev: true

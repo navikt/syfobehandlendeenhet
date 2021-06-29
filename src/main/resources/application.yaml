@@ -17,6 +17,10 @@ no.nav.security.jwt:
       discoveryurl: <syfonais>
       accepted_audience: <syfonais>
       cookie_name: isso-idtoken
+    veilederaad:
+      discoveryurl: ${azure.app.well.known.url}
+      accepted_audience: ${azure.app.client.id}
+      cookiename: ID_token
 
 spring:
   cache.type: redis
