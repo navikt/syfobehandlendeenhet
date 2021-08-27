@@ -75,10 +75,6 @@ spec:
       value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
     - name: NO_NAV_SECURITY_JWT_ISSUER_STS_ACCEPTEDAUDIENCE
       value: srvispersonoppgave,srvsyfooversikthen,srvsyfomotebehov,srvsyfomoteadmin,srvsyfooversiktsrv,srvsyfooppfolgings,srvsyfo-tilgangsko
-    - name: NO_NAV_SECURITY_JWT_ISSUER_VEILEDER_DISCOVERYURL
-      value: https://login.microsoftonline.com/navno.onmicrosoft.com/.well-known/openid-configuration
-    - name: NO_NAV_SECURITY_JWT_ISSUER_VEILEDER_ACCEPTEDAUDIENCE
-      value: 9b4e07a3-4f4c-4bab-b866-87f62dff480d
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
     - name: SECURITY_TOKEN_SERVICE_REST_URL

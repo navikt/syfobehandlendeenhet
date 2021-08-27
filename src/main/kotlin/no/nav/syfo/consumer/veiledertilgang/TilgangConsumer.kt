@@ -2,7 +2,6 @@ package no.nav.syfo.consumer.veiledertilgang
 
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.api.auth.OIDCIssuer
-import no.nav.syfo.api.auth.OIDCIssuer.AZURE
 import no.nav.syfo.api.auth.OIDCUtil.tokenFraOIDC
 import no.nav.syfo.consumer.azuread.v2.AzureAdV2TokenConsumer
 import org.slf4j.LoggerFactory
@@ -24,14 +23,9 @@ class TilgangConsumer @Inject constructor(
     private val template: RestTemplate,
     private val contextHolder: TokenValidationContextHolder
 ) {
-    private val accessToSYFOURI: URI
     private val accessToSYFOV2URI: URI
 
     init {
-        accessToSYFOURI = fromHttpUrl(tilgangskontrollUrl)
-            .path(ACCESS_TO_SYFO_WITH_AZURE_PATH)
-            .build()
-            .toUri()
         accessToSYFOV2URI = fromHttpUrl(tilgangskontrollUrl)
             .path(ACCESS_TO_SYFO_WITH_AZURE_V2_PATH)
             .build()
@@ -53,19 +47,6 @@ class TilgangConsumer @Inject constructor(
         return callUriWithTemplate(
             token = oboToken,
             uri = accessToSYFOV2URI
-        )
-    }
-
-    fun throwExceptionIfVeilederWithoutAccessToSYFO() {
-        if (!isVeilederGrantedAccessToSYFO()) {
-            throw ForbiddenException()
-        }
-    }
-
-    fun isVeilederGrantedAccessToSYFO(): Boolean {
-        return callUriWithTemplate(
-            token = tokenFraOIDC(contextHolder, AZURE),
-            uri = accessToSYFOURI
         )
     }
 
@@ -101,7 +82,6 @@ class TilgangConsumer @Inject constructor(
     companion object {
 
         private val LOG = LoggerFactory.getLogger(TilgangConsumer::class.java)
-        const val ACCESS_TO_SYFO_WITH_AZURE_PATH = "/syfo"
         const val ACCESS_TO_SYFO_WITH_AZURE_V2_PATH = "/navident/syfo"
     }
 }

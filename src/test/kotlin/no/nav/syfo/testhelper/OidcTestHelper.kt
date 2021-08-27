@@ -13,13 +13,6 @@ import java.util.*
 object OidcTestHelper {
 
     @Throws(ParseException::class)
-    fun logInVeilederAD(oidcRequestContextHolder: TokenValidationContextHolder, veilederIdent: String) {
-        val claimsSet = JWTClaimsSet.parse("{\"NAVident\":\"$veilederIdent\"}")
-        val jwt = JwtTokenGenerator.createSignedJWT(claimsSet)
-        settOIDCValidationContext(oidcRequestContextHolder, jwt, OIDCIssuer.AZURE)
-    }
-
-    @Throws(ParseException::class)
     fun logInVeilederADV2(oidcRequestContextHolder: TokenValidationContextHolder, veilederIdent: String) {
         val claimsSet = JWTClaimsSet.parse("{\"NAVident\":\"$veilederIdent\"}")
         val jwt = JwtTokenGenerator.createSignedJWT(claimsSet)
