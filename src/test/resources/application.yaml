@@ -37,6 +37,7 @@ azure:
       token:
         endpoint: "https://login.microsoftonline.com/id/oauth2/v2.0/token"
 
+pdl.client.id: "dev-fss.pdl.pdl-apiq"
 syfotilgangskontroll.client.id: "syfotilgangskontrollId"
 
 fasit.environment.name: 'local'
