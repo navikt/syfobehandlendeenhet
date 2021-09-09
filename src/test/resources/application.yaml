@@ -10,15 +10,6 @@ server:
   servlet:
     context-path: /syfobehandlendeenhet
 
-securitytokenservice.url: "sts.url"
-srvsyfobehandlendeenhet:
-  username: "username"
-  password: "1234"
-
-srv:
-  username: "username"
-  password: "password"
-
 no.nav.security.jwt:
   issuers: sts
   issuer:
@@ -40,13 +31,6 @@ azure:
 pdl.client.id: "dev-fss.pdl.pdl-apiq"
 syfotilgangskontroll.client.id: "syfotilgangskontrollId"
 
-fasit.environment.name: 'local'
-
-dev: true
-
-tjenester.url: https://tjenester-q1.nav.no
-
 norg2.url: https://norg2
-security.token.service.rest.url: "http://sts"
 pdl.url: "http://pdl"
 tilgangskontrollapi.url: "http://syfotilgangskontroll"

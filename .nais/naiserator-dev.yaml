@@ -58,8 +58,6 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: "/serviceuser/data/dev/srvsyfobehandlendeenhet"
-        mountPath: "/secrets/serviceuser/syfobehandlendeenhet"
       - kvPath: "/kv/preprod/fss/syfobehandlendeenhet/default"
         mountPath: "/secrets/vault"
   env:
@@ -75,10 +73,6 @@ spec:
       value: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
     - name: NO_NAV_SECURITY_JWT_ISSUER_STS_ACCEPTEDAUDIENCE
       value: srvispersonoppgave,srvsyfooversikthen,srvsyfomotebehov,srvsyfomoteadmin,srvsyfooversiktsrv,srvsyfooppfolgings,srvsyfo-tilgangsko
-    - name: SECURITYTOKENSERVICE_URL
-      value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
-    - name: SECURITY_TOKEN_SERVICE_REST_URL
-      value: https://security-token-service.nais.preprod.local
     - name: PDL_CLIENT_ID
       value: "dev-fss.pdl.pdl-api"
     - name: PDL_URL
