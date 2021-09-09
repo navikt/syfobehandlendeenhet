@@ -23,6 +23,9 @@ azure:
     client:
       id: "1345678"
       secret: "secret"
+    pre:
+      authorized:
+        apps: "[{\"name\":\"dev-fss:teamsykefravr:syfo-tilgangskontroll\",\"clientId\":\"syfo-tilgangskontroll-client-id\"},{\"name\":\"dev-fss:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}]"
   openid:
     config:
       token:
