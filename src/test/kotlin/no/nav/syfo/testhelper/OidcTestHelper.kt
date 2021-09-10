@@ -19,7 +19,7 @@ object OidcTestHelper {
         settOIDCValidationContext(oidcRequestContextHolder, jwt, OIDCIssuer.VEILEDER_AZURE_V2)
     }
 
-    private fun settOIDCValidationContext(tokenValidationContextHolder: TokenValidationContextHolder, jwt: SignedJWT, issuer: String) {
+    fun settOIDCValidationContext(tokenValidationContextHolder: TokenValidationContextHolder, jwt: SignedJWT, issuer: String) {
         val jwtToken = JwtToken(jwt.serialize())
         val issuerTokenMap: MutableMap<String, JwtToken> = HashMap()
         issuerTokenMap[issuer] = jwtToken
@@ -30,4 +30,13 @@ object OidcTestHelper {
     fun clearOIDCContext(tokenValidationContextHolder: TokenValidationContextHolder) {
         tokenValidationContextHolder.tokenValidationContext = null
     }
+}
+
+fun logInSystemConsumerClient(
+    oidcRequestContextHolder: TokenValidationContextHolder,
+    consumerClientId: String = ""
+) {
+    val claimsSet = JWTClaimsSet.parse("{ \"azp\": \"$consumerClientId\"}")
+    val jwt = JwtTokenGenerator.createSignedJWT(claimsSet)
+    OidcTestHelper.settOIDCValidationContext(oidcRequestContextHolder, jwt, OIDCIssuer.VEILEDER_AZURE_V2)
 }

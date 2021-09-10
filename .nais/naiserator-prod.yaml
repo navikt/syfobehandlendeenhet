@@ -46,6 +46,9 @@ spec:
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: prod-fss
+        - application: syfo-tilgangskontroll
+          namespace: teamsykefravr
+          cluster: prod-fss
   azure:
     application:
       enabled: true
