@@ -12,8 +12,8 @@ import no.nav.syfo.testhelper.OidcTestHelper.clearOIDCContext
 import no.nav.syfo.testhelper.UserConstants.USER_FNR
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -23,7 +23,7 @@ import org.springframework.cache.CacheManager
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.HttpStatus.OK
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -33,7 +33,7 @@ import javax.inject.Inject
 import javax.ws.rs.ForbiddenException
 
 @DirtiesContext
-@RunWith(SpringRunner::class)
+@ExtendWith(SpringExtension::class)
 @SpringBootTest(classes = [LocalApplication::class])
 class BehandlendeEnhetSystemControllerV2Test {
 
@@ -68,7 +68,7 @@ class BehandlendeEnhetSystemControllerV2Test {
     private lateinit var mockRestServiceServer: MockRestServiceServer
     private lateinit var mockRestServiceWithProxyServer: MockRestServiceServer
 
-    @Before
+    @BeforeEach
     @Throws(ParseException::class)
     fun setup() {
         this.mockRestServiceServer = MockRestServiceServer.bindTo(restTemplate).build()
@@ -84,7 +84,7 @@ class BehandlendeEnhetSystemControllerV2Test {
         )
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         clearOIDCContext(oidcRequestContextHolder)
         mockRestServiceServer.reset()
@@ -124,13 +124,15 @@ class BehandlendeEnhetSystemControllerV2Test {
         assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(NO_CONTENT)
     }
 
-    @Test(expected = ForbiddenException::class)
+    @Test
     fun getBehandlendeEnhetAccessForbidden() {
         logInSystemConsumerClient(oidcRequestContextHolder, "syfo-client-id")
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
 
-        behandlendeEnhetSystemControllerV2.getBehandlendeEnhet(headers)
+        assertThrows<ForbiddenException> {
+            behandlendeEnhetSystemControllerV2.getBehandlendeEnhet(headers)
+        }
     }
 }

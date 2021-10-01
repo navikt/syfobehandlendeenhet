@@ -16,8 +16,8 @@ import no.nav.syfo.testhelper.UserConstants.VEILEDER_ID
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.util.bearerHeader
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -29,7 +29,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.*
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.client.ExpectedCount.manyTimes
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.*
@@ -43,7 +43,7 @@ import javax.inject.Inject
 import javax.ws.rs.ForbiddenException
 
 @DirtiesContext
-@RunWith(SpringRunner::class)
+@ExtendWith(SpringExtension::class)
 @SpringBootTest(classes = [LocalApplication::class])
 class BehandlendeEnhetADControllerV2PersonIdentTest {
 
@@ -80,7 +80,7 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
 
     private val oboToken = "oboToken"
 
-    @Before
+    @BeforeEach
     @Throws(ParseException::class)
     fun setup() {
         this.mockRestServiceServer = MockRestServiceServer.bindTo(restTemplate).build()
@@ -97,7 +97,7 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
         )
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         clearOIDCContext(oidcRequestContextHolder)
         mockRestServiceServer.reset()
@@ -139,7 +139,7 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
         assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(NO_CONTENT)
     }
 
-    @Test(expected = ForbiddenException::class)
+    @Test
     fun getBehandlendeEnhetAccessForbidden() {
         mockAndExpectAzureADV2(mockRestServiceWithProxyServer, azureTokenEndpoint, generateAzureAdV2TokenResponse())
         mockAccessToSYFO(FORBIDDEN)
@@ -147,18 +147,21 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
 
-        behandlendeEnhetADControllerV2.getBehandlendeEnhet(headers)
+        assertThrows<ForbiddenException> {
+            behandlendeEnhetADControllerV2.getBehandlendeEnhet(headers)
+        }
     }
 
-    @Test(expected = RuntimeException::class)
+    @Test
     fun getBehandlendeEnhetAccessServerError() {
         mockAndExpectAzureADV2(mockRestServiceWithProxyServer, azureTokenEndpoint, generateAzureAdV2TokenResponse())
         mockAccessToSYFO(INTERNAL_SERVER_ERROR)
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
-
-        behandlendeEnhetADControllerV2.getBehandlendeEnhet(headers)
+        assertThrows<RuntimeException> {
+            behandlendeEnhetADControllerV2.getBehandlendeEnhet(headers)
+        }
     }
 
     private fun mockAccessToSYFO(status: HttpStatus) {
