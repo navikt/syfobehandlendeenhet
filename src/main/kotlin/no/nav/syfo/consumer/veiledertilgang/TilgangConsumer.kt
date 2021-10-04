@@ -3,6 +3,8 @@ package no.nav.syfo.consumer.veiledertilgang
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.api.auth.OIDCIssuer
 import no.nav.syfo.api.auth.OIDCUtil.tokenFraOIDC
+import no.nav.syfo.api.auth.OIDCUtil.getConsumerClientIdFraOIDC
+import no.nav.syfo.api.auth.OIDCUtil.getNAVIdentFraOIDC
 import no.nav.syfo.consumer.azuread.v2.AzureAdV2TokenConsumer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -40,9 +42,16 @@ class TilgangConsumer @Inject constructor(
 
     fun isVeilederGrantedAccessToSYFOWithOBO(): Boolean {
         val token = tokenFraOIDC(contextHolder, OIDCIssuer.VEILEDER_AZURE_V2)
+        val navIdent = getNAVIdentFraOIDC(contextHolder)
+            ?: throw RuntimeException("Missing veilederId in OIDC-context")
+        val azp = getConsumerClientIdFraOIDC(contextHolder)
+            ?: throw RuntimeException("Missing azp in OIDC-context")
+
         val oboToken = azureAdV2TokenConsumer.getOnBehalfOfToken(
             scopeClientId = syfotilgangskontrollClientId,
-            token = token
+            token = token,
+            veilederId = navIdent,
+            azp = azp,
         )
         return callUriWithTemplate(
             token = oboToken,

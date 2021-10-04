@@ -25,6 +25,7 @@ class CacheConfig {
 
         cacheConfigurations[CACHENAME_BEHANDLENDEENHET] = defaultConfig
         cacheConfigurations[CACHENAME_EGENANSATT] = defaultConfig
+        cacheConfigurations[CACHENAME_TOKENS] = defaultConfig
 
         return RedisCacheManager.builder(redisConnectionFactory)
             .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig())
@@ -35,5 +36,6 @@ class CacheConfig {
     companion object {
         const val CACHENAME_BEHANDLENDEENHET = "behandlendeenhet"
         const val CACHENAME_EGENANSATT = "egenansattident"
+        const val CACHENAME_TOKENS = "tokens"
     }
 }

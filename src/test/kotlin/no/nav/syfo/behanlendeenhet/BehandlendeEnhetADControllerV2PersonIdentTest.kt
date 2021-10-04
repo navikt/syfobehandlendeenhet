@@ -3,6 +3,7 @@ package no.nav.syfo.behanlendeenhet
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.LocalApplication
 import no.nav.syfo.behandlendeenhet.api.internad.v2.BehandlendeEnhetADControllerV2
+import no.nav.syfo.config.CacheConfig
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.pdl.geografiskTilknytning
 import no.nav.syfo.consumer.skjermedepersonerpip.getSkjermedePersonerPipUrl
@@ -102,6 +103,8 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
         clearOIDCContext(oidcRequestContextHolder)
         mockRestServiceServer.reset()
         mockRestServiceWithProxyServer.reset()
+        cacheManager.getCache(CacheConfig.CACHENAME_BEHANDLENDEENHET)?.clear()
+        cacheManager.getCache(CacheConfig.CACHENAME_EGENANSATT)?.clear()
     }
 
     @Test

@@ -2,7 +2,7 @@ package no.nav.syfo.behandlendeenhet.api.access
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.syfo.api.auth.getConsumerClientId
+import no.nav.syfo.api.auth.OIDCUtil.getConsumerClientIdFraOIDC
 import no.nav.syfo.util.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -20,7 +20,7 @@ class APIConsumerAccessService(
             .filter { authorizedApplicationNameList.contains(it.toNamespaceAndApplicationName().applicationName) }
             .map { it.clientId }
 
-        val consumerClientIdAzp = getConsumerClientId(contextHolder = tokenValidationContextHolder)
+        val consumerClientIdAzp = getConsumerClientIdFraOIDC(contextHolder = tokenValidationContextHolder)
             ?: throw IllegalArgumentException("Claim AZP was not found in token")
         if (!clientIdList.contains(consumerClientIdAzp)) {
             throw ForbiddenException("Consumer with clientId(azp)=$consumerClientIdAzp is denied access to system API")
