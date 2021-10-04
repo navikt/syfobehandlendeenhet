@@ -12,20 +12,21 @@ val kotlinJacksonVersion = "2.11.2"
 val logstashVersion = "4.10"
 val prometheusVersion = "1.5.5"
 val slf4jVersion = "1.7.25"
-val tokenValidationSpringSupportVersion = "1.3.0"
+val tokenValidationSpringSupportVersion = "1.3.7"
 
 plugins {
-    kotlin("jvm") version "1.4.10"
-    id("org.jlleitschuh.gradle.ktlint") version "9.4.0"
-    id("com.github.johnrengelman.shadow") version "6.0.0"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.4.10"
-    id("org.springframework.boot") version "2.3.7.RELEASE"
-    id("io.spring.dependency-management") version "1.0.10.RELEASE"
+    kotlin("jvm") version "1.5.10"
+    id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.5.10"
+    id("org.springframework.boot") version "2.4.9"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
 }
 
 allOpen {
     annotation("org.springframework.context.annotation.Configuration")
     annotation("org.springframework.stereotype.Service")
+    annotation("org.springframework.stereotype.Component")
 }
 
 repositories {
@@ -71,6 +72,10 @@ tasks {
         doLast {
             println(project.version)
         }
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     withType<ShadowJar> {
