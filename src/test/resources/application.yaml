@@ -25,7 +25,7 @@ azure:
       secret: "secret"
     pre:
       authorized:
-        apps: "[{\"name\":\"dev-fss:teamsykefravr:syfo-tilgangskontroll\",\"clientId\":\"syfo-tilgangskontroll-client-id\"},{\"name\":\"dev-fss:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}]"
+        apps: "[{\"name\":\"dev-fss:teamsykefravr:ispersonoppgave\",\"clientId\":\"ispersonoppgave-client-id\"},{\"name\":\"dev-fss:teamsykefravr:syfo-tilgangskontroll\",\"clientId\":\"syfo-tilgangskontroll-client-id\"},{\"name\":\"dev-fss:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}]"
   openid:
     config:
       token:
