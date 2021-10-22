@@ -18,6 +18,13 @@ no.nav.security.jwt:
       accepted_audience: aud-localhost
       cookie_name: localhost-idtoken
 
+
+preauthorized:
+  ispersonoppgave: "{\"name\":\"dev-fss:teamsykefravr:ispersonoppgave\",\"clientId\":\"ispersonoppgave-client-id\"}"
+  syfomodiaperson: "{\"name\":\"dev-fss:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}"
+  syfomoteadmin: "{\"name\":\"dev-fss:teamsykefravr:syfomoteadmin\",\"clientId\":\"syfomoteadmin-client-id\"}"
+  syfotilgangskontroll: "{\"name\":\"dev-fss:teamsykefravr:syfo-tilgangskontroll\",\"clientId\":\"syfo-tilgangskontroll-client-id\"}"
+
 azure:
   app:
     client:
@@ -25,7 +32,7 @@ azure:
       secret: "secret"
     pre:
       authorized:
-        apps: "[{\"name\":\"dev-fss:teamsykefravr:syfomoteadmin\",\"clientId\":\"syfomoteadmin-client-id\"},{\"name\":\"dev-fss:teamsykefravr:ispersonoppgave\",\"clientId\":\"ispersonoppgave-client-id\"},{\"name\":\"dev-fss:teamsykefravr:syfo-tilgangskontroll\",\"clientId\":\"syfo-tilgangskontroll-client-id\"},{\"name\":\"dev-fss:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}]"
+        apps: "[${preauthorized.ispersonoppgave},${preauthorized.syfomodiaperson},${preauthorized.syfomoteadmin},${preauthorized.syfotilgangskontroll}]"
   openid:
     config:
       token:
