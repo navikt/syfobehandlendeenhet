@@ -149,6 +149,42 @@ class BehandlendeEnhetSystemControllerV2Test {
     }
 
     @Test
+    fun getBehandlendeEnhetHasAccessContentAsSyfomotebehov() {
+        logInSystemConsumerClient(oidcRequestContextHolder, "syfomotebehov-client-id")
+
+        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+
+        val norgEnhet = generateNorgEnhet().copy()
+        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
+
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+        headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
+
+        val behandlendeEnhetResponse = behandlendeEnhetSystemControllerV2.getBehandlendeEnhet(headers)
+        assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(OK)
+        assertThat(behandlendeEnhetResponse.body!!.enhetId).isEqualTo(norgEnhet.enhetNr)
+        assertThat(behandlendeEnhetResponse.body!!.navn).isEqualTo(norgEnhet.navn)
+    }
+
+    @Test
+    fun getBehandlendeEnhetHasAccessContentAsSyfooversikthendelsetilfelle() {
+        logInSystemConsumerClient(oidcRequestContextHolder, "syfooversikthendelsetilfelle-client-id")
+
+        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+
+        val norgEnhet = generateNorgEnhet().copy()
+        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
+
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+        headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
+
+        val behandlendeEnhetResponse = behandlendeEnhetSystemControllerV2.getBehandlendeEnhet(headers)
+        assertThat(behandlendeEnhetResponse.statusCode).isEqualTo(OK)
+        assertThat(behandlendeEnhetResponse.body!!.enhetId).isEqualTo(norgEnhet.enhetNr)
+        assertThat(behandlendeEnhetResponse.body!!.navn).isEqualTo(norgEnhet.navn)
+    }
+
+    @Test
     fun getBehandlendeEnhetHasAccessNoContent() {
         logInSystemConsumerClient(oidcRequestContextHolder, "syfo-tilgangskontroll-client-id")
 

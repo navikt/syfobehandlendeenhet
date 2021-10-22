@@ -51,6 +51,12 @@ spec:
         - application: syfomoteadmin
           namespace: teamsykefravr
           cluster: prod-fss
+        - application: syfomotebehov
+          namespace: teamsykefravr
+          cluster: prod-fss
+        - application: syfooversikthendelsetilfelle
+          namespace: teamsykefravr
+          cluster: prod-fss
         - application: syfo-tilgangskontroll
           namespace: teamsykefravr
           cluster: prod-fss

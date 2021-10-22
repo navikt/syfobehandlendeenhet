@@ -60,10 +60,14 @@ constructor(
     companion object {
         private const val ISPERSONOPPGAVE_NAME_AZP = "ispersonoppgave"
         private const val SYFOMOTEADMIN_NAME_AZP = "syfomoteadmin"
+        private const val SYFOMOTEBEHOV_NAME_AZP = "syfomotebehov"
+        private const val SYFOOVERSIKTHENDELSTILFELLE_NAME_AZP = "syfooversikthendelsetilfelle"
         private const val SYFOTILGANGSKONTROLL_NAME_AZP = "syfo-tilgangskontroll"
         val authorizedAPIConsumerApplicationNameList = listOf(
             ISPERSONOPPGAVE_NAME_AZP,
             SYFOMOTEADMIN_NAME_AZP,
+            SYFOMOTEBEHOV_NAME_AZP,
+            SYFOOVERSIKTHENDELSTILFELLE_NAME_AZP,
             SYFOTILGANGSKONTROLL_NAME_AZP,
         )
     }
