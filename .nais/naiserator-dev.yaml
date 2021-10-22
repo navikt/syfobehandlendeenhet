@@ -49,6 +49,9 @@ spec:
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: dev-fss
+        - application: syfomoteadmin
+          namespace: teamsykefravr
+          cluster: dev-fss
         - application: syfo-tilgangskontroll
           namespace: teamsykefravr
           cluster: dev-fss

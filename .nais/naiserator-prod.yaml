@@ -49,6 +49,9 @@ spec:
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: prod-fss
+        - application: syfomoteadmin
+          namespace: teamsykefravr
+          cluster: prod-fss
         - application: syfo-tilgangskontroll
           namespace: teamsykefravr
           cluster: prod-fss
