@@ -23,7 +23,7 @@ preauthorized:
   ispersonoppgave: "{\"name\":\"dev-fss:teamsykefravr:ispersonoppgave\",\"clientId\":\"ispersonoppgave-client-id\"}"
   syfomodiaperson: "{\"name\":\"dev-fss:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}"
   syfomoteadmin: "{\"name\":\"dev-fss:teamsykefravr:syfomoteadmin\",\"clientId\":\"syfomoteadmin-client-id\"}"
-  syfomotebehov: "{\"name\":\"dev-fss:teamsykefravr:syfomotebehov\",\"clientId\":\"syfomotebehov-client-id\"}"
+  syfomotebehov: "{\"name\":\"dev-fss:team-esyfo:syfomotebehov\",\"clientId\":\"syfomotebehov-client-id\"}"
   syfooversikthendelsetilfelle: "{\"name\":\"dev-fss:teamsykefravr:syfooversikthendelsetilfelle\",\"clientId\":\"syfooversikthendelsetilfelle-client-id\"}"
   syfotilgangskontroll: "{\"name\":\"dev-fss:teamsykefravr:syfo-tilgangskontroll\",\"clientId\":\"syfo-tilgangskontroll-client-id\"}"
 

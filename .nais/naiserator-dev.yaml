@@ -52,7 +52,7 @@ spec:
           namespace: teamsykefravr
           cluster: dev-fss
         - application: syfomotebehov
-          namespace: teamsykefravr
+          namespace: team-esyfo
           cluster: dev-fss
         - application: syfooversikthendelsetilfelle
           namespace: teamsykefravr
