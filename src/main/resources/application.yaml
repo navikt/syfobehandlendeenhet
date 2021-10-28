@@ -8,11 +8,7 @@ management:
     path-mapping.prometheus: /prometheus
 
 no.nav.security.jwt:
-  issuers: sts
   issuer:
-    sts:
-      discoveryurl: <syfonais>
-      accepted_audience: <syfonais>
     veilederaad:
       discoveryurl: ${azure.app.well.known.url}
       accepted_audience: ${azure.app.client.id}

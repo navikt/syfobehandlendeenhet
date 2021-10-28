@@ -83,10 +83,6 @@ spec:
       value: "443"
     - name: APPDYNAMICS_CONTROLLER_SSL_ENABLED
       value: "true"
-    - name: NO_NAV_SECURITY_JWT_ISSUER_STS_DISCOVERYURL
-      value: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
-    - name: NO_NAV_SECURITY_JWT_ISSUER_STS_ACCEPTEDAUDIENCE
-      value: srvispersonoppgave
     - name: PDL_CLIENT_ID
       value: "dev-fss.pdl.pdl-api"
     - name: PDL_URL

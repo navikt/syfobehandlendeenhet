@@ -10,15 +10,6 @@ server:
   servlet:
     context-path: /syfobehandlendeenhet
 
-no.nav.security.jwt:
-  issuers: sts
-  issuer:
-    sts:
-      discoveryurl: http://metadata
-      accepted_audience: aud-localhost
-      cookie_name: localhost-idtoken
-
-
 preauthorized:
   ispersonoppgave: "{\"name\":\"dev-fss:teamsykefravr:ispersonoppgave\",\"clientId\":\"ispersonoppgave-client-id\"}"
   syfomodiaperson: "{\"name\":\"dev-fss:teamsykefravr:syfomodiaperson\",\"clientId\":\"syfomodiaperson-client-id\"}"
