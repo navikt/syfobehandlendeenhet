@@ -1,3 +1,5 @@
+![Build status](https://github.com/navikt/syfobehandlendeenhet/workflows/main/badge.svg?branch=master)
+
 # Syfobehandlendeenhet
 
 ## About
