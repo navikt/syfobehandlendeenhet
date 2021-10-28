@@ -15,7 +15,6 @@ To find BehandlendeEnhet, the application makes requests to PersonDataLøsningen
 * Kotlin
 * Spring Boot
 * Redis
-* Vault
 
 ## Lokal utvikling
 Build the application with `gradle` 
