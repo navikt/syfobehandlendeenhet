@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.syfo.consumer.norg.NorgConsumer
 import no.nav.syfo.consumer.norg.Enhetsstatus
 import no.nav.syfo.consumer.norg.NorgEnhet
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.http.*
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers
@@ -25,11 +24,14 @@ fun mockAndExpectNorgArbeidsfordeling(
         .path(NorgConsumer.ARBEIDSFORDELING_BESTMATCH_PATH)
         .toUriString()
 
+    val systemToken = generateAzureAdV2TokenResponse().access_token
+
     try {
         val json = ObjectMapper().writeValueAsString(enhetList)
 
-        mockRestServiceServer.expect(ExpectedCount.manyTimes(), MockRestRequestMatchers.requestTo(uriString))
+        mockRestServiceServer.expect(ExpectedCount.once(), MockRestRequestMatchers.requestTo(uriString))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andExpect(MockRestRequestMatchers.header(HttpHeaders.AUTHORIZATION, "Bearer $systemToken"))
             .andRespond(MockRestResponseCreators.withSuccess(json, MediaType.APPLICATION_JSON))
     } catch (e: JsonProcessingException) {
         e.printStackTrace()

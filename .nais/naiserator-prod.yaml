@@ -70,12 +70,14 @@ spec:
         extra:
           - "NAVident"
   env:
+    - name: ISPROXY_CLIENT_ID
+      value: "prod-fss.teamsykefravr.isproxy"
+    - name: ISPROXY_URL
+      value: "https://isproxy.intern.nav.no"
     - name: PDL_CLIENT_ID
       value: "prod-fss.pdl.pdl-api"
     - name: PDL_URL
       value: "https://pdl-api.intern.nav.no/graphql"
-    - name: NORG2_URL
-      value: https://app.adeo.no/norg2/api/v1
     - name: SYFOTILGANGSKONTROLL_CLIENT_ID
       value: "prod-fss.teamsykefravr.syfo-tilgangskontroll"
     - name: TILGANGSKONTROLLAPI_URL

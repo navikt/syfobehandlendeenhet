@@ -34,6 +34,7 @@ azure:
 pdl.client.id: "dev-fss.pdl.pdl-apiq"
 syfotilgangskontroll.client.id: "syfotilgangskontrollId"
 
-norg2.url: https://norg2
+isproxy.client.id: "dev-fss:teamsykefravr:isproxy"
+isproxy.url: "https://isproxy"
 pdl.url: "http://pdl"
 tilgangskontrollapi.url: "http://syfotilgangskontroll"

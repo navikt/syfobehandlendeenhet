@@ -4,6 +4,7 @@ import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.syfo.LocalApplication
 import no.nav.syfo.behandlendeenhet.api.system.v2.BehandlendeEnhetSystemControllerV2
 import no.nav.syfo.config.CacheConfig
+import no.nav.syfo.consumer.norg.NorgEnhet
 import no.nav.syfo.consumer.pdl.PdlConsumer
 import no.nav.syfo.consumer.pdl.geografiskTilknytning
 import no.nav.syfo.consumer.skjermedepersonerpip.getSkjermedePersonerPipUrl
@@ -41,8 +42,8 @@ class BehandlendeEnhetSystemControllerV2Test {
     @Value("\${azure.openid.config.token.endpoint}")
     private lateinit var azureTokenEndpoint: String
 
-    @Value("\${norg2.url}")
-    private lateinit var norg2Url: String
+    @Value("\${isproxy.url}")
+    private lateinit var isproxyUrl: String
 
     @Value("\${tilgangskontrollapi.url}")
     private lateinit var tilgangskontrollUrl: String
@@ -92,6 +93,7 @@ class BehandlendeEnhetSystemControllerV2Test {
         mockRestServiceWithProxyServer.reset()
         cacheManager.getCache(CacheConfig.CACHENAME_BEHANDLENDEENHET)?.clear()
         cacheManager.getCache(CacheConfig.CACHENAME_EGENANSATT)?.clear()
+        cacheManager.getCache(CacheConfig.CACHENAME_TOKENS)?.clear()
     }
 
     @Test
@@ -101,7 +103,7 @@ class BehandlendeEnhetSystemControllerV2Test {
         mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
 
         val norgEnhet = generateNorgEnhet().copy()
-        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
+        mockArbeidsfordeling(response = listOf(norgEnhet))
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
@@ -119,7 +121,7 @@ class BehandlendeEnhetSystemControllerV2Test {
         mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
 
         val norgEnhet = generateNorgEnhet().copy()
-        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
+        mockArbeidsfordeling(response = listOf(norgEnhet))
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
@@ -137,7 +139,7 @@ class BehandlendeEnhetSystemControllerV2Test {
         mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
 
         val norgEnhet = generateNorgEnhet().copy()
-        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
+        mockArbeidsfordeling(response = listOf(norgEnhet))
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
@@ -155,7 +157,7 @@ class BehandlendeEnhetSystemControllerV2Test {
         mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
 
         val norgEnhet = generateNorgEnhet().copy()
-        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
+        mockArbeidsfordeling(response = listOf(norgEnhet))
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
@@ -173,7 +175,7 @@ class BehandlendeEnhetSystemControllerV2Test {
         mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
 
         val norgEnhet = generateNorgEnhet().copy()
-        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, listOf(norgEnhet))
+        mockArbeidsfordeling(response = listOf(norgEnhet))
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
@@ -190,7 +192,7 @@ class BehandlendeEnhetSystemControllerV2Test {
 
         mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
 
-        mockAndExpectNorgArbeidsfordeling(mockRestServiceServer, norg2Url, emptyList())
+        mockArbeidsfordeling(response = emptyList())
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NAV_PERSONIDENT_HEADER, USER_FNR)
@@ -209,5 +211,20 @@ class BehandlendeEnhetSystemControllerV2Test {
         assertThrows<ForbiddenException> {
             behandlendeEnhetSystemControllerV2.getBehandlendeEnhet(headers)
         }
+    }
+
+    private fun mockArbeidsfordeling(
+        response: List<NorgEnhet>,
+    ) {
+        mockAndExpectAzureADV2(
+            mockRestServiceServer = mockRestServiceWithProxyServer,
+            url = azureTokenEndpoint,
+            response = generateAzureAdV2TokenResponse(),
+        )
+        mockAndExpectNorgArbeidsfordeling(
+            mockRestServiceServer = mockRestServiceWithProxyServer,
+            url = isproxyUrl,
+            enhetList = response,
+        )
     }
 }
