@@ -55,6 +55,9 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
     @Value("\${isproxy.url}")
     private lateinit var isproxyUrl: String
 
+    @Value("\${skjermedepersonerpip.url}")
+    private lateinit var skjermedepersonerpipUrl: String
+
     @Value("\${tilgangskontrollapi.url}")
     private lateinit var tilgangskontrollUrl: String
 
@@ -114,7 +117,7 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
         mockAndExpectAzureADV2(mockRestServiceWithProxyServer, azureTokenEndpoint, generateAzureAdV2TokenResponse())
         mockAccessToSYFO(OK)
 
-        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+        mockSkjermedePersonerPip(isEgenAnsatt = true)
 
         val norgEnhet = generateNorgEnhet().copy()
         mockArbeidsfordeling(response = listOf(norgEnhet))
@@ -133,7 +136,7 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
         mockAndExpectAzureADV2(mockRestServiceWithProxyServer, azureTokenEndpoint, generateAzureAdV2TokenResponse())
         mockAccessToSYFO(OK)
 
-        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+        mockSkjermedePersonerPip(isEgenAnsatt = true)
 
         mockArbeidsfordeling(response = emptyList())
 
@@ -169,6 +172,21 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
         }
     }
 
+    private fun mockSkjermedePersonerPip(
+        isEgenAnsatt: Boolean,
+    ) {
+        mockAndExpectAzureADV2(
+            mockRestServiceServer = mockRestServiceWithProxyServer,
+            url = azureTokenEndpoint,
+            response = generateAzureAdV2TokenResponse(),
+        )
+        mockAndExpectSkjermedPersonerEgenAnsatt(
+            mockRestServiceServer = mockRestServiceServer,
+            url = getSkjermedePersonerPipUrl(skjermedepersonerpipUrl, USER_FNR),
+            isEgenAnsatt = isEgenAnsatt,
+        )
+    }
+
     private fun mockArbeidsfordeling(
         response: List<NorgEnhet>,
     ) {
@@ -178,7 +196,7 @@ class BehandlendeEnhetADControllerV2PersonIdentTest {
             response = generateAzureAdV2TokenResponse(),
         )
         mockAndExpectNorgArbeidsfordeling(
-            mockRestServiceServer = mockRestServiceWithProxyServer,
+            mockRestServiceServer = mockRestServiceServer,
             url = isproxyUrl,
             enhetList = response,
         )

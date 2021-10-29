@@ -45,6 +45,9 @@ class BehandlendeEnhetSystemControllerV2Test {
     @Value("\${isproxy.url}")
     private lateinit var isproxyUrl: String
 
+    @Value("\${skjermedepersonerpip.url}")
+    private lateinit var skjermedepersonerpipUrl: String
+
     @Value("\${tilgangskontrollapi.url}")
     private lateinit var tilgangskontrollUrl: String
 
@@ -100,7 +103,7 @@ class BehandlendeEnhetSystemControllerV2Test {
     fun getBehandlendeEnhetHasAccessContent() {
         logInSystemConsumerClient(oidcRequestContextHolder, "syfo-tilgangskontroll-client-id")
 
-        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+        mockSkjermedePersonerPip(isEgenAnsatt = true)
 
         val norgEnhet = generateNorgEnhet().copy()
         mockArbeidsfordeling(response = listOf(norgEnhet))
@@ -118,7 +121,7 @@ class BehandlendeEnhetSystemControllerV2Test {
     fun getBehandlendeEnhetHasAccessContentAsIspersonoppgave() {
         logInSystemConsumerClient(oidcRequestContextHolder, "ispersonoppgave-client-id")
 
-        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+        mockSkjermedePersonerPip(isEgenAnsatt = true)
 
         val norgEnhet = generateNorgEnhet().copy()
         mockArbeidsfordeling(response = listOf(norgEnhet))
@@ -136,7 +139,7 @@ class BehandlendeEnhetSystemControllerV2Test {
     fun getBehandlendeEnhetHasAccessContentAsSyfomoteadmin() {
         logInSystemConsumerClient(oidcRequestContextHolder, "syfomoteadmin-client-id")
 
-        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+        mockSkjermedePersonerPip(isEgenAnsatt = true)
 
         val norgEnhet = generateNorgEnhet().copy()
         mockArbeidsfordeling(response = listOf(norgEnhet))
@@ -154,7 +157,7 @@ class BehandlendeEnhetSystemControllerV2Test {
     fun getBehandlendeEnhetHasAccessContentAsSyfomotebehov() {
         logInSystemConsumerClient(oidcRequestContextHolder, "syfomotebehov-client-id")
 
-        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+        mockSkjermedePersonerPip(isEgenAnsatt = true)
 
         val norgEnhet = generateNorgEnhet().copy()
         mockArbeidsfordeling(response = listOf(norgEnhet))
@@ -172,7 +175,7 @@ class BehandlendeEnhetSystemControllerV2Test {
     fun getBehandlendeEnhetHasAccessContentAsSyfooversikthendelsetilfelle() {
         logInSystemConsumerClient(oidcRequestContextHolder, "syfooversikthendelsetilfelle-client-id")
 
-        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+        mockSkjermedePersonerPip(isEgenAnsatt = true)
 
         val norgEnhet = generateNorgEnhet().copy()
         mockArbeidsfordeling(response = listOf(norgEnhet))
@@ -190,7 +193,7 @@ class BehandlendeEnhetSystemControllerV2Test {
     fun getBehandlendeEnhetHasAccessNoContent() {
         logInSystemConsumerClient(oidcRequestContextHolder, "syfo-tilgangskontroll-client-id")
 
-        mockAndExpectSkjermedPersonerEgenAnsatt(mockRestServiceServer, getSkjermedePersonerPipUrl(USER_FNR), true)
+        mockSkjermedePersonerPip(isEgenAnsatt = true)
 
         mockArbeidsfordeling(response = emptyList())
 
@@ -213,6 +216,21 @@ class BehandlendeEnhetSystemControllerV2Test {
         }
     }
 
+    private fun mockSkjermedePersonerPip(
+        isEgenAnsatt: Boolean,
+    ) {
+        mockAndExpectAzureADV2(
+            mockRestServiceServer = mockRestServiceWithProxyServer,
+            url = azureTokenEndpoint,
+            response = generateAzureAdV2TokenResponse(),
+        )
+        mockAndExpectSkjermedPersonerEgenAnsatt(
+            mockRestServiceServer = mockRestServiceServer,
+            url = getSkjermedePersonerPipUrl(skjermedepersonerpipUrl, USER_FNR),
+            isEgenAnsatt = isEgenAnsatt,
+        )
+    }
+
     private fun mockArbeidsfordeling(
         response: List<NorgEnhet>,
     ) {
@@ -222,7 +240,7 @@ class BehandlendeEnhetSystemControllerV2Test {
             response = generateAzureAdV2TokenResponse(),
         )
         mockAndExpectNorgArbeidsfordeling(
-            mockRestServiceServer = mockRestServiceWithProxyServer,
+            mockRestServiceServer = mockRestServiceServer,
             url = isproxyUrl,
             enhetList = response,
         )

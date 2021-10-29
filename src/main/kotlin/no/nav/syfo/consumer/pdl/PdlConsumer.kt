@@ -6,7 +6,6 @@ import no.nav.syfo.metric.Metric
 import no.nav.syfo.util.ALLE_TEMA_HEADERVERDI
 import no.nav.syfo.util.TEMA_HEADER
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Service
@@ -15,7 +14,7 @@ import org.springframework.web.client.*
 @Service
 class PdlConsumer(
     private val metric: Metric,
-    @Qualifier("restTemplateWithProxy") private val restTemplate: RestTemplate,
+    private val restTemplate: RestTemplate,
     private val azureAdV2TokenConsumer: AzureAdV2TokenConsumer,
     @Value("\${pdl.url}") private val pdlUrl: String,
     @Value("\${pdl.client.id}") private val pdlClientId: String,

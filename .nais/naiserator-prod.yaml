@@ -34,8 +34,6 @@ spec:
     path: /internal/prometheus
   ingresses:
     - "https://syfobehandlendeenhet.intern.nav.no"
-    - "https://syfobehandlendeenhet.prod-fss-pub.nais.io"
-    - "https://syfobehandlendeenhet.nais.adeo.no"
   accessPolicy:
     inbound:
       rules:
@@ -60,6 +58,14 @@ spec:
         - application: syfo-tilgangskontroll
           namespace: teamsykefravr
           cluster: prod-fss
+    outbound:
+      external:
+        - host: "isproxy.prod-fss-pub.nais.io"
+        - host: "pdl-api.prod-fss-pub.nais.io"
+        - host: "skjermede-personer-pip.intern.nav.no"
+        - host: "syfo-tilgangskontroll.prod-fss-pub.nais.io"
+      rules:
+        - application: syfobehandlendeenhet-redis
   azure:
     application:
       enabled: true
@@ -69,16 +75,24 @@ spec:
       claims:
         extra:
           - "NAVident"
+  envFrom:
+    - secret: syfobehandlendeenhet-redis-password
   env:
     - name: ISPROXY_CLIENT_ID
       value: "prod-fss.teamsykefravr.isproxy"
     - name: ISPROXY_URL
-      value: "https://isproxy.intern.nav.no"
+      value: "https://isproxy.prod-fss-pub.nais.io"
     - name: PDL_CLIENT_ID
       value: "prod-fss.pdl.pdl-api"
     - name: PDL_URL
-      value: "https://pdl-api.intern.nav.no/graphql"
+      value: "https://pdl-api.prod-fss-pub.nais.io/graphql"
+    - name: REDIS_HOST
+      value: "syfobehandlendeenhet-redis.teamsykefravr.svc.cluster.local"
+    - name: SKJERMEDEPERSONERPIP_CLIENT_ID
+      value: "prod-gcp.nom.skjermede-personer-pip"
+    - name: SKJERMEDEPERSONERPIP_URL
+      value: "https://skjermede-personer-pip.intern.nav.no"
     - name: SYFOTILGANGSKONTROLL_CLIENT_ID
       value: "prod-fss.teamsykefravr.syfo-tilgangskontroll"
     - name: TILGANGSKONTROLLAPI_URL
-      value: https://syfo-tilgangskontroll.nais.adeo.no/syfo-tilgangskontroll/api/tilgang
+      value: "https://syfo-tilgangskontroll.prod-fss-pub.nais.io/syfo-tilgangskontroll/api/tilgang"

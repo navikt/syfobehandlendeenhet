@@ -6,7 +6,6 @@ import no.nav.syfo.consumer.pdl.GeografiskTilknytning
 import no.nav.syfo.metric.Metric
 import no.nav.syfo.util.callIdArgument
 import org.slf4j.LoggerFactory.getLogger
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
@@ -23,7 +22,7 @@ constructor(
     @Value("\${isproxy.client.id}") private val isproxyClientId: String,
     @Value("\${isproxy.url}") private val baseUrl: String,
     private val metric: Metric,
-    @Qualifier("restTemplateWithProxy") private val restTemplateProxy: RestTemplate,
+    private val restTemplate: RestTemplate,
 ) {
     private val norg2ArbeidsfordelingBestmatchUrl: String = "$baseUrl$ARBEIDSFORDELING_BESTMATCH_PATH"
 
@@ -75,7 +74,7 @@ constructor(
                 body = requestBody,
                 token = systemToken,
             )
-            val result = restTemplateProxy
+            val result = restTemplate
                 .exchange(
                     norg2ArbeidsfordelingBestmatchUrl,
                     HttpMethod.POST,
