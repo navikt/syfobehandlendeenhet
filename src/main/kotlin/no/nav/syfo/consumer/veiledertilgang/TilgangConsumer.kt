@@ -25,14 +25,10 @@ class TilgangConsumer @Inject constructor(
     private val template: RestTemplate,
     private val contextHolder: TokenValidationContextHolder
 ) {
-    private val accessToSYFOV2URI: URI
-
-    init {
-        accessToSYFOV2URI = fromHttpUrl(tilgangskontrollUrl)
-            .path(ACCESS_TO_SYFO_WITH_AZURE_V2_PATH)
-            .build()
-            .toUri()
-    }
+    private val accessToSYFOV2URI: URI = fromHttpUrl(tilgangskontrollUrl)
+        .path(ACCESS_TO_SYFO_WITH_AZURE_V2_PATH)
+        .build()
+        .toUri()
 
     fun throwExceptionIfVeilederWithoutAccessToSYFOWithOBO() {
         if (!isVeilederGrantedAccessToSYFOWithOBO()) {
