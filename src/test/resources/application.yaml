@@ -36,5 +36,7 @@ syfotilgangskontroll.client.id: "syfotilgangskontrollId"
 
 isproxy.client.id: "dev-fss:teamsykefravr:isproxy"
 isproxy.url: "https://isproxy"
+skjermedepersonerpip.client.id: "dev-fss:teamsykefravr:skjermedepersonerpip"
+skjermedepersonerpip.url: "https://skjermedepersonerpip"
 pdl.url: "http://pdl"
 tilgangskontrollapi.url: "http://syfotilgangskontroll"

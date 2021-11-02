@@ -1,14 +1,17 @@
-name: Deploy redis to NAIS
+name: redis
+
 on:
   push:
     branches:
       - master
     paths:
       - '.github/workflows/redis.yaml'
-      - '.nais/redis-config.yaml'
+      - '.nais/redis/redis-config.yaml'
+      - '.nais/redis/redisexporter.yaml'
+
 jobs:
-  apply-redis:
-    name: Apply Redis cache to cluster
+  apply-redis-cache:
+    name: Apply Redis instance for caching
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -17,11 +20,11 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: .nais/redis-config.yaml
+          CLUSTER: dev-gcp
+          RESOURCE: ".nais/redis/redis-config.yaml,.nais/redis/redisexporter.yaml"
       - name: deploy to prod
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: .nais/redis-config.yaml
+          CLUSTER: prod-gcp
+          RESOURCE: ".nais/redis/redis-config.yaml,.nais/redis/redisexporter.yaml"

@@ -1,9 +1,11 @@
 package no.nav.syfo.consumer.skjermedepersonerpip
 
 import no.nav.syfo.config.CacheConfig.Companion.CACHENAME_EGENANSATT
+import no.nav.syfo.consumer.azuread.v2.AzureAdV2TokenConsumer
 import no.nav.syfo.metric.Metric
 import no.nav.syfo.util.*
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.*
 import org.springframework.stereotype.Service
@@ -13,8 +15,11 @@ import javax.inject.Inject
 
 @Service
 class SkjermedePersonerPipConsumer @Inject constructor(
+    private val azureAdV2TokenConsumer: AzureAdV2TokenConsumer,
+    @Value("\${skjermedepersonerpip.client.id}") private val skjermedepersonerpipClientId: String,
+    @Value("\${skjermedepersonerpip.url}") private val baseUrl: String,
     private val metric: Metric,
-    private val restTemplate: RestTemplate
+    private val restTemplate: RestTemplate,
 ) {
     private val log = LoggerFactory.getLogger(SkjermedePersonerPipConsumer::class.java)
 
@@ -23,11 +28,18 @@ class SkjermedePersonerPipConsumer @Inject constructor(
         callId: String,
         personIdent: String
     ): Boolean {
+        val systemToken = azureAdV2TokenConsumer.getSystemToken(
+            scopeClientId = skjermedepersonerpipClientId,
+        )
         try {
+            val url = getSkjermedePersonerPipUrl(
+                baseUrl = baseUrl,
+                personIdent = personIdent,
+            )
             val response = restTemplate.exchange(
-                getSkjermedePersonerPipUrl(personIdent),
+                url,
                 HttpMethod.GET,
-                entity(),
+                entity(token = systemToken),
                 String::class.java
             )
             val skjermedePersonerResponse = response.body!!
@@ -45,15 +57,19 @@ class SkjermedePersonerPipConsumer @Inject constructor(
         }
     }
 
-    private fun entity(): HttpEntity<String> {
+    private fun entity(token: String): HttpEntity<String> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
+        headers.setBearerAuth(token)
         headers[NAV_CONSUMER_ID_HEADER] = APP_CONSUMER_ID
         headers[NAV_CALL_ID_HEADER] = createCallId()
         return HttpEntity(headers)
     }
 }
 
-fun getSkjermedePersonerPipUrl(personIdent: String): String {
-    return "http://skjermede-personer-pip.nom.svc.nais.local/skjermet?personident=$personIdent"
+fun getSkjermedePersonerPipUrl(
+    baseUrl: String,
+    personIdent: String,
+): String {
+    return "$baseUrl/skjermet?personident=$personIdent"
 }

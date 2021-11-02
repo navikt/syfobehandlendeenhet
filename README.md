@@ -32,10 +32,11 @@ Apply formatting: `./gradlew addKtlintFormatGitPreCommitHook`
 
 ## Cache
 A single Redis pod is responsible for caching.
-The Redis pod is deployed automatically to NAIS after changes are made to the workflow or config file.
-The Redis can also be deployed manually with the following command: `kubectl apply -f .nais/redis-config.yaml`.
+This application uses Redis for caching. Redis is deployed automatically on changes to workflow or config on master
+branch. For manual deploy, run: `kubectl apply -f .nais/redis/redis-config.yaml`
+    or `kubectl apply -f .nais/redis/redisexporter.yaml`.
 
 ### Pipeline
 Pipeline is run with Github Action workflows.
-Commits to Master-branch is deployed automatically to dev-fss and prod-fss.
+Commits to Master-branch is deployed automatically to dev and prod.
 Commits to non-master-branch is built without automatic deploy.
