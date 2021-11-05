@@ -88,7 +88,7 @@ constructor(
         } catch (e: RestClientResponseException) {
             metric.countOutgoingRequestsFailed("getArbeidsfordelingEnheter", e.rawStatusCode.toString())
             log.error(
-                "Call to NORG2-arbeidsfordeling failed with status HTTP-{} for GeografiskTilknytning {}. {}",
+                "Call to Isproxy-NORG2-arbeidsfordeling failed with status HTTP-{} for GeografiskTilknytning {}. {}",
                 e.rawStatusCode,
                 geografiskTilknytning,
                 callIdArgument(callId)
