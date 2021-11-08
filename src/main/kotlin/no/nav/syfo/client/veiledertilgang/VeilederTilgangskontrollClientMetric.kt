@@ -1,0 +1,20 @@
+package no.nav.syfo.client.veiledertilgang
+
+import io.micrometer.core.instrument.Counter
+import no.nav.syfo.application.metric.METRICS_NS
+import no.nav.syfo.application.metric.METRICS_REGISTRY
+
+const val CALL_TILGANGSKONTROLL_SYFO_BASE = "${METRICS_NS}_call_tilgangskontroll_syfo"
+const val CALL_TILGANGSKONTROLL_SYFO_SUCCESS = "${CALL_TILGANGSKONTROLL_SYFO_BASE}_success_count"
+const val CALL_TILGANGSKONTROLL_SYFO_FAIL = "${CALL_TILGANGSKONTROLL_SYFO_BASE}_fail_count"
+const val CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN = "${CALL_TILGANGSKONTROLL_SYFO_BASE}_forbidden_count"
+
+val COUNT_CALL_TILGANGSKONTROLL_SYFO_SUCCESS: Counter = Counter.builder(CALL_TILGANGSKONTROLL_SYFO_SUCCESS)
+    .description("Counts the number of successful calls to syfo-tilgangskontroll - person")
+    .register(METRICS_REGISTRY)
+val COUNT_CALL_TILGANGSKONTROLL_SYFO_FAIL: Counter = Counter.builder(CALL_TILGANGSKONTROLL_SYFO_FAIL)
+    .description("Counts the number of failed calls to syfo-tilgangskontroll - person")
+    .register(METRICS_REGISTRY)
+val COUNT_CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN: Counter = Counter.builder(CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN)
+    .description("Counts the number of forbidden calls to syfo-tilgangskontroll - person")
+    .register(METRICS_REGISTRY)
