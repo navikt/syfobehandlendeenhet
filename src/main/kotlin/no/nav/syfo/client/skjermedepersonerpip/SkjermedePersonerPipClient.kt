@@ -25,7 +25,7 @@ class SkjermedePersonerPipClient(
     ): Boolean {
         val oboToken = azureAdClient.getSystemToken(
             scopeClientId = clientId,
-        )?.accessToken ?: throw RuntimeException("Failed to request access to Skjerming: Failed to get OBO token")
+        )?.accessToken ?: throw RuntimeException("Failed to request access to Skjerming: Failed to get system token")
 
         val cacheKey = "$CACHE_SKJERMET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
         val cachedValue: Boolean? = redisStore.getObject(key = cacheKey)
