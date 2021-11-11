@@ -3,17 +3,17 @@
 # Syfobehandlendeenhet
 
 ## About
-Syfobehandlendeenhet is a Spring Boot application written in Kotlin. 
+Syfobehandlendeenhet is a Ktor application written in Kotlin.
 Syfobehandlendeenhet takes a person's PersonIdent as input and outputs a NAV-enhet.
 This NAV-enhet is the BehandlendeEnhet of the person in the context of SYFO(Sykefraværsoppfølging)
 
-To find BehandlendeEnhet, the application makes requests to PersonDataLøsningen(PDL), to skjermed-personer-pip(`egenAnsatt`) til NORG; resultatet fra disse caches.
+To find BehandlendeEnhet, the application makes requests to PersonDataLøsningen(PDL), to skjermed-personer-pip(`egenAnsatt`) til NORG.
 
 ## Technologies Used
 * Docker
 * Gradle
 * Kotlin
-* Spring Boot
+* Ktor
 * Redis
 
 ## Lokal utvikling

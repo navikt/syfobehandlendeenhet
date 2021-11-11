@@ -1,32 +1,27 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val apacheHttpClientVersion = "4.5.13"
-val javaxActivationVersion = "1.2.0"
-val jaxRiVersion = "2.3.2"
-val kotlinJacksonVersion = "2.11.2"
-val logstashVersion = "4.10"
-val prometheusVersion = "1.5.5"
-val slf4jVersion = "1.7.25"
-val tokenValidationSpringSupportVersion = "1.3.7"
-
-plugins {
-    kotlin("jvm") version "1.5.10"
-    id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.5.10"
-    id("org.springframework.boot") version "2.4.9"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+object Versions {
+    const val jackson = "2.13.0"
+    const val jedis = "3.7.0"
+    const val ktor = "1.6.5"
+    const val kluent = "1.68"
+    const val logback = "1.2.6"
+    const val logstashEncoder = "6.6"
+    const val mockk = "1.12.0"
+    const val nimbusJoseJwt = "9.15.2"
+    const val micrometerRegistry = "1.7.5"
+    const val redisEmbedded = "0.7.3"
+    const val spek = "2.0.17"
 }
 
-allOpen {
-    annotation("org.springframework.context.annotation.Configuration")
-    annotation("org.springframework.stereotype.Service")
-    annotation("org.springframework.stereotype.Component")
+plugins {
+    kotlin("jvm") version "1.5.30"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
 }
 
 repositories {
@@ -37,35 +32,44 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$kotlinJacksonVersion")
+    implementation("io.ktor:ktor-auth-jwt:${Versions.ktor}")
+    implementation("io.ktor:ktor-client-apache:${Versions.ktor}")
+    implementation("io.ktor:ktor-client-cio:${Versions.ktor}")
+    implementation("io.ktor:ktor-client-jackson:${Versions.ktor}")
+    implementation("io.ktor:ktor-jackson:${Versions.ktor}")
+    implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
 
-    implementation("org.apache.httpcomponents:httpclient:$apacheHttpClientVersion")
+    // Logging
+    implementation("ch.qos.logback:logback-classic:${Versions.logback}")
+    implementation("net.logstash.logback:logstash-logback-encoder:${Versions.logstashEncoder}")
 
-    implementation("com.sun.xml.ws:jaxws-ri:$jaxRiVersion")
-    implementation("com.sun.activation:javax.activation:$javaxActivationVersion")
+    // Metrics and Prometheus
+    implementation("io.ktor:ktor-metrics-micrometer:${Versions.ktor}")
+    implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
 
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-aop")
-    implementation("org.springframework.boot:spring-boot-starter-cache")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("org.springframework.boot:spring-boot-starter-jersey")
-    implementation("org.springframework.boot:spring-boot-starter-jetty")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    // Cache
+    implementation("redis.clients:jedis:${Versions.jedis}")
+    testImplementation("it.ozimov:embedded-redis:${Versions.redisEmbedded}")
 
-    implementation("no.nav.security:token-validation-spring:$tokenValidationSpringSupportVersion")
+    // (De-)serialization
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${Versions.jackson}")
 
-    implementation("io.micrometer:micrometer-registry-prometheus:$prometheusVersion")
-    implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("no.nav.security:token-validation-test-support:$tokenValidationSpringSupportVersion")
+    testImplementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbusJoseJwt}")
+    testImplementation("io.ktor:ktor-server-test-host:${Versions.ktor}")
+    testImplementation("io.mockk:mockk:${Versions.mockk}")
+    testImplementation("org.amshove.kluent:kluent:${Versions.kluent}")
+    testImplementation("org.spekframework.spek2:spek-dsl-jvm:${Versions.ktor}")
+    testImplementation("org.spekframework.spek2:spek-dsl-jvm:${Versions.spek}") {
+        exclude(group = "org.jetbrains.kotlin")
+    }
+    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:${Versions.spek}") {
+        exclude(group = "org.jetbrains.kotlin")
+    }
 }
 
 tasks {
     withType<Jar> {
-        manifest.attributes["Main-Class"] = "no.nav.syfo.ApplicationKt"
+        manifest.attributes["Main-Class"] = "no.nav.syfo.AppKt"
     }
 
     create("printVersion") {
@@ -74,19 +78,20 @@ tasks {
         }
     }
 
-    test {
-        useJUnitPlatform()
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "11"
     }
 
     withType<ShadowJar> {
-        transform(PropertiesFileTransformer::class.java) {
-            paths = listOf("META-INF/spring.factories")
-            mergeStrategy = "append"
-        }
-        mergeServiceFiles()
+        archiveBaseName.set("app")
+        archiveClassifier.set("")
+        archiveVersion.set("")
     }
 
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "11"
+    withType<Test> {
+        useJUnitPlatform {
+            includeEngines("spek2")
+        }
+        testLogging.showStandardStreams = true
     }
 }

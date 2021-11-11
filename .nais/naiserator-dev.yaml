@@ -9,13 +9,13 @@ spec:
   image: {{ image }}
   port: 8080
   liveness:
-    path: /internal/isAlive
+    path: /internal/is_alive
     initialDelay: 30
     timeout: 1
     periodSeconds: 10
     failureThreshold: 5
   readiness:
-    path: /internal/isReady
+    path: /internal/is_ready
     initialDelay: 30
     timeout: 1
   resources:
@@ -31,7 +31,7 @@ spec:
     cpuThresholdPercentage: 90
   prometheus:
     enabled: true
-    path: /internal/prometheus
+    path: /internal/metrics
   ingresses:
     - "https://syfobehandlendeenhet.dev.intern.nav.no"
   accessPolicy:
@@ -70,8 +70,6 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
-      replyURLs:
-        - "https://syfobehandlendeenhet.dev.intern.nav.no/oauth2/callback"
       claims:
         extra:
           - "NAVident"
@@ -94,5 +92,5 @@ spec:
       value: "https://skjermede-personer-pip.dev.intern.nav.no"
     - name: SYFOTILGANGSKONTROLL_CLIENT_ID
       value: "dev-fss.teamsykefravr.syfo-tilgangskontroll"
-    - name: TILGANGSKONTROLLAPI_URL
-      value: "https://syfo-tilgangskontroll.dev-fss-pub.nais.io/syfo-tilgangskontroll/api/tilgang"
+    - name: SYFOTILGANGSKONTROLL_URL
+      value: "https://syfo-tilgangskontroll.dev-fss-pub.nais.io"

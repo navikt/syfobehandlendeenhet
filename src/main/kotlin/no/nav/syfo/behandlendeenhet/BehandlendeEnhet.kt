@@ -3,6 +3,6 @@ package no.nav.syfo.behandlendeenhet
 import java.io.Serializable
 
 data class BehandlendeEnhet(
-    var enhetId: String,
-    var navn: String
+    val enhetId: String,
+    val navn: String,
 ) : Serializable
