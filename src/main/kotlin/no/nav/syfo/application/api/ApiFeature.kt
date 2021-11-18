@@ -62,8 +62,14 @@ fun Application.installStatusPages() {
 
             val callId = getCallId()
             val consumerClientId = getConsumerClientId()
-            log.error("Caught exception, callId=$callId, consumerClientId=$consumerClientId", cause)
-
+            val errorMessage = "Caught exception, callId=$callId, consumerClientId=$consumerClientId"
+            if (cause is ForbiddenAccessVeilederException || cause is ForbiddenAccessSystemConsumer) {
+                log.info(errorMessage, cause)
+            } else if (cause is IllegalArgumentException) {
+                log.warn(errorMessage, cause)
+            } else {
+                log.error(errorMessage, cause)
+            }
             val message = cause.message ?: "Unknown error"
             call.respond(responseStatus, message)
         }
