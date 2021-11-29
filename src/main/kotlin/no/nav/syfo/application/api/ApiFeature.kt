@@ -26,10 +26,9 @@ fun Application.installMetrics() {
 
 fun Application.installCallId() {
     install(CallId) {
-        retrieve { it.request.headers[NAV_CALL_ID_HEADER] }
-        generate { UUID.randomUUID().toString() }
-        verify { callId: String -> callId.isNotEmpty() }
         header(NAV_CALL_ID_HEADER)
+        generate { "generated-${UUID.randomUUID()}" }
+        verify { callId: String -> callId.isNotEmpty() }
     }
 }
 
