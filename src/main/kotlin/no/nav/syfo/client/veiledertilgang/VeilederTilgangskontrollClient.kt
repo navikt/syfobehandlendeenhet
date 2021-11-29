@@ -5,6 +5,7 @@ import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.application.api.ForbiddenAccessVeilederException
 import no.nav.syfo.client.azuread.AzureAdClient
@@ -63,6 +64,13 @@ class VeilederTilgangskontrollClient(
                 )
                 COUNT_CALL_TILGANGSKONTROLL_SYFO_FAIL.increment()
             }
+            false
+        } catch (e: ClosedReceiveChannelException) {
+            log.error(
+                "ClosedReceiveChannelException while requesting access to SYFO from syfo-tilgangskontroll, callId=$callId",
+                e
+            )
+            COUNT_CALL_TILGANGSKONTROLL_SYFO_FAIL.increment()
             false
         }
     }
