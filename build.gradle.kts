@@ -10,7 +10,7 @@ object Versions {
     const val ktor = "1.6.5"
     const val kluent = "1.68"
     const val logback = "1.2.7"
-    const val logstashEncoder = "7.01"
+    const val logstashEncoder = "7.0.1"
     const val mockk = "1.12.1"
     const val nimbusJoseJwt = "9.15.2"
     const val micrometerRegistry = "1.8.0"
