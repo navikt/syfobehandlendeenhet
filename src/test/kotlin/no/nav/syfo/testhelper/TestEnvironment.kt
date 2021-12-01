@@ -53,7 +53,7 @@ val testAzureAppPreAuthorizedApps = listOf(
         clientId = testIsdialogmoteClientId,
     ),
     PreAuthorizedClient(
-        name = "dev-fss:teamsykefravr:ispersonoppgave",
+        name = "dev-gcp:teamsykefravr:ispersonoppgave",
         clientId = testIspersonoppgaveClientId,
     ),
     PreAuthorizedClient(
