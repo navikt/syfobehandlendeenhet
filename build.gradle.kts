@@ -6,7 +6,7 @@ version = "1.0.0"
 
 object Versions {
     const val jackson = "2.13.1"
-    const val jedis = "3.8.0"
+    const val jedis = "4.0.1"
     const val ktor = "1.6.7"
     const val kluent = "1.68"
     const val logback = "1.2.10"
@@ -20,8 +20,8 @@ object Versions {
 
 plugins {
     kotlin("jvm") version "1.6.10"
-    id("com.github.johnrengelman.shadow") version "7.1.1"
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
 }
 
 repositories {
