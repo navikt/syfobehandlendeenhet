@@ -40,3 +40,9 @@ branch. For manual deploy, run: `kubectl apply -f .nais/redis/redis-config.yaml`
 Pipeline is run with Github Action workflows.
 Commits to Master-branch is deployed automatically to dev and prod.
 Commits to non-master-branch is built without automatic deploy.
+
+## Contact
+
+### For NAV employees
+
+We are available at the Slack channel `#isyfo`.
