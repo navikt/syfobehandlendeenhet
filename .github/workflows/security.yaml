@@ -16,5 +16,5 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: monitor 
-          args: --project-name=${{ github.repository }}
+          command: monitor
+          args: --org=teamsykefravr --project-name=${{ github.repository }}
