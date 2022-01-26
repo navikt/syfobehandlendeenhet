@@ -8,7 +8,7 @@ import no.nav.syfo.util.configuredJacksonMapper
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 
-fun httpClientDefault() = HttpClient(CIO) {
+fun httpClientDefault() = HttpClient(Apache) {
     install(JsonFeature) {
         serializer = JacksonSerializer(configuredJacksonMapper())
     }
