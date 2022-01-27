@@ -8,9 +8,12 @@ import no.nav.syfo.util.configuredJacksonMapper
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 
-fun httpClientDefault() = HttpClient(CIO) {
+val defaultConfig: HttpClientConfig<CIOEngineConfig>.() -> Unit = {
     install(JsonFeature) {
         serializer = JacksonSerializer(configuredJacksonMapper())
+    }
+    engine {
+        requestTimeout = 30000
     }
 }
 
@@ -24,6 +27,11 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         }
     }
 }
+
+fun httpClientDefault() = HttpClient(
+    engineFactory = CIO,
+    block = defaultConfig
+)
 
 fun httpClientProxy() = HttpClient(
     engineFactory = Apache,
