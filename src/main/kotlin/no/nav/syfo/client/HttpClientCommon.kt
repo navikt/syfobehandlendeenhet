@@ -14,6 +14,10 @@ val defaultConfig: HttpClientConfig<CIOEngineConfig>.() -> Unit = {
     }
     engine {
         requestTimeout = 30000
+        endpoint {
+            keepAliveTime = 30000
+            connectTimeout = 30000
+        }
     }
 }
 
