@@ -14,7 +14,7 @@ object Versions {
     const val mockk = "1.12.2"
     const val nimbusJoseJwt = "9.18"
     const val micrometerRegistry = "1.8.2"
-    const val redisEmbedded = "0.7.3"
+    const val redisEmbedded = "0.8.2"
     const val spek = "2.0.17"
 }
 
@@ -49,7 +49,7 @@ dependencies {
 
     // Cache
     implementation("redis.clients:jedis:${Versions.jedis}")
-    testImplementation("it.ozimov:embedded-redis:${Versions.redisEmbedded}")
+    testImplementation("org.signal:embedded-redis:${Versions.redisEmbedded}")
 
     // (De-)serialization
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${Versions.jackson}")
