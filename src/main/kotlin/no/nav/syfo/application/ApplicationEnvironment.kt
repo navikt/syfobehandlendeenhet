@@ -29,12 +29,14 @@ data class Environment(
     val syfomoteadminApplicationName: String = "syfomoteadmin",
     val syfomotebehovApplicationName: String = "syfomotebehov",
     val syfooversikthendelsetilfelleApplicationName: String = "syfooversikthendelsetilfelle",
+    val syfooversiktsrvApplicationName: String = "syfooversiktsrv",
     val syfotilgangskontrollApplicationName: String = "syfo-tilgangskontroll",
     val systemAPIAuthorizedConsumerApplicationNameList: List<String> = listOf(
         ispersonoppgaveApplicationName,
         syfomoteadminApplicationName,
         syfomotebehovApplicationName,
         syfooversikthendelsetilfelleApplicationName,
+        syfooversiktsrvApplicationName,
         syfotilgangskontrollApplicationName,
     ),
 )

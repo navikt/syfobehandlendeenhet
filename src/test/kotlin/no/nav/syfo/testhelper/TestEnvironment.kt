@@ -45,6 +45,7 @@ const val testSyfomodiapersonClientId = "syfomodiaperson-client-id"
 const val testSyfomoteadminClientId = "syfomoteadmin-client-id"
 const val testSyfomotebehovClientId = "syfomotebehov-client-id"
 const val testSyfooversikthendelsetilfelleClientId = "syfooversikthendelsetilfelle-client-id"
+const val testSyfooversiktsrvClientId = "syfooversiktsrv-client-id"
 const val testSyfotilgangskontrollClientId = "syfo-tilgangskontroll-client-id"
 
 val testAzureAppPreAuthorizedApps = listOf(
@@ -71,6 +72,10 @@ val testAzureAppPreAuthorizedApps = listOf(
     PreAuthorizedClient(
         name = "dev-fss:teamsykefravr:syfooversikthendelsetilfelle",
         clientId = testSyfooversikthendelsetilfelleClientId,
+    ),
+    PreAuthorizedClient(
+        name = "dev-gcp:teamsykefravr:syfooversiktsrv",
+        clientId = testSyfooversiktsrvClientId,
     ),
     PreAuthorizedClient(
         name = "dev-fss:teamsykefravr:syfo-tilgangskontroll",
