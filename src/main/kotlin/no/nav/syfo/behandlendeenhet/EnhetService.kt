@@ -74,6 +74,6 @@ class EnhetService(
 
     companion object {
         const val CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX = "behandlendeenhet-personident-"
-        const val CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS = 60 * 60L
+        const val CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS = 2 * 60 * 60L
     }
 }
