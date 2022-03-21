@@ -14,13 +14,11 @@ import no.nav.syfo.testhelper.getRandomPort
 import no.nav.syfo.util.getBearerHeader
 
 val tilgangFalse = TilgangDTO(
-    false,
-    "",
+    harTilgang = false,
 )
 
 val tilgangTrue = TilgangDTO(
-    true,
-    "",
+    harTilgang = true,
 )
 
 class VeilederTilgangskontrollMock {
