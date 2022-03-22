@@ -9,7 +9,7 @@ import no.nav.syfo.application.api.installContentNegotiation
 import no.nav.syfo.client.norg.NorgClient
 import no.nav.syfo.client.norg.domain.Enhetsstatus
 import no.nav.syfo.client.norg.domain.NorgEnhet
-import no.nav.syfo.testhelper.*
+import no.nav.syfo.testhelper.getRandomPort
 
 const val ENHET_NR = "0101"
 const val ENHET_NAVN = "Enhet"
@@ -45,9 +45,9 @@ class IsproxyMock {
     )
 
     val name = "isproxy"
-    val server: NettyApplicationEngine = embeddedServer(
+    val server = embeddedServer(
         factory = Netty,
-        port = port
+        port = port,
     ) {
         installContentNegotiation()
         routing {

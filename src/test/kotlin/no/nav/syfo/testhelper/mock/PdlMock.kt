@@ -68,32 +68,28 @@ class PdlMock {
     private val port = getRandomPort()
     val url = "http://localhost:$port"
     val name = "pdl"
-    val server = mockPdlServer()
-
     val personResponseDefault = generatePdlPersonResponse()
 
-    private fun mockPdlServer(): NettyApplicationEngine {
-        return embeddedServer(
-            factory = Netty,
-            port = port
-        ) {
-            installContentNegotiation()
-            routing {
-                post {
-                    if (call.request.headers[GT_HEADER] == GT_HEADER) {
-                        val pdlRequest = call.receive<PdlGeografiskTilknytningRequest>()
-                        if (UserConstants.ARBEIDSTAKER_PERSONIDENT.value == pdlRequest.variables.ident) {
-                            call.respond(generatePdlGeografiskTilknytningResponse())
-                        } else {
-                            call.respond(HttpStatusCode.InternalServerError)
-                        }
+    val server = embeddedServer(
+        factory = Netty,
+        port = port,
+    ) {
+        installContentNegotiation()
+        routing {
+            post {
+                if (call.request.headers[GT_HEADER] == GT_HEADER) {
+                    val pdlRequest = call.receive<PdlGeografiskTilknytningRequest>()
+                    if (UserConstants.ARBEIDSTAKER_PERSONIDENT.value == pdlRequest.variables.ident) {
+                        call.respond(generatePdlGeografiskTilknytningResponse())
                     } else {
-                        val pdlRequest = call.receive<PdlRequest>()
-                        if (ARBEIDSTAKER_ADRESSEBESKYTTET.value == pdlRequest.variables.ident) {
-                            call.respond(generatePdlPersonResponse(Gradering.STRENGT_FORTROLIG))
-                        } else {
-                            call.respond(personResponseDefault)
-                        }
+                        call.respond(HttpStatusCode.InternalServerError)
+                    }
+                } else {
+                    val pdlRequest = call.receive<PdlRequest>()
+                    if (ARBEIDSTAKER_ADRESSEBESKYTTET.value == pdlRequest.variables.ident) {
+                        call.respond(generatePdlPersonResponse(Gradering.STRENGT_FORTROLIG))
+                    } else {
+                        call.respond(personResponseDefault)
                     }
                 }
             }

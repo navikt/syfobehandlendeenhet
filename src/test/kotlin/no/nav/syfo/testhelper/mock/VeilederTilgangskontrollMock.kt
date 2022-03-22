@@ -29,9 +29,9 @@ class VeilederTilgangskontrollMock {
     val responseAccessTrue = tilgangTrue
 
     val name = "veiledertilgangskontroll"
-    val server: NettyApplicationEngine = embeddedServer(
+    val server = embeddedServer(
         factory = Netty,
-        port = port
+        port = port,
     ) {
         installContentNegotiation()
         routing {
