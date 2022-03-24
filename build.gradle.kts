@@ -6,14 +6,14 @@ version = "1.0.0"
 
 object Versions {
     const val jackson = "2.13.1"
-    const val jedis = "4.1.1"
+    const val jedis = "4.2.0"
     const val ktor = "1.6.8"
     const val kluent = "1.68"
     const val logback = "1.2.11"
     const val logstashEncoder = "7.0.1"
     const val mockk = "1.12.3"
     const val nimbusJoseJwt = "9.21"
-    const val micrometerRegistry = "1.8.3"
+    const val micrometerRegistry = "1.8.4"
     const val redisEmbedded = "0.7.3"
     const val spek = "2.0.18"
 }
