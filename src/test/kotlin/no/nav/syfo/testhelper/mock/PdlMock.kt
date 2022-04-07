@@ -17,15 +17,23 @@ import no.nav.syfo.testhelper.getRandomPort
 const val geografiskTilknytningKommune = "0330"
 
 fun generatePdlHentGeografiskTilknytning(
-    hentGeografiskTilknytning: PdlGeografiskTilknytning? = null
-) = PdlHentGeografiskTilknytning(
-    hentGeografiskTilknytning = hentGeografiskTilknytning ?: PdlGeografiskTilknytning(
+    hentGeografiskTilknytning: PdlGeografiskTilknytning? = PdlGeografiskTilknytning(
         gtType = PdlGeografiskTilknytningType.KOMMUNE.name,
         gtBydel = null,
         gtKommune = geografiskTilknytningKommune,
-        gtLand = null
+        gtLand = null,
     )
+) = PdlHentGeografiskTilknytning(
+    hentGeografiskTilknytning = hentGeografiskTilknytning
 )
+
+fun generatePdlGeografiskTilknytningNotFoundResponse() =
+    PdlGeografiskTilknytningResponse(
+        data = generatePdlHentGeografiskTilknytning(
+            hentGeografiskTilknytning = null,
+        ),
+        errors = null,
+    )
 
 fun generatePdlGeografiskTilknytningResponse() =
     PdlGeografiskTilknytningResponse(
@@ -81,6 +89,8 @@ class PdlMock {
                     val pdlRequest = call.receive<PdlGeografiskTilknytningRequest>()
                     if (UserConstants.ARBEIDSTAKER_PERSONIDENT.value == pdlRequest.variables.ident) {
                         call.respond(generatePdlGeografiskTilknytningResponse())
+                    } else if (UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value == pdlRequest.variables.ident) {
+                        call.respond(generatePdlGeografiskTilknytningNotFoundResponse())
                     } else {
                         call.respond(HttpStatusCode.InternalServerError)
                     }

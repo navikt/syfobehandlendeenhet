@@ -4,6 +4,7 @@ import no.nav.syfo.domain.PersonIdentNumber
 
 object UserConstants {
     val ARBEIDSTAKER_PERSONIDENT = PersonIdentNumber("12345678912")
+    val ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "1"))
     val ARBEIDSTAKER_ADRESSEBESKYTTET = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "6"))
 
     const val VEILEDER_IDENT = "Z999999"

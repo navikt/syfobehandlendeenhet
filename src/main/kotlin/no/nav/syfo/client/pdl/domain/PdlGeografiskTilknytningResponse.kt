@@ -27,9 +27,8 @@ enum class PdlGeografiskTilknytningType {
     UDEFINERT,
 }
 
-fun PdlHentGeografiskTilknytning.geografiskTilknytning(): GeografiskTilknytning? {
-    val geografiskTilknytning = this.hentGeografiskTilknytning
-    geografiskTilknytning?.let { gt ->
+fun PdlGeografiskTilknytning.geografiskTilknytning(): GeografiskTilknytning? {
+    this.let { gt ->
         return when (gt.gtType) {
             PdlGeografiskTilknytningType.BYDEL.name -> {
                 GeografiskTilknytning(
@@ -57,5 +56,5 @@ fun PdlHentGeografiskTilknytning.geografiskTilknytning(): GeografiskTilknytning?
             }
             else -> null
         }
-    } ?: return null
+    }
 }
