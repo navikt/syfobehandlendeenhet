@@ -10,6 +10,7 @@ import io.ktor.response.*
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig
 import no.nav.syfo.application.metric.METRICS_REGISTRY
 import no.nav.syfo.behandlendeenhet.api.access.ForbiddenAccessSystemConsumer
+import no.nav.syfo.client.pdl.GeografiskTilknytningNotFoundException
 import no.nav.syfo.util.*
 import java.time.Duration
 import java.util.*
@@ -54,6 +55,9 @@ fun Application.installStatusPages() {
                 is ForbiddenAccessSystemConsumer -> {
                     HttpStatusCode.Forbidden
                 }
+                is GeografiskTilknytningNotFoundException -> {
+                    HttpStatusCode.NoContent
+                }
                 else -> {
                     HttpStatusCode.InternalServerError
                 }
@@ -64,7 +68,7 @@ fun Application.installStatusPages() {
             val errorMessage = "Caught exception, callId=$callId, consumerClientId=$consumerClientId"
             if (cause is ForbiddenAccessVeilederException || cause is ForbiddenAccessSystemConsumer) {
                 log.info(errorMessage, cause)
-            } else if (cause is IllegalArgumentException) {
+            } else if (cause is IllegalArgumentException || cause is GeografiskTilknytningNotFoundException) {
                 log.warn(errorMessage, cause)
             } else {
                 log.error(errorMessage, cause)

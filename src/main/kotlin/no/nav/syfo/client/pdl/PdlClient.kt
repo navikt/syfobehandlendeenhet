@@ -22,17 +22,6 @@ class PdlClient(
         callId: String,
         personIdentNumber: PersonIdentNumber,
     ): GeografiskTilknytning {
-        return geografiskTilknytningResponse(
-            callId = callId,
-            personIdentNumber = personIdentNumber,
-        )?.geografiskTilknytning()
-            ?: throw RuntimeException("No Geografisk Tilknytning was found in response from PDL")
-    }
-
-    suspend fun geografiskTilknytningResponse(
-        callId: String,
-        personIdentNumber: PersonIdentNumber,
-    ): PdlHentGeografiskTilknytning? {
         val systemToken = azureAdClient.getSystemToken(
             scopeClientId = clientId,
         )?.accessToken
@@ -52,15 +41,22 @@ class PdlClient(
                 contentType(ContentType.Application.Json)
                 body = request
             }
-            return if (pdlPersonResponse.errors != null && pdlPersonResponse.errors.isNotEmpty()) {
+            if (pdlPersonResponse.errors != null && pdlPersonResponse.errors.isNotEmpty()) {
                 COUNT_CALL_PDL_GT_FAIL.increment()
                 pdlPersonResponse.errors.forEach {
                     log.error("Error while requesting person from PersonDataLosningen: ${it.errorMessage()}")
                 }
-                null
+                throw RuntimeException("No Geografisk Tilknytning was found in response from PDL: Errors found in response")
+            } else if (pdlPersonResponse.data == null) {
+                COUNT_CALL_PDL_GT_FAIL.increment()
+                val errorMessage =
+                    "No Geografisk Tilknytning was found in response from PDL: No data was found in response"
+                log.error("Error while requesting person from PersonDataLosningen: $errorMessage")
+                throw throw RuntimeException(errorMessage)
             } else {
                 COUNT_CALL_PDL_GT_SUCCESS.increment()
-                pdlPersonResponse.data
+                return pdlPersonResponse.data.hentGeografiskTilknytning?.geografiskTilknytning()
+                    ?: throw GeografiskTilknytningNotFoundException()
             }
         } catch (e: ResponseException) {
             log.error(

@@ -6,6 +6,7 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
 import no.nav.syfo.testhelper.*
+import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
@@ -51,6 +52,18 @@ class BehandlendeEnhetApiSpek : Spek({
 
                             behandlendeEnhet.enhetId shouldBeEqualTo externalMockEnvironment.isproxyMock.norg2Response.first().enhetNr
                             behandlendeEnhet.navn shouldBeEqualTo externalMockEnvironment.isproxyMock.norg2Response.first().navn
+                        }
+                    }
+
+                    it("should return NoContent if GeografiskTilknyning was not found for PersonIdent") {
+                        with(
+                            handleRequest(HttpMethod.Get, url) {
+                                addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                                addHeader(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value)
+                            }
+                        ) {
+                            response.status() shouldBeEqualTo HttpStatusCode.NoContent
                         }
                     }
                 }

@@ -56,6 +56,21 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                                 behandlendeEnhet.navn shouldBeEqualTo externalMockEnvironment.isproxyMock.norg2Response.first().navn
                             }
                         }
+
+                        it("should return NoContent if GeografiskTilknyning was not found for PersonIdent as $consumerApplicationName") {
+                            with(
+                                handleRequest(HttpMethod.Get, url) {
+                                    addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                                    addHeader(
+                                        NAV_PERSONIDENT_HEADER,
+                                        UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value
+                                    )
+                                }
+                            ) {
+                                response.status() shouldBeEqualTo HttpStatusCode.NoContent
+                            }
+                        }
                     }
                 }
                 describe("Unhappy paths") {
