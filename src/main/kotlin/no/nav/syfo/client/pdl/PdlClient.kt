@@ -44,7 +44,7 @@ class PdlClient(
             variables = PdlGeografiskTilknytningRequestVariables(personIdentNumber.value)
         )
         try {
-            val pdlPersonReponse: PdlGeografiskTilknytningResponse = httpClient.post(baseUrl) {
+            val pdlPersonResponse: PdlGeografiskTilknytningResponse = httpClient.post(baseUrl) {
                 header(HttpHeaders.Authorization, bearerHeader(systemToken))
                 header(TEMA_HEADER, ALLE_TEMA_HEADERVERDI)
                 header(NAV_CALL_ID_HEADER, callId)
@@ -52,15 +52,15 @@ class PdlClient(
                 contentType(ContentType.Application.Json)
                 body = request
             }
-            return if (pdlPersonReponse.errors != null && pdlPersonReponse.errors.isNotEmpty()) {
+            return if (pdlPersonResponse.errors != null && pdlPersonResponse.errors.isNotEmpty()) {
                 COUNT_CALL_PDL_GT_FAIL.increment()
-                pdlPersonReponse.errors.forEach {
+                pdlPersonResponse.errors.forEach {
                     log.error("Error while requesting person from PersonDataLosningen: ${it.errorMessage()}")
                 }
                 null
             } else {
                 COUNT_CALL_PDL_GT_SUCCESS.increment()
-                pdlPersonReponse.data
+                pdlPersonResponse.data
             }
         } catch (e: ResponseException) {
             log.error(
@@ -89,22 +89,22 @@ class PdlClient(
             variables = Variables(personIdentNumber.value)
         )
         try {
-            val pdlPersonReponse: PdlPersonResponse = httpClient.post(baseUrl) {
+            val pdlPersonResponse: PdlPersonResponse = httpClient.post(baseUrl) {
                 header(HttpHeaders.Authorization, bearerHeader(systemToken))
                 header(TEMA_HEADER, ALLE_TEMA_HEADERVERDI)
                 header(NAV_CALL_ID_HEADER, callId)
                 contentType(ContentType.Application.Json)
                 body = request
             }
-            return if (pdlPersonReponse.errors != null && pdlPersonReponse.errors.isNotEmpty()) {
+            return if (pdlPersonResponse.errors != null && pdlPersonResponse.errors.isNotEmpty()) {
                 COUNT_CALL_PDL_PERSON_FAIL.increment()
-                pdlPersonReponse.errors.forEach {
+                pdlPersonResponse.errors.forEach {
                     log.error("Error while requesting person from PersonDataLosningen: ${it.errorMessage()}")
                 }
                 null
             } else {
                 COUNT_CALL_PDL_PERSON_SUCCESS.increment()
-                pdlPersonReponse.data
+                pdlPersonResponse.data
             }
         } catch (e: ResponseException) {
             log.error(
