@@ -1,7 +1,7 @@
 package no.nav.syfo.client.veiledertilgang
 
 import io.ktor.client.call.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -52,7 +52,7 @@ class VeilederTilgangskontrollClient(
                 accept(ContentType.Application.Json)
             }
             COUNT_CALL_TILGANGSKONTROLL_SYFO_SUCCESS.increment()
-            response.receive<TilgangDTO>().harTilgang
+            response.body<TilgangDTO>().harTilgang
         } catch (e: ResponseException) {
             if (e.response.status == HttpStatusCode.Forbidden) {
                 COUNT_CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN.increment()

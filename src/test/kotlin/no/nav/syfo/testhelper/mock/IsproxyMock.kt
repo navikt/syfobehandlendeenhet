@@ -1,8 +1,8 @@
 package no.nav.syfo.testhelper.mock
 
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import no.nav.syfo.application.api.installContentNegotiation

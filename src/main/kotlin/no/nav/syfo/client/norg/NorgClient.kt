@@ -1,6 +1,7 @@
 package no.nav.syfo.client.norg
 
-import io.ktor.client.features.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
@@ -70,8 +71,8 @@ class NorgClient(
                 header(NAV_CALL_ID_HEADER, callId)
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }.body()
             COUNT_CALL_NORG_ARBEIDSFORDELING_SUCCESS.increment()
             return response
         } catch (e: ResponseException) {

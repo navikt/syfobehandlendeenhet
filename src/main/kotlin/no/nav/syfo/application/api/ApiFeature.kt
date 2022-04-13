@@ -1,12 +1,14 @@
 package no.nav.syfo.application.api
 
-import io.ktor.application.*
-import io.ktor.client.features.*
-import io.ktor.features.*
+import io.ktor.client.plugins.*
 import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.metrics.micrometer.*
-import io.ktor.response.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.metrics.micrometer.*
+import io.ktor.server.plugins.callid.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig
 import no.nav.syfo.application.metric.METRICS_REGISTRY
 import no.nav.syfo.behandlendeenhet.api.access.ForbiddenAccessSystemConsumer
@@ -41,7 +43,9 @@ fun Application.installContentNegotiation() {
 
 fun Application.installStatusPages() {
     install(StatusPages) {
-        exception<Throwable> { cause ->
+        exception<Throwable> { call, cause ->
+            val log = call.application.log
+
             val responseStatus: HttpStatusCode = when (cause) {
                 is ResponseException -> {
                     cause.response.status
@@ -63,15 +67,19 @@ fun Application.installStatusPages() {
                 }
             }
 
-            val callId = getCallId()
-            val consumerClientId = getConsumerClientId()
+            val callId = call.getCallId()
+            val consumerClientId = call.getConsumerClientId()
             val errorMessage = "Caught exception, callId=$callId, consumerClientId=$consumerClientId"
-            if (cause is ForbiddenAccessVeilederException || cause is ForbiddenAccessSystemConsumer) {
-                log.info(errorMessage, cause)
-            } else if (cause is IllegalArgumentException || cause is GeografiskTilknytningNotFoundException) {
-                log.warn(errorMessage, cause)
-            } else {
-                log.error(errorMessage, cause)
+            when (cause) {
+                is ForbiddenAccessVeilederException, is ForbiddenAccessSystemConsumer -> {
+                    log.info(errorMessage, cause)
+                }
+                is IllegalArgumentException, is GeografiskTilknytningNotFoundException -> {
+                    log.warn(errorMessage, cause)
+                }
+                else -> {
+                    log.error(errorMessage, cause)
+                }
             }
             val message = cause.message ?: "Unknown error"
             call.respond(responseStatus, message)
