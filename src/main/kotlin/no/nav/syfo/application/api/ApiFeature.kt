@@ -37,11 +37,9 @@ fun Application.installCallId() {
 
 fun Application.installContentNegotiation() {
     install(ContentNegotiation) {
-        jackson(
-            block = {
-                this.configure()
-            }
-        )
+        jackson {
+            configure()
+        }
     }
 }
 
