@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
-fun configuredJacksonMapper() = jacksonObjectMapper().apply {
-    applyConfig()
-}
+fun configuredJacksonMapper() = jacksonObjectMapper().applyConfig()
 
 fun ObjectMapper.applyConfig() = this.apply {
     registerModule(JavaTimeModule())
