@@ -1,6 +1,7 @@
 package no.nav.syfo.client.skjermedepersonerpip
 
-import io.ktor.client.features.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import net.logstash.logback.argument.StructuredArguments
@@ -39,7 +40,7 @@ class SkjermedePersonerPipClient(
                     header(NAV_CALL_ID_HEADER, callId)
                     header(NAV_CONSUMER_ID_HEADER, NAV_APP_CONSUMER_ID)
                     header(NAV_PERSONIDENTER_HEADER, personIdentNumber.value)
-                }
+                }.body()
 
                 COUNT_CALL_SKJERMEDE_PERSONER_SKJERMET_SUCCESS.increment()
                 redisStore.setObject(

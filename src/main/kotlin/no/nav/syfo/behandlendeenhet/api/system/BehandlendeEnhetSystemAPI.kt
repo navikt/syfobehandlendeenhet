@@ -1,9 +1,9 @@
 package no.nav.syfo.behandlendeenhet.api.system
 
-import io.ktor.application.*
+import io.ktor.server.application.*
 import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.access.APIConsumerAccessService
 import no.nav.syfo.domain.PersonIdentNumber

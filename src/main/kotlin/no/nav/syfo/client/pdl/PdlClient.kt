@@ -1,6 +1,7 @@
 package no.nav.syfo.client.pdl
 
-import io.ktor.client.features.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import net.logstash.logback.argument.StructuredArguments
@@ -39,8 +40,8 @@ class PdlClient(
                 header(NAV_CALL_ID_HEADER, callId)
                 header(GT_HEADER, GT_HEADER)
                 contentType(ContentType.Application.Json)
-                body = request
-            }
+                setBody(request)
+            }.body()
             if (pdlPersonResponse.errors != null && pdlPersonResponse.errors.isNotEmpty()) {
                 COUNT_CALL_PDL_GT_FAIL.increment()
                 pdlPersonResponse.errors.forEach {
@@ -90,8 +91,8 @@ class PdlClient(
                 header(TEMA_HEADER, ALLE_TEMA_HEADERVERDI)
                 header(NAV_CALL_ID_HEADER, callId)
                 contentType(ContentType.Application.Json)
-                body = request
-            }
+                setBody(request)
+            }.body()
             return if (pdlPersonResponse.errors != null && pdlPersonResponse.errors.isNotEmpty()) {
                 COUNT_CALL_PDL_PERSON_FAIL.increment()
                 pdlPersonResponse.errors.forEach {
