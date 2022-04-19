@@ -5,14 +5,14 @@ import io.ktor.client.engine.apache.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
-import no.nav.syfo.util.applyConfig
+import no.nav.syfo.util.configure
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 
 val defaultConfig: HttpClientConfig<CIOEngineConfig>.() -> Unit = {
     install(ContentNegotiation) {
         jackson {
-            applyConfig()
+            configure()
         }
     }
     engine {
@@ -27,7 +27,7 @@ val defaultConfig: HttpClientConfig<CIOEngineConfig>.() -> Unit = {
 val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
     install(ContentNegotiation) {
         jackson {
-            applyConfig()
+            configure()
         }
     }
     engine {
