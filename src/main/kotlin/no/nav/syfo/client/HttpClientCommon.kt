@@ -15,6 +15,7 @@ val defaultConfig: HttpClientConfig<CIOEngineConfig>.() -> Unit = {
             configure()
         }
     }
+    expectSuccess = true
     engine {
         requestTimeout = 30000
         endpoint {
@@ -30,6 +31,7 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
             configure()
         }
     }
+    expectSuccess = true
     engine {
         customizeClient {
             setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
