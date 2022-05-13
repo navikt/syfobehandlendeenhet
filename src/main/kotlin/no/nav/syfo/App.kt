@@ -55,5 +55,5 @@ fun main() {
         }
     )
 
-    server.start(wait = false)
+    server.start(wait = true)
 }

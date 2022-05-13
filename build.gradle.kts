@@ -5,23 +5,23 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 object Versions {
-    const val jackson = "2.13.1"
-    const val jedis = "4.2.1"
-    const val ktor = "2.0.0"
+    const val jackson = "2.13.2"
+    const val jedis = "4.2.3"
+    const val ktor = "2.0.1"
     const val kluent = "1.68"
     const val logback = "1.2.11"
-    const val logstashEncoder = "7.0.1"
-    const val mockk = "1.12.3"
-    const val nimbusJoseJwt = "9.21"
-    const val micrometerRegistry = "1.8.4"
+    const val logstashEncoder = "7.1.1"
+    const val mockk = "1.12.4"
+    const val nimbusJoseJwt = "9.22"
+    const val micrometerRegistry = "1.9.0"
     const val redisEmbedded = "0.7.3"
     const val spek = "2.0.18"
 }
 
 plugins {
-    kotlin("jvm") version "1.6.20"
+    kotlin("jvm") version "1.6.21"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
 repositories {
