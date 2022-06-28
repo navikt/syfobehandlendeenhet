@@ -7,14 +7,14 @@ import no.nav.syfo.testhelper.mock.*
 class ExternalMockEnvironment private constructor() {
     val applicationState: ApplicationState = testAppState()
     val azureAdMock = AzureAdMock()
-    val isproxyMock = IsproxyMock()
+    val norg2Mock = Norg2Mock()
     val pdlMock = PdlMock()
     val skjermedPersonerPipMock = SkjermedePersonerPipMock()
     val veilederTilgangskontrollMock = VeilederTilgangskontrollMock()
 
     val externalApplicationMockMap = hashMapOf(
         azureAdMock.name to azureAdMock.server,
-        isproxyMock.name to isproxyMock.server,
+        norg2Mock.name to norg2Mock.server,
         pdlMock.name to pdlMock.server,
         skjermedPersonerPipMock.name to skjermedPersonerPipMock.server,
         veilederTilgangskontrollMock.name to veilederTilgangskontrollMock.server,
@@ -22,7 +22,7 @@ class ExternalMockEnvironment private constructor() {
 
     val environment = testEnvironment(
         azureOpenIdTokenEndpoint = azureAdMock.url,
-        isproxyUrl = isproxyMock.url,
+        norg2Url = norg2Mock.url,
         pdlUrl = pdlMock.url,
         skjermedePersonerPipUrl = skjermedPersonerPipMock.url,
         syfotilgangskontrollUrl = veilederTilgangskontrollMock.url,

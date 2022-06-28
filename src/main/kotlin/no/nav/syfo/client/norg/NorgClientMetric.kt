@@ -10,9 +10,9 @@ const val CALL_NORG_ARBEIDSFORDELING_SUCCESS = "${CALL_NORG_ARBEIDSFORDELING_BAS
 const val CALL_NORG_ARBEIDSFORDELING_FAIL = "${CALL_NORG_ARBEIDSFORDELING_BASE}_fail_count"
 
 val COUNT_CALL_NORG_ARBEIDSFORDELING_SUCCESS: Counter = builder(CALL_NORG_ARBEIDSFORDELING_SUCCESS)
-    .description("Counts the number of successful calls to Isproxy - Norg - Arbeidsfordeling")
+    .description("Counts the number of successful calls to Norg - Arbeidsfordeling")
     .register(METRICS_REGISTRY)
 
 val COUNT_CALL_NORG_ARBEIDSFORDELING_FAIL: Counter = builder(CALL_NORG_ARBEIDSFORDELING_FAIL)
-    .description("Counts the number of failed calls to Isproxy - Norg - Arbeidsfordeling")
+    .description("Counts the number of failed calls to Norg - Arbeidsfordeling")
     .register(METRICS_REGISTRY)

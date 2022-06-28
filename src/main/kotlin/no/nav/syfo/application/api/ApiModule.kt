@@ -57,9 +57,7 @@ fun Application.apiModule(
     )
 
     val norgClient = NorgClient(
-        azureAdClient = azureAdClient,
-        baseUrl = environment.isproxyUrl,
-        clientId = environment.isproxyClientId,
+        baseUrl = environment.norg2Url,
     )
     val pdlClient = PdlClient(
         azureAdClient = azureAdClient,
