@@ -63,7 +63,7 @@ spec:
           cluster: prod-fss
     outbound:
       external:
-        - host: "isproxy.prod-fss-pub.nais.io"
+        - host: "norg2.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "skjermede-personer-pip.intern.nav.no"
         - host: "syfo-tilgangskontroll.prod-fss-pub.nais.io"
@@ -79,10 +79,8 @@ spec:
   envFrom:
     - secret: syfobehandlendeenhet-redis-password
   env:
-    - name: ISPROXY_CLIENT_ID
-      value: "prod-fss.teamsykefravr.isproxy"
-    - name: ISPROXY_URL
-      value: "https://isproxy.prod-fss-pub.nais.io"
+    - name: NORG2_URL
+      value: "norg2.prod-fss-pub.nais.io"
     - name: PDL_CLIENT_ID
       value: "prod-fss.pdl.pdl-api"
     - name: PDL_URL

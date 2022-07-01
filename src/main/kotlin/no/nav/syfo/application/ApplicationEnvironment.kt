@@ -13,8 +13,7 @@ data class Environment(
     val redisPort: Int = getEnvVar("REDIS_PORT", "6379").toInt(),
     val redisSecret: String = getEnvVar("REDIS_PASSWORD"),
 
-    val isproxyClientId: String = getEnvVar("ISPROXY_CLIENT_ID"),
-    val isproxyUrl: String = getEnvVar("ISPROXY_URL"),
+    val norg2Url: String = getEnvVar("NORG2_URL"),
 
     val pdlClientId: String = getEnvVar("PDL_CLIENT_ID"),
     val pdlUrl: String = getEnvVar("PDL_URL"),

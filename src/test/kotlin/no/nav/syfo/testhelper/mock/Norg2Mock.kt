@@ -36,7 +36,7 @@ fun generateNorgEnhet(): NorgEnhet {
     )
 }
 
-class IsproxyMock {
+class Norg2Mock {
     private val port = getRandomPort()
     val url = "http://localhost:$port"
 
@@ -44,7 +44,7 @@ class IsproxyMock {
         generateNorgEnhet(),
     )
 
-    val name = "isproxy"
+    val name = "norg2"
     val server = embeddedServer(
         factory = Netty,
         port = port,

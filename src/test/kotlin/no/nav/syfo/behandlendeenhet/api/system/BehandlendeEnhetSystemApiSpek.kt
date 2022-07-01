@@ -52,8 +52,8 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                                 response.status() shouldBeEqualTo HttpStatusCode.OK
                                 val behandlendeEnhet: BehandlendeEnhet = objectMapper.readValue(response.content!!)
 
-                                behandlendeEnhet.enhetId shouldBeEqualTo externalMockEnvironment.isproxyMock.norg2Response.first().enhetNr
-                                behandlendeEnhet.navn shouldBeEqualTo externalMockEnvironment.isproxyMock.norg2Response.first().navn
+                                behandlendeEnhet.enhetId shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2Response.first().enhetNr
+                                behandlendeEnhet.navn shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2Response.first().navn
                             }
                         }
 

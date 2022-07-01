@@ -8,7 +8,7 @@ import java.net.ServerSocket
 
 fun testEnvironment(
     azureOpenIdTokenEndpoint: String = "azureTokenEndpoint",
-    isproxyUrl: String = "isproxy",
+    norg2Url: String = "norg2",
     pdlUrl: String = "pdl",
     skjermedePersonerPipUrl: String = "skjermedepersonerpip",
     syfotilgangskontrollUrl: String = "tilgangskontroll",
@@ -18,8 +18,7 @@ fun testEnvironment(
     azureAppWellKnownUrl = "wellknown",
     azureAppPreAuthorizedApps = configuredJacksonMapper().writeValueAsString(testAzureAppPreAuthorizedApps),
     azureOpenidConfigTokenEndpoint = azureOpenIdTokenEndpoint,
-    isproxyClientId = "dev-fss.teamsykefravr.isproxy",
-    isproxyUrl = isproxyUrl,
+    norg2Url = norg2Url,
     pdlClientId = "dev-fss.pdl.pdl-api",
     pdlUrl = pdlUrl,
     skjermedePersonerPipClientId = "dev-gcp.nom.skjermede-personer-pip",
