@@ -80,7 +80,7 @@ spec:
     - secret: syfobehandlendeenhet-redis-password
   env:
     - name: NORG2_URL
-      value: "norg2.prod-fss-pub.nais.io"
+      value: "https://norg2.prod-fss-pub.nais.io"
     - name: PDL_CLIENT_ID
       value: "prod-fss.pdl.pdl-api"
     - name: PDL_URL
