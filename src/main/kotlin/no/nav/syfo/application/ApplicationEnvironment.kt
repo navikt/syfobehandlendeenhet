@@ -25,14 +25,12 @@ data class Environment(
     val syfotilgangskontrollUrl: String = getEnvVar("SYFOTILGANGSKONTROLL_URL"),
 
     val ispersonoppgaveApplicationName: String = "ispersonoppgave",
-    val syfomoteadminApplicationName: String = "syfomoteadmin",
     val syfomotebehovApplicationName: String = "syfomotebehov",
     val syfooversikthendelsetilfelleApplicationName: String = "syfooversikthendelsetilfelle",
     val syfooversiktsrvApplicationName: String = "syfooversiktsrv",
     val syfotilgangskontrollApplicationName: String = "syfo-tilgangskontroll",
     val systemAPIAuthorizedConsumerApplicationNameList: List<String> = listOf(
         ispersonoppgaveApplicationName,
-        syfomoteadminApplicationName,
         syfomotebehovApplicationName,
         syfooversikthendelsetilfelleApplicationName,
         syfooversiktsrvApplicationName,

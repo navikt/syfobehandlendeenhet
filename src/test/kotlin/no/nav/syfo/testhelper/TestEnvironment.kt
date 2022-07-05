@@ -41,7 +41,6 @@ fun getRandomPort() = ServerSocket(0).use {
 const val testIspersonoppgaveClientId = "ispersonoppgave-client-id"
 const val testIsdialogmoteClientId = "isdialogmote-client-id"
 const val testSyfomodiapersonClientId = "syfomodiaperson-client-id"
-const val testSyfomoteadminClientId = "syfomoteadmin-client-id"
 const val testSyfomotebehovClientId = "syfomotebehov-client-id"
 const val testSyfooversikthendelsetilfelleClientId = "syfooversikthendelsetilfelle-client-id"
 const val testSyfooversiktsrvClientId = "syfooversiktsrv-client-id"
@@ -59,10 +58,6 @@ val testAzureAppPreAuthorizedApps = listOf(
     PreAuthorizedClient(
         name = "dev-fss:teamsykefravr:syfomodiaperson",
         clientId = testSyfomodiapersonClientId,
-    ),
-    PreAuthorizedClient(
-        name = "dev-fss:teamsykefravr:syfomoteadmin",
-        clientId = testSyfomoteadminClientId,
     ),
     PreAuthorizedClient(
         name = "dev-fss:team-esyfo:syfomotebehov",
