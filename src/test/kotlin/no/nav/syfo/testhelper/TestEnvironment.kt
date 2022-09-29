@@ -25,6 +25,11 @@ fun testEnvironment(
     skjermedePersonerPipUrl = skjermedePersonerPipUrl,
     syfotilgangskontrollClientId = "dev-fss.teamsykefravr.syfo-tilgangskontroll",
     syfotilgangskontrollUrl = syfotilgangskontrollUrl,
+    syfobehandlendeenhetDbHost = "localhost",
+    syfobehandlendeenhetDbPort = "5432",
+    syfobehandlendeenhetDbName = "syfobehandlendeenhet_dev",
+    syfobehandlendeenhetDbUsername = "username",
+    syfobehandlendeenhetDbPassword = "password",
     redisHost = "localhost",
     redisSecret = "password",
 )

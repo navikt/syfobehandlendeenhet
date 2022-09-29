@@ -5,6 +5,8 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 object Versions {
+    const val flyway = "8.5.13"
+    const val hikari = "5.0.1"
     const val jackson = "2.13.3"
     const val jedis = "4.2.3"
     const val ktor = "2.0.3"
@@ -14,6 +16,8 @@ object Versions {
     const val mockk = "1.12.4"
     const val nimbusJoseJwt = "9.23"
     const val micrometerRegistry = "1.9.2"
+    const val postgres = "42.4.1"
+    const val postgresEmbedded = "0.13.4"
     const val redisEmbedded = "0.7.3"
     const val spek = "2.0.18"
 }
@@ -56,6 +60,12 @@ dependencies {
 
     // (De-)serialization
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${Versions.jackson}")
+
+    // Database
+    implementation("org.flywaydb:flyway-core:${Versions.flyway}")
+    implementation("com.zaxxer:HikariCP:${Versions.hikari}")
+    implementation("org.postgresql:postgresql:${Versions.postgres}")
+    testImplementation("com.opentable.components:otj-pg-embedded:${Versions.postgresEmbedded}")
 
     testImplementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbusJoseJwt}")
     testImplementation("io.ktor:ktor-server-test-host:${Versions.ktor}")

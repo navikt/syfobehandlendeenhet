@@ -82,6 +82,8 @@ spec:
   envFrom:
     - secret: syfobehandlendeenhet-redis-password
   env:
+    - name: KTOR_ENV
+      value: "production"
     - name: NORG2_URL
       value: "https://norg2.prod-fss-pub.nais.io"
     - name: PDL_CLIENT_ID
