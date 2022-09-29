@@ -24,6 +24,12 @@ data class Environment(
     val syfotilgangskontrollClientId: String = getEnvVar("SYFOTILGANGSKONTROLL_CLIENT_ID"),
     val syfotilgangskontrollUrl: String = getEnvVar("SYFOTILGANGSKONTROLL_URL"),
 
+    val syfobehandlendeenhetDbHost: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_HOST"),
+    val syfobehandlendeenhetDbPort: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_PORT"),
+    val syfobehandlendeenhetDbName: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_DATABASE"),
+    val syfobehandlendeenhetDbUsername: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_USERNAME"),
+    val syfobehandlendeenhetDbPassword: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_PASSWORD"),
+
     val ispersonoppgaveApplicationName: String = "ispersonoppgave",
     val syfomotebehovApplicationName: String = "syfomotebehov",
     val syfooversikthendelsetilfelleApplicationName: String = "syfooversikthendelsetilfelle",
@@ -36,7 +42,11 @@ data class Environment(
         syfooversiktsrvApplicationName,
         syfotilgangskontrollApplicationName,
     ),
-)
+) {
+    fun jdbcUrl(): String {
+        return "jdbc:postgresql://$syfobehandlendeenhetDbHost:$syfobehandlendeenhetDbPort/$syfobehandlendeenhetDbName"
+    }
+}
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
