@@ -73,6 +73,12 @@ spec:
       claims:
         extra:
           - "NAVident"
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        databases:
+          - name: syfobehandlendeenhet-db
+        diskAutoresize: true
   envFrom:
     - secret: syfobehandlendeenhet-redis-password
   env:
