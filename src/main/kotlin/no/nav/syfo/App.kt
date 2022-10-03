@@ -8,6 +8,7 @@ import io.ktor.server.netty.*
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.application.api.apiModule
+import no.nav.syfo.application.database.applicationDatabase
 import no.nav.syfo.application.database.databaseModule
 import no.nav.syfo.client.wellknown.getWellKnown
 import org.slf4j.LoggerFactory
@@ -37,6 +38,7 @@ fun main() {
                 applicationState = applicationState,
                 environment = environment,
                 wellKnownInternalAzureAD = wellKnownInternalAzureAD,
+                database = applicationDatabase,
             )
         }
     }

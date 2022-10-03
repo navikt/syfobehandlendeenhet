@@ -1,6 +1,11 @@
 package no.nav.syfo.behandlendeenhet
 
 import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.database.DatabaseInterface
+import no.nav.syfo.behandlendeenhet.database.domain.toPerson
+import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
+import no.nav.syfo.behandlendeenhet.database.updatePerson
+import no.nav.syfo.behandlendeenhet.domain.Person
 import no.nav.syfo.client.norg.NorgClient
 import no.nav.syfo.client.pdl.PdlClient
 import no.nav.syfo.client.pdl.domain.gradering
@@ -13,6 +18,7 @@ class EnhetService(
     private val pdlClient: PdlClient,
     private val redisStore: RedisStore,
     private val skjermedePersonerPipClient: SkjermedePersonerPipClient,
+    private val database: DatabaseInterface,
 ) {
     private val geografiskTilknytningUtvandret = "NOR"
     private val enhetnrNAVUtland = "0393"
@@ -61,11 +67,19 @@ class EnhetService(
         }
     }
 
-    fun isEnhetUtvandret(enhet: BehandlendeEnhet): Boolean {
+    fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? {
+        return database.updatePerson(personIdent, isNavUtland)?.toPerson()
+    }
+
+    fun getPerson(personIdent: PersonIdentNumber): Person? {
+        return database.getPersonByIdent(personIdent)?.toPerson()
+    }
+
+    private fun isEnhetUtvandret(enhet: BehandlendeEnhet): Boolean {
         return enhet.enhetId == geografiskTilknytningUtvandret
     }
 
-    fun getEnhetNAVUtland(enhet: BehandlendeEnhet): BehandlendeEnhet {
+    private fun getEnhetNAVUtland(enhet: BehandlendeEnhet): BehandlendeEnhet {
         return BehandlendeEnhet(
             enhetId = enhetnrNAVUtland,
             navn = enhet.navn,
