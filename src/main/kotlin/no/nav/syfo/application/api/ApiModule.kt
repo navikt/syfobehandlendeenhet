@@ -7,6 +7,7 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.application.api.authentication.*
 import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.database.DatabaseInterface
 import no.nav.syfo.application.metric.api.registerMetricApi
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.access.APIConsumerAccessService
@@ -24,6 +25,7 @@ fun Application.apiModule(
     applicationState: ApplicationState,
     environment: Environment,
     wellKnownInternalAzureAD: WellKnown,
+    database: DatabaseInterface,
 ) {
     installMetrics()
     installCallId()
@@ -76,6 +78,7 @@ fun Application.apiModule(
         pdlClient = pdlClient,
         redisStore = redisStore,
         skjermedePersonerPipClient = skjermedePersonerPipClient,
+        database = database,
     )
 
     val veilederTilgangskontrollClient = VeilederTilgangskontrollClient(

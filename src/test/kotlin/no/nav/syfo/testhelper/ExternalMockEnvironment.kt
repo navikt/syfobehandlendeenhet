@@ -11,6 +11,7 @@ class ExternalMockEnvironment private constructor() {
     val pdlMock = PdlMock()
     val skjermedPersonerPipMock = SkjermedePersonerPipMock()
     val veilederTilgangskontrollMock = VeilederTilgangskontrollMock()
+    val database = TestDatabase()
 
     val externalApplicationMockMap = hashMapOf(
         azureAdMock.name to azureAdMock.server,
