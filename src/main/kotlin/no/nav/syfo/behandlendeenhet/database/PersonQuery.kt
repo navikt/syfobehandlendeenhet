@@ -43,6 +43,8 @@ fun DatabaseInterface.updatePerson(
             it.setObject(4, now)
             it.setObject(5, now)
             it.executeQuery().toList { toPPerson() }
+        }.also {
+            connection.commit()
         }
     }.firstOrNull()
 }
