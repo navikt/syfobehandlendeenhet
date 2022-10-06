@@ -46,11 +46,14 @@ class EnhetService(
                 personIdentNumber = personIdentNumber,
             )?.gradering()
 
+            val person = getPerson(personIdentNumber)
+
             val behandlendeEnhet = norgClient.getArbeidsfordelingEnhet(
                 callId = callId,
                 diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
                 geografiskTilknytning = geografiskTilknytning,
                 isEgenAnsatt = isEgenAnsatt,
+                isNavUtland = person?.isNavUtland ?: false
             ) ?: return null
 
             val behandlendeEnhetResponse = if (isEnhetUtvandret(behandlendeEnhet)) {

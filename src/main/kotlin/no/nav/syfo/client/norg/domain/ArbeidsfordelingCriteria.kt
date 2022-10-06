@@ -21,4 +21,5 @@ enum class ArbeidsfordelingCriteriaBehandlingstype(
     val behandlingstype: String,
 ) {
     SYKEFRAVAERSOPPFOLGING("ae0257"),
+    NAV_UTLAND("ae0106"),
 }
