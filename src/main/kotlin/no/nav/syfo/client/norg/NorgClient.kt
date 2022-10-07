@@ -68,6 +68,14 @@ class NorgClient(
                 setBody(requestBody)
             }.body()
             COUNT_CALL_NORG_ARBEIDSFORDELING_SUCCESS.increment()
+            log.info(
+                """
+                    Successfully received Arbeidsfordeling from NORG:
+                    Request: $requestBody
+                    Response: $response
+                    CallID: $callId
+                """.trimIndent()
+            )
             return response
         } catch (e: ResponseException) {
             COUNT_CALL_NORG_ARBEIDSFORDELING_FAIL.increment()
