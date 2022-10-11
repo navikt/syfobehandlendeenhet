@@ -23,12 +23,14 @@ class NorgClient(
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
+        isNavUtland: Boolean,
     ): BehandlendeEnhet? {
         val enheter = getArbeidsfordelingEnheter(
             callId = callId,
             diskresjonskode = diskresjonskode,
             geografiskTilknytning = geografiskTilknytning,
             isEgenAnsatt = isEgenAnsatt,
+            isNavUtland = isNavUtland,
         )
         if (enheter.isEmpty()) {
             return null
@@ -49,10 +51,11 @@ class NorgClient(
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
+        isNavUtland: Boolean,
     ): List<NorgEnhet> {
         val requestBody = ArbeidsfordelingCriteria(
             diskresjonskode = diskresjonskode?.name,
-            behandlingstype = ArbeidsfordelingCriteriaBehandlingstype.SYKEFRAVAERSOPPFOLGING.behandlingstype,
+            behandlingstype = getBehandlingstype(isNavUtland),
             tema = "OPP",
             geografiskOmraade = geografiskTilknytning.value,
             skjermet = isEgenAnsatt,
@@ -75,6 +78,14 @@ class NorgClient(
                 callIdArgument(callId)
             )
             throw e
+        }
+    }
+
+    private fun getBehandlingstype(isNavUtland: Boolean): String {
+        return if (isNavUtland) {
+            ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype
+        } else {
+            ArbeidsfordelingCriteriaBehandlingstype.SYKEFRAVAERSOPPFOLGING.behandlingstype
         }
     }
 

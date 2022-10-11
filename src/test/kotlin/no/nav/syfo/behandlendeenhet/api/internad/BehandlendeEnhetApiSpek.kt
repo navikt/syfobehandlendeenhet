@@ -75,6 +75,31 @@ class BehandlendeEnhetApiSpek : Spek({
                             response.status() shouldBeEqualTo HttpStatusCode.NoContent
                         }
                     }
+
+                    it("should send NavUtland behandlingstype if Person has entry in database") {
+                        with(
+                            handleRequest(HttpMethod.Post, personUrl) {
+                                addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                                setBody(objectMapper.writeValueAsString(personDTO))
+                            }
+                        ) {
+                            response.status() shouldBeEqualTo HttpStatusCode.OK
+                        }
+
+                        with(
+                            handleRequest(HttpMethod.Get, behandlendeEnhetUrl) {
+                                addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                                addHeader(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
+                            }
+                        ) {
+                            response.status() shouldBeEqualTo HttpStatusCode.OK
+                            val behandlendeEnhet: BehandlendeEnhet = objectMapper.readValue(response.content!!)
+                            behandlendeEnhet.enhetId shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2ResponseNavUtland.first().enhetNr
+                            behandlendeEnhet.navn shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2ResponseNavUtland.first().navn
+                        }
+                    }
                 }
                 describe("Unhappy paths") {
                     it("should return status Unauthorized if no token is supplied") {

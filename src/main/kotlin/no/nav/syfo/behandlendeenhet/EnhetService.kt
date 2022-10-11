@@ -46,11 +46,14 @@ class EnhetService(
                 personIdentNumber = personIdentNumber,
             )?.gradering()
 
+            val person = getPerson(personIdentNumber)
+
             val behandlendeEnhet = norgClient.getArbeidsfordelingEnhet(
                 callId = callId,
                 diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
                 geografiskTilknytning = geografiskTilknytning,
                 isEgenAnsatt = isEgenAnsatt,
+                isNavUtland = person?.isNavUtland ?: false,
             ) ?: return null
 
             val behandlendeEnhetResponse = if (isEnhetUtvandret(behandlendeEnhet)) {
@@ -68,10 +71,17 @@ class EnhetService(
     }
 
     fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? {
-        return database.updatePerson(personIdent, isNavUtland)?.toPerson()
+        val pPerson = database.updatePerson(personIdent, isNavUtland)
+        val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}"
+        redisStore.setObject(
+            key = cacheKey,
+            value = null,
+            expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
+        )
+        return pPerson?.toPerson()
     }
 
-    fun getPerson(personIdent: PersonIdentNumber): Person? {
+    private fun getPerson(personIdent: PersonIdentNumber): Person? {
         return database.getPersonByIdent(personIdent)?.toPerson()
     }
 

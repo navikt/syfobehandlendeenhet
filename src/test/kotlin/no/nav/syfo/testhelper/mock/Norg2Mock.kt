@@ -5,8 +5,11 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.request.*
 import no.nav.syfo.application.api.installContentNegotiation
 import no.nav.syfo.client.norg.NorgClient
+import no.nav.syfo.client.norg.domain.ArbeidsfordelingCriteria
+import no.nav.syfo.client.norg.domain.ArbeidsfordelingCriteriaBehandlingstype
 import no.nav.syfo.client.norg.domain.Enhetsstatus
 import no.nav.syfo.client.norg.domain.NorgEnhet
 import no.nav.syfo.testhelper.getRandomPort
@@ -44,6 +47,13 @@ class Norg2Mock {
         generateNorgEnhet(),
     )
 
+    val norg2ResponseNavUtland = norg2Response.map {
+        it.copy(
+            enhetNr = "0393",
+            navn = "NAV Utland"
+        )
+    }
+
     val name = "norg2"
     val server = embeddedServer(
         factory = Netty,
@@ -52,7 +62,12 @@ class Norg2Mock {
         installContentNegotiation()
         routing {
             post(NorgClient.ARBEIDSFORDELING_BESTMATCH_PATH) {
-                call.respond(norg2Response)
+                val body = call.receive<ArbeidsfordelingCriteria>()
+                if (body.behandlingstype == ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype) {
+                    call.respond(norg2ResponseNavUtland)
+                } else {
+                    call.respond(norg2Response)
+                }
             }
         }
     }
