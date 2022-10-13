@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import io.mockk.justRun
+import io.mockk.mockk
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.util.*
 import org.amshove.kluent.shouldBeEqualTo
@@ -21,8 +24,12 @@ class BehandlendeEnhetSystemApiSpek : Spek({
 
             val externalMockEnvironment = ExternalMockEnvironment.instance
 
+            val behandlendeEnhetProducer = mockk<BehandlendeEnhetProducer>()
+            justRun { behandlendeEnhetProducer.updateBehandlendeEnhet(any()) }
+
             application.testApiModule(
                 externalMockEnvironment = externalMockEnvironment,
+                behandlendeEnhetProducer = behandlendeEnhetProducer,
             )
 
             val url = "$systemBehandlendeEnhetApiV2BasePath$systemdBehandlendeEnhetApiV2PersonIdentPath"

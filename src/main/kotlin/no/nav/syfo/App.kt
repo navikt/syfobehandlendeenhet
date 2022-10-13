@@ -10,7 +10,11 @@ import no.nav.syfo.application.Environment
 import no.nav.syfo.application.api.apiModule
 import no.nav.syfo.application.database.applicationDatabase
 import no.nav.syfo.application.database.databaseModule
+import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
+import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
+import no.nav.syfo.behandlendeenhet.kafka.kafkaBehandlendeEnhetProducerConfig
 import no.nav.syfo.client.wellknown.getWellKnown
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -22,6 +26,12 @@ fun main() {
 
     val wellKnownInternalAzureAD = getWellKnown(
         wellKnownUrl = environment.azureAppWellKnownUrl,
+    )
+
+    val behandlendeEnhetProducer = BehandlendeEnhetProducer(
+        kafkaProducerBehandlendeEnhet = KafkaProducer<String, KBehandlendeEnhetUpdate>(
+            kafkaBehandlendeEnhetProducerConfig(environment.kafka)
+        ),
     )
 
     val applicationEngineEnvironment = applicationEngineEnvironment {
@@ -39,6 +49,7 @@ fun main() {
                 environment = environment,
                 wellKnownInternalAzureAD = wellKnownInternalAzureAD,
                 database = applicationDatabase,
+                behandlendeEnhetProducer = behandlendeEnhetProducer,
             )
         }
     }

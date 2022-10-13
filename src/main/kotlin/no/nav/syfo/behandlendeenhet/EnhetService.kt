@@ -6,6 +6,7 @@ import no.nav.syfo.behandlendeenhet.database.domain.toPerson
 import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
 import no.nav.syfo.behandlendeenhet.database.updatePerson
 import no.nav.syfo.behandlendeenhet.domain.Person
+import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.client.norg.NorgClient
 import no.nav.syfo.client.pdl.PdlClient
 import no.nav.syfo.client.pdl.domain.gradering
@@ -19,6 +20,7 @@ class EnhetService(
     private val redisStore: RedisStore,
     private val skjermedePersonerPipClient: SkjermedePersonerPipClient,
     private val database: DatabaseInterface,
+    private val behandlendeEnhetProducer: BehandlendeEnhetProducer,
 ) {
     private val geografiskTilknytningUtvandret = "NOR"
     private val enhetnrNAVUtland = "0393"
@@ -72,12 +74,15 @@ class EnhetService(
 
     fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? {
         val pPerson = database.updatePerson(personIdent, isNavUtland)
-        val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}"
-        redisStore.setObject(
-            key = cacheKey,
-            value = null,
-            expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
-        )
+        if (pPerson != null) {
+            val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}"
+            redisStore.setObject(
+                key = cacheKey,
+                value = null,
+                expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
+            )
+            behandlendeEnhetProducer.updateBehandlendeEnhet(pPerson)
+        }
         return pPerson?.toPerson()
     }
 
