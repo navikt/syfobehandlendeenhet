@@ -1,5 +1,6 @@
 package no.nav.syfo.testhelper
 
+import no.nav.syfo.application.ApplicationEnvironmentKafka
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.behandlendeenhet.api.access.PreAuthorizedClient
@@ -8,6 +9,7 @@ import java.net.ServerSocket
 
 fun testEnvironment(
     azureOpenIdTokenEndpoint: String = "azureTokenEndpoint",
+    kafkaBootstrapServers: String,
     norg2Url: String = "norg2",
     pdlUrl: String = "pdl",
     skjermedePersonerPipUrl: String = "skjermedepersonerpip",
@@ -18,6 +20,16 @@ fun testEnvironment(
     azureAppWellKnownUrl = "wellknown",
     azureAppPreAuthorizedApps = configuredJacksonMapper().writeValueAsString(testAzureAppPreAuthorizedApps),
     azureOpenidConfigTokenEndpoint = azureOpenIdTokenEndpoint,
+    kafka = ApplicationEnvironmentKafka(
+        aivenBootstrapServers = kafkaBootstrapServers,
+        aivenSchemaRegistryUrl = "http://kafka-schema-registry.tpa.svc.nais.local:8081",
+        aivenRegistryUser = "registryuser",
+        aivenRegistryPassword = "registrypassword",
+        aivenSecurityProtocol = "SSL",
+        aivenCredstorePassword = "credstorepassord",
+        aivenTruststoreLocation = "truststore",
+        aivenKeystoreLocation = "keystore",
+    ),
     norg2Url = norg2Url,
     pdlClientId = "dev-fss.pdl.pdl-api",
     pdlUrl = pdlUrl,

@@ -81,6 +81,8 @@ spec:
         diskAutoresize: true
   envFrom:
     - secret: syfobehandlendeenhet-redis-password
+  kafka:
+    pool: nav-prod
   env:
     - name: KTOR_ENV
       value: "production"

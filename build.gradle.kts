@@ -9,6 +9,8 @@ object Versions {
     const val hikari = "5.0.1"
     const val jackson = "2.13.4"
     const val jedis = "4.2.3"
+    const val kafka = "3.3.1"
+    const val kafkaEmbedded = "3.2.1"
     const val ktor = "2.0.3"
     const val kluent = "1.68"
     const val logback = "1.2.11"
@@ -19,6 +21,7 @@ object Versions {
     const val postgres = "42.4.1"
     const val postgresEmbedded = "0.13.4"
     const val redisEmbedded = "0.7.3"
+    const val scala = "2.13.9"
     const val spek = "2.0.18"
 }
 
@@ -30,6 +33,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven(url = "https://packages.confluent.io/maven/")
 }
 
 dependencies {
@@ -66,6 +70,28 @@ dependencies {
     implementation("com.zaxxer:HikariCP:${Versions.hikari}")
     implementation("org.postgresql:postgresql:${Versions.postgres}")
     testImplementation("com.opentable.components:otj-pg-embedded:${Versions.postgresEmbedded}")
+
+    // Kafka
+    val excludeLog4j = fun ExternalModuleDependency.() {
+        exclude(group = "log4j")
+    }
+    implementation("org.apache.kafka:kafka_2.13:${Versions.kafka}", excludeLog4j)
+    constraints {
+        implementation("org.scala-lang:scala-library") {
+            version {
+                require(Versions.scala)
+            }
+        }
+    }
+    testImplementation("no.nav:kafka-embedded-env:${Versions.kafkaEmbedded}", excludeLog4j)
+    constraints {
+        implementation("org.eclipse.jetty.http2:http2-server") {
+            because("no.nav:kafka-embedded-env:${Versions.kafkaEmbedded} -> https://advisory.checkmarx.net/advisory/vulnerability/CVE-2022-2048/")
+            version {
+                require("9.4.48.v20220622")
+            }
+        }
+    }
 
     testImplementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbusJoseJwt}")
     testImplementation("io.ktor:ktor-server-test-host:${Versions.ktor}")

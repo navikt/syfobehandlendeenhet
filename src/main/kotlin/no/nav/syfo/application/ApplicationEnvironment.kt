@@ -9,6 +9,17 @@ data class Environment(
     val azureAppPreAuthorizedApps: String = getEnvVar("AZURE_APP_PRE_AUTHORIZED_APPS"),
     val azureOpenidConfigTokenEndpoint: String = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
 
+    val kafka: ApplicationEnvironmentKafka = ApplicationEnvironmentKafka(
+        aivenBootstrapServers = getEnvVar("KAFKA_BROKERS"),
+        aivenSchemaRegistryUrl = getEnvVar("KAFKA_SCHEMA_REGISTRY"),
+        aivenRegistryUser = getEnvVar("KAFKA_SCHEMA_REGISTRY_USER"),
+        aivenRegistryPassword = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD"),
+        aivenSecurityProtocol = "SSL",
+        aivenCredstorePassword = getEnvVar("KAFKA_CREDSTORE_PASSWORD"),
+        aivenTruststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
+        aivenKeystoreLocation = getEnvVar("KAFKA_KEYSTORE_PATH"),
+    ),
+
     val redisHost: String = getEnvVar("REDIS_HOST"),
     val redisPort: Int = getEnvVar("REDIS_PORT", "6379").toInt(),
     val redisSecret: String = getEnvVar("REDIS_PASSWORD"),
@@ -47,6 +58,17 @@ data class Environment(
         return "jdbc:postgresql://$syfobehandlendeenhetDbHost:$syfobehandlendeenhetDbPort/$syfobehandlendeenhetDbName"
     }
 }
+
+data class ApplicationEnvironmentKafka(
+    val aivenBootstrapServers: String,
+    val aivenSchemaRegistryUrl: String,
+    val aivenRegistryUser: String,
+    val aivenRegistryPassword: String,
+    val aivenSecurityProtocol: String,
+    val aivenCredstorePassword: String,
+    val aivenTruststoreLocation: String,
+    val aivenKeystoreLocation: String,
+)
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
     System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
