@@ -1,12 +1,14 @@
 package no.nav.syfo.testhelper
 
 import io.ktor.server.netty.*
+import no.nav.common.KafkaEnvironment
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.testhelper.mock.*
 
 class ExternalMockEnvironment private constructor() {
     val applicationState: ApplicationState = testAppState()
     val azureAdMock = AzureAdMock()
+    val embeddedEnvironment: KafkaEnvironment = testKafka()
     val norg2Mock = Norg2Mock()
     val pdlMock = PdlMock()
     val skjermedPersonerPipMock = SkjermedePersonerPipMock()
@@ -23,6 +25,7 @@ class ExternalMockEnvironment private constructor() {
 
     val environment = testEnvironment(
         azureOpenIdTokenEndpoint = azureAdMock.url,
+        kafkaBootstrapServers = embeddedEnvironment.brokersURL,
         norg2Url = norg2Mock.url,
         pdlUrl = pdlMock.url,
         skjermedePersonerPipUrl = skjermedPersonerPipMock.url,
