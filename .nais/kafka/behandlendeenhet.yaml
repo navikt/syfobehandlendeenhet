@@ -5,7 +5,7 @@ metadata:
     dcat.data.nav.no/title: "Endring i arbeidstakers behandlende enhet"
     dcat.data.nav.no/description: >-
       Topic inneholder oppdateringer på endringer i arbeidstakers behandlende enhet
-  name: syfobehandlendeenhet-behandlendeenhet
+  name: behandlendeenhet
   namespace: teamsykefravr
   labels:
     team: teamsykefravr
