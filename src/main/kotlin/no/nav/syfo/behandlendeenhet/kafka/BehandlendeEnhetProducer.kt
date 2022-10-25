@@ -36,7 +36,7 @@ class BehandlendeEnhetProducer(
     }
 
     companion object {
-        const val BEHANDLENDE_ENHET_UPDATE_TOPIC = "teamsykefravr.syfobehandlendeenhet-enhet-update"
+        const val BEHANDLENDE_ENHET_UPDATE_TOPIC = "teamsykefravr.behandlendeenhet"
         private val log = LoggerFactory.getLogger(BehandlendeEnhetProducer::class.java)
     }
 }
