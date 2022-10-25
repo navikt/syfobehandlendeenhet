@@ -24,7 +24,6 @@ class BehandlendeEnhetProducer(
                     ),
                 )
             ).get()
-            log.info("Record successfully sent to kafka, with key $key")
         } catch (e: Exception) {
             log.error(
                 "Exception was thrown when attempting to send dialogmelding with id {}: ${e.message}",
