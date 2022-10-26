@@ -13,6 +13,7 @@ import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.access.APIConsumerAccessService
 import no.nav.syfo.behandlendeenhet.api.internad.registrerPersonApi
 import no.nav.syfo.behandlendeenhet.api.system.registrerSystemApi
+import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.client.azuread.AzureAdClient
 import no.nav.syfo.client.norg.NorgClient
 import no.nav.syfo.client.pdl.PdlClient
@@ -26,6 +27,7 @@ fun Application.apiModule(
     environment: Environment,
     wellKnownInternalAzureAD: WellKnown,
     database: DatabaseInterface,
+    behandlendeEnhetProducer: BehandlendeEnhetProducer,
 ) {
     installMetrics()
     installCallId()
@@ -79,6 +81,7 @@ fun Application.apiModule(
         redisStore = redisStore,
         skjermedePersonerPipClient = skjermedePersonerPipClient,
         database = database,
+        behandlendeEnhetProducer = behandlendeEnhetProducer,
     )
 
     val veilederTilgangskontrollClient = VeilederTilgangskontrollClient(

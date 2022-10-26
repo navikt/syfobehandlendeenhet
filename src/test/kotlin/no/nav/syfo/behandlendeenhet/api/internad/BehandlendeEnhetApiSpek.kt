@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import io.mockk.*
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
 import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
+import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
+import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
@@ -15,6 +18,9 @@ import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
 import no.nav.syfo.testhelper.generator.generatePersonDTO
 import no.nav.syfo.util.*
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeLessThan
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -29,9 +35,17 @@ class BehandlendeEnhetApiSpek : Spek({
             val externalMockEnvironment = ExternalMockEnvironment.instance
             val database = externalMockEnvironment.database
 
+            val kafkaProducerMock = mockk<KafkaProducer<String, KBehandlendeEnhetUpdate>>(relaxed = true)
+            val behandlendeEnhetProducer = BehandlendeEnhetProducer(kafkaProducerMock)
+
             application.testApiModule(
                 externalMockEnvironment = externalMockEnvironment,
+                behandlendeEnhetProducer = behandlendeEnhetProducer,
             )
+
+            beforeEachTest {
+                clearMocks(kafkaProducerMock)
+            }
 
             afterEachTest {
                 database.dropData()
@@ -165,6 +179,11 @@ class BehandlendeEnhetApiSpek : Spek({
                         val pPerson = database.getPersonByIdent(PersonIdentNumber(personDTO.personident))
                         pPerson?.isNavUtland shouldBeEqualTo true
                         pPerson?.personident shouldBeEqualTo personDTO.personident
+
+                        val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
+                        verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
+                        kafkaRecordSlot.captured.value().personident shouldBeEqualTo pPerson?.personident
+                        kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo pPerson?.updatedAt
                     }
 
                     it("should update Person if already in db") {
@@ -193,6 +212,12 @@ class BehandlendeEnhetApiSpek : Spek({
                         val pPersonUpdate = database.getPersonByIdent(PersonIdentNumber(updatePersonDTO.personident))
                         pPersonUpdate?.isNavUtland shouldBeEqualTo false
                         pPersonUpdate?.id shouldBeEqualTo pPersonInsert?.id
+
+                        val kafkaRecordSlot = mutableListOf<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
+                        verify(exactly = 2) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
+                        kafkaRecordSlot[0].value().personident shouldBeEqualTo pPersonUpdate?.personident
+                        kafkaRecordSlot[1].value().updatedAt shouldBeEqualTo pPersonUpdate?.updatedAt
+                        kafkaRecordSlot[0].value().updatedAt shouldBeLessThan kafkaRecordSlot[1].value().updatedAt
                     }
                 }
 
