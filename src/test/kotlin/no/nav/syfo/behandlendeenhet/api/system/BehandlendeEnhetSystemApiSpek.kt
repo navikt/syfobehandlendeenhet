@@ -25,7 +25,7 @@ class BehandlendeEnhetSystemApiSpek : Spek({
             val externalMockEnvironment = ExternalMockEnvironment.instance
 
             val behandlendeEnhetProducer = mockk<BehandlendeEnhetProducer>()
-            justRun { behandlendeEnhetProducer.updateBehandlendeEnhet(any()) }
+            justRun { behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(any(), any()) }
 
             application.testApiModule(
                 externalMockEnvironment = externalMockEnvironment,

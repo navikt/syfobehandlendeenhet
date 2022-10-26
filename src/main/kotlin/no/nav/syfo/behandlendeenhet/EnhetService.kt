@@ -74,16 +74,17 @@ class EnhetService(
 
     fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? {
         val pPerson = database.updatePerson(personIdent, isNavUtland)
-        if (pPerson != null) {
+        val person = pPerson?.toPerson()
+        if (person != null) {
             val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}"
             redisStore.setObject(
                 key = cacheKey,
                 value = null,
                 expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
             )
-            behandlendeEnhetProducer.updateBehandlendeEnhet(pPerson)
+            behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(person, pPerson.updatedAt)
         }
-        return pPerson?.toPerson()
+        return person
     }
 
     private fun getPerson(personIdent: PersonIdentNumber): Person? {
