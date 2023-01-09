@@ -1,10 +1,12 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.syfo"
 version = "1.0.0"
 
 object Versions {
+    const val confluent = "7.3.1"
     const val flyway = "8.5.13"
     const val hikari = "5.0.1"
     const val jackson = "2.13.4"
@@ -19,7 +21,7 @@ object Versions {
     const val nimbusJoseJwt = "9.23"
     const val micrometerRegistry = "1.9.2"
     const val postgres = "42.4.1"
-    const val postgresEmbedded = "0.13.4"
+    val postgresEmbedded = if (Os.isFamily(Os.FAMILY_MAC)) "1.0.0" else "0.13.4"
     const val redisEmbedded = "0.7.3"
     const val scala = "2.13.9"
     const val spek = "2.0.18"
@@ -83,6 +85,7 @@ dependencies {
             }
         }
     }
+    implementation("io.confluent:kafka-avro-serializer:${Versions.confluent}", excludeLog4j)
     testImplementation("no.nav:kafka-embedded-env:${Versions.kafkaEmbedded}", excludeLog4j)
     constraints {
         implementation("org.eclipse.jetty.http2:http2-server") {

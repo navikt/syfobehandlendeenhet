@@ -14,6 +14,8 @@ import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.behandlendeenhet.kafka.kafkaBehandlendeEnhetProducerConfig
 import no.nav.syfo.client.wellknown.getWellKnown
+import no.nav.syfo.identhendelse.kafka.IdenthendelseConsumerService
+import no.nav.syfo.identhendelse.kafka.launchKafkaTaskIdenthendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
@@ -57,6 +59,15 @@ fun main() {
     applicationEngineEnvironment.monitor.subscribe(ApplicationStarted) { application ->
         applicationState.ready = true
         application.environment.log.info("Application is ready, running Java VM ${Runtime.version()}")
+
+        if (environment.toggleKafkaConsumerIdenthendelseEnabled) {
+            val kafkaIdenthendelseConsumerService = IdenthendelseConsumerService()
+            launchKafkaTaskIdenthendelse(
+                applicationState = applicationState,
+                applicationEnvironmentKafka = environment.kafka,
+                kafkaIdenthendelseConsumerService = kafkaIdenthendelseConsumerService,
+            )
+        }
     }
 
     val server = embeddedServer(

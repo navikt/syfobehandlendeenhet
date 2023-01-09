@@ -2,9 +2,11 @@ package no.nav.syfo.application.kafka
 
 import no.nav.syfo.application.ApplicationEnvironmentKafka
 import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.serialization.StringDeserializer
 import java.util.*
 
 fun commonKafkaProducerConfig() = Properties().apply {
@@ -18,6 +20,21 @@ fun commonKafkaProducerConfig() = Properties().apply {
 fun commonKafkaAivenProducerConfig(applicationEnvironmentKafka: ApplicationEnvironmentKafka) = Properties().apply {
     putAll(commonKafkaAivenConfig(applicationEnvironmentKafka))
     putAll(commonKafkaProducerConfig())
+}
+
+fun commonKafkaConsumerConfig(
+    applicationEnvironmentKafka: ApplicationEnvironmentKafka,
+): Properties {
+    return Properties().apply {
+        putAll(commonKafkaAivenConfig(applicationEnvironmentKafka))
+
+        this[ConsumerConfig.GROUP_ID_CONFIG] = "syfobehandlendeenhet"
+        this[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java.canonicalName
+        this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
+        this[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = "false"
+        this[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1000"
+        this[ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG] = "" + (10 * 1024 * 1024)
+    }
 }
 
 fun commonKafkaAivenConfig(
