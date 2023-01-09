@@ -3,6 +3,7 @@ package no.nav.syfo.client.pdl
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.client.azuread.AzureAdClient
@@ -115,6 +116,59 @@ class PdlClient(
         }
     }
 
+    suspend fun getPdlIdenter(
+        personIdent: PersonIdentNumber,
+        callId: String? = null,
+    ): PdlHentIdenter? {
+        val token = azureAdClient.getSystemToken(clientId)?.accessToken
+            ?: throw RuntimeException("Failed to send PdlHentIdenterRequest to PDL: No token was found")
+
+        val query = getPdlQuery(
+            queryFilePath = "/pdl/hentIdenter.graphql",
+        )
+
+        val request = PdlHentIdenterRequest(
+            query = query,
+            variables = PdlHentIdenterRequestVariables(
+                ident = personIdent.value,
+                historikk = true,
+                grupper = listOf(
+                    IdentType.FOLKEREGISTERIDENT,
+                ),
+            ),
+        )
+
+        val response: HttpResponse = httpClient.post(baseUrl) {
+            header(HttpHeaders.Authorization, bearerHeader(token))
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            header(TEMA_HEADER, ALLE_TEMA_HEADERVERDI)
+            header(NAV_CALL_ID_HEADER, callId)
+            header(IDENTER_HEADER, IDENTER_HEADER)
+            setBody(request)
+        }
+
+        when (response.status) {
+            HttpStatusCode.OK -> {
+                val pdlIdenterResponse = response.body<PdlIdenterResponse>()
+                return if (!pdlIdenterResponse.errors.isNullOrEmpty()) {
+                    COUNT_CALL_PDL_IDENTER_FAIL.increment()
+                    pdlIdenterResponse.errors.forEach {
+                        log.error("Error while requesting IdentList from PersonDataLosningen: ${it.errorMessage()}")
+                    }
+                    null
+                } else {
+                    COUNT_CALL_PDL_IDENTER_SUCCESS.increment()
+                    pdlIdenterResponse.data
+                }
+            }
+            else -> {
+                COUNT_CALL_PDL_IDENTER_FAIL.increment()
+                log.error("Request to get IdentList with url: $clientId failed with reponse code ${response.status.value}")
+                return null
+            }
+        }
+    }
+
     private fun getPdlQuery(queryFilePath: String): String {
         return this::class.java.getResource(queryFilePath)
             .readText()
@@ -123,7 +177,7 @@ class PdlClient(
 
     companion object {
         private val log = LoggerFactory.getLogger(PdlClient::class.java)
-
+        const val IDENTER_HEADER = "identer"
         const val GT_HEADER = "geografisktilknytning"
     }
 }
