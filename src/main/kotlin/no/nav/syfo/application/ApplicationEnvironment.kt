@@ -53,6 +53,7 @@ data class Environment(
         syfooversiktsrvApplicationName,
         syfotilgangskontrollApplicationName,
     ),
+    val toggleKafkaConsumerIdenthendelseEnabled: Boolean = getEnvVar("TOGGLE_KAFKA_IDENTHENDELSE_CONSUMER_ENABLED").toBoolean(),
 ) {
     fun jdbcUrl(): String {
         return "jdbc:postgresql://$syfobehandlendeenhetDbHost:$syfobehandlendeenhetDbPort/$syfobehandlendeenhetDbName"

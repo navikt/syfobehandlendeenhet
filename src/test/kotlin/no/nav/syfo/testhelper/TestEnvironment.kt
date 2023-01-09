@@ -44,6 +44,7 @@ fun testEnvironment(
     syfobehandlendeenhetDbPassword = "password",
     redisHost = "localhost",
     redisSecret = "password",
+    toggleKafkaConsumerIdenthendelseEnabled = true,
 )
 
 fun testAppState() = ApplicationState(
