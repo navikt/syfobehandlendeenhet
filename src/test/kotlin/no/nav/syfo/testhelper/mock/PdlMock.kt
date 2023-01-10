@@ -1,5 +1,7 @@
 package no.nav.syfo.testhelper.mock
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -13,6 +15,7 @@ import no.nav.syfo.client.pdl.domain.*
 import no.nav.syfo.testhelper.UserConstants
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 import no.nav.syfo.testhelper.getRandomPort
+import no.nav.syfo.util.configuredJacksonMapper
 
 const val geografiskTilknytningKommune = "0330"
 
@@ -72,8 +75,31 @@ fun generatePdlHentPerson(
     )
 }
 
+fun generatePdlIdenter(
+    personident: String,
+) = PdlIdenterResponse(
+    data = PdlHentIdenter(
+        hentIdenter = PdlIdenter(
+            identer = listOf(
+                PdlIdent(
+                    ident = personident,
+                    historisk = false,
+                    gruppe = IdentType.FOLKEREGISTERIDENT,
+                ),
+                PdlIdent(
+                    ident = "9${personident.drop(1)}",
+                    historisk = true,
+                    gruppe = IdentType.FOLKEREGISTERIDENT,
+                ),
+            ),
+        ),
+    ),
+    errors = null,
+)
+
 class PdlMock {
     private val port = getRandomPort()
+    private val objectMapper: ObjectMapper = configuredJacksonMapper()
     val url = "http://localhost:$port"
     val name = "pdl"
     val personResponseDefault = generatePdlPersonResponse()
@@ -95,11 +121,23 @@ class PdlMock {
                         call.respond(HttpStatusCode.InternalServerError)
                     }
                 } else {
-                    val pdlRequest = call.receive<PdlRequest>()
-                    if (ARBEIDSTAKER_ADRESSEBESKYTTET.value == pdlRequest.variables.ident) {
-                        call.respond(generatePdlPersonResponse(Gradering.STRENGT_FORTROLIG))
+                    val pdlRequest = call.receiveText()
+                    val isHentIdenter = pdlRequest.contains("hentIdenter")
+                    if (isHentIdenter) {
+                        val request: PdlHentIdenterRequest = objectMapper.readValue(pdlRequest)
+                        if (request.variables.ident == UserConstants.ARBEIDSTAKER_PERSONIDENT_3.value) {
+                            call.respond(generatePdlIdenter("enAnnenIdent"))
+                        } else {
+                            call.respond(generatePdlIdenter(request.variables.ident))
+                        }
                     } else {
-                        call.respond(personResponseDefault)
+                        val request: PdlRequest = objectMapper.readValue(pdlRequest)
+                        call.respond(generatePdlPersonResponse())
+                        if (ARBEIDSTAKER_ADRESSEBESKYTTET.value == request.variables.ident) {
+                            call.respond(generatePdlPersonResponse(Gradering.STRENGT_FORTROLIG))
+                        } else {
+                            call.respond(personResponseDefault)
+                        }
                     }
                 }
             }
