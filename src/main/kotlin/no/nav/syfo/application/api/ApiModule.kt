@@ -20,14 +20,16 @@ import no.nav.syfo.client.pdl.PdlClient
 import no.nav.syfo.client.skjermedepersonerpip.SkjermedePersonerPipClient
 import no.nav.syfo.client.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.client.wellknown.WellKnown
-import redis.clients.jedis.*
 
 fun Application.apiModule(
     applicationState: ApplicationState,
+    azureAdClient: AzureAdClient,
     environment: Environment,
     wellKnownInternalAzureAD: WellKnown,
     database: DatabaseInterface,
     behandlendeEnhetProducer: BehandlendeEnhetProducer,
+    pdlClient: PdlClient,
+    redisStore: RedisStore,
 ) {
     installMetrics()
     installCallId()
@@ -43,31 +45,10 @@ fun Application.apiModule(
     )
     installStatusPages()
 
-    val redisStore = RedisStore(
-        jedisPool = JedisPool(
-            JedisPoolConfig(),
-            environment.redisHost,
-            environment.redisPort,
-            Protocol.DEFAULT_TIMEOUT,
-            environment.redisSecret,
-        ),
-    )
-
-    val azureAdClient = AzureAdClient(
-        azureAppClientId = environment.azureAppClientId,
-        azureAppClientSecret = environment.azureAppClientSecret,
-        azureOpenidConfigTokenEndpoint = environment.azureOpenidConfigTokenEndpoint,
-        redisStore = redisStore,
-    )
-
     val norgClient = NorgClient(
         baseUrl = environment.norg2Url,
     )
-    val pdlClient = PdlClient(
-        azureAdClient = azureAdClient,
-        baseUrl = environment.pdlUrl,
-        clientId = environment.pdlClientId,
-    )
+
     val skjermedePersonerPipClient = SkjermedePersonerPipClient(
         azureAdClient = azureAdClient,
         baseUrl = environment.skjermedePersonerPipUrl,

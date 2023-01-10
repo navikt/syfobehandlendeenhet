@@ -8,16 +8,22 @@ import io.ktor.server.netty.*
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.application.api.apiModule
+import no.nav.syfo.application.cache.RedisStore
 import no.nav.syfo.application.database.applicationDatabase
 import no.nav.syfo.application.database.databaseModule
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.behandlendeenhet.kafka.kafkaBehandlendeEnhetProducerConfig
+import no.nav.syfo.client.azuread.AzureAdClient
+import no.nav.syfo.client.pdl.PdlClient
 import no.nav.syfo.client.wellknown.getWellKnown
 import no.nav.syfo.identhendelse.kafka.IdenthendelseConsumerService
 import no.nav.syfo.identhendelse.kafka.launchKafkaTaskIdenthendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
+import redis.clients.jedis.JedisPool
+import redis.clients.jedis.JedisPoolConfig
+import redis.clients.jedis.Protocol
 import java.util.concurrent.TimeUnit
 
 const val applicationPort = 8080
@@ -36,6 +42,29 @@ fun main() {
         ),
     )
 
+    val redisStore = RedisStore(
+        jedisPool = JedisPool(
+            JedisPoolConfig(),
+            environment.redisHost,
+            environment.redisPort,
+            Protocol.DEFAULT_TIMEOUT,
+            environment.redisSecret,
+        ),
+    )
+
+    val azureAdClient = AzureAdClient(
+        azureAppClientId = environment.azureAppClientId,
+        azureAppClientSecret = environment.azureAppClientSecret,
+        azureOpenidConfigTokenEndpoint = environment.azureOpenidConfigTokenEndpoint,
+        redisStore = redisStore,
+    )
+
+    val pdlClient = PdlClient(
+        azureAdClient = azureAdClient,
+        baseUrl = environment.pdlUrl,
+        clientId = environment.pdlClientId,
+    )
+
     val applicationEngineEnvironment = applicationEngineEnvironment {
         log = LoggerFactory.getLogger("ktor.application")
         config = HoconApplicationConfig(ConfigFactory.load())
@@ -48,10 +77,13 @@ fun main() {
             databaseModule(environment = environment)
             apiModule(
                 applicationState = applicationState,
+                azureAdClient = azureAdClient,
                 environment = environment,
                 wellKnownInternalAzureAD = wellKnownInternalAzureAD,
                 database = applicationDatabase,
                 behandlendeEnhetProducer = behandlendeEnhetProducer,
+                pdlClient = pdlClient,
+                redisStore = redisStore,
             )
         }
     }
