@@ -17,6 +17,7 @@ import no.nav.syfo.behandlendeenhet.kafka.kafkaBehandlendeEnhetProducerConfig
 import no.nav.syfo.client.azuread.AzureAdClient
 import no.nav.syfo.client.pdl.PdlClient
 import no.nav.syfo.client.wellknown.getWellKnown
+import no.nav.syfo.identhendelse.IdenthendelseService
 import no.nav.syfo.identhendelse.kafka.IdenthendelseConsumerService
 import no.nav.syfo.identhendelse.kafka.launchKafkaTaskIdenthendelse
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -93,7 +94,13 @@ fun main() {
         application.environment.log.info("Application is ready, running Java VM ${Runtime.version()}")
 
         if (environment.toggleKafkaConsumerIdenthendelseEnabled) {
-            val kafkaIdenthendelseConsumerService = IdenthendelseConsumerService()
+            val identhendelseService = IdenthendelseService(
+                database = applicationDatabase,
+                pdlClient = pdlClient,
+            )
+            val kafkaIdenthendelseConsumerService = IdenthendelseConsumerService(
+                identhendelseService = identhendelseService,
+            )
             launchKafkaTaskIdenthendelse(
                 applicationState = applicationState,
                 applicationEnvironmentKafka = environment.kafka,

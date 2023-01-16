@@ -1,5 +1,7 @@
 package no.nav.syfo.client.pdl.domain
 
+import no.nav.syfo.domain.PersonIdentNumber
+
 data class PdlIdenterResponse(
     val data: PdlHentIdenter?,
     val errors: List<PdlError>?
@@ -15,6 +17,9 @@ data class PdlIdenter(
     val aktivIdent: String? = identer.firstOrNull {
         it.gruppe == IdentType.FOLKEREGISTERIDENT && !it.historisk
     }?.ident
+    fun aktivIdentIsHistorisk(newIdent: PersonIdentNumber): Boolean {
+        return identer.any { it.ident == newIdent.value && it.historisk }
+    }
 }
 
 data class PdlIdent(
