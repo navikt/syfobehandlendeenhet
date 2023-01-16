@@ -30,7 +30,7 @@ const val queryUpdatePerson =
             updated_at;
     """
 
-fun DatabaseInterface.updatePerson(
+fun DatabaseInterface.createOrUpdatePerson(
     personIdent: PersonIdentNumber,
     isNavUtland: Boolean
 ): PPerson? {

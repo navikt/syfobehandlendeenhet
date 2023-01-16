@@ -4,7 +4,7 @@ import no.nav.syfo.application.cache.RedisStore
 import no.nav.syfo.application.database.DatabaseInterface
 import no.nav.syfo.behandlendeenhet.database.domain.toPerson
 import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
-import no.nav.syfo.behandlendeenhet.database.updatePerson
+import no.nav.syfo.behandlendeenhet.database.createOrUpdatePerson
 import no.nav.syfo.behandlendeenhet.domain.Person
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.client.norg.NorgClient
@@ -73,7 +73,7 @@ class EnhetService(
     }
 
     fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? {
-        val pPerson = database.updatePerson(personIdent, isNavUtland)
+        val pPerson = database.createOrUpdatePerson(personIdent, isNavUtland)
         val person = pPerson?.toPerson()
         if (person != null) {
             val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}"
