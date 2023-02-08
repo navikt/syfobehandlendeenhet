@@ -25,8 +25,7 @@ class IdenthendelseService(
             if (activeIdent != null) {
                 val inactiveIdenter = identhendelse.getInactivePersonidenter()
                 val oldPersonIdentList = inactiveIdenter.mapNotNull { personident ->
-                    val person = database.getPersonByIdent(personident)
-                    if (person != null) PersonIdentNumber(person.personident) else null
+                    database.getPersonByIdent(personident)?.let { PersonIdentNumber(it.personident) }
                 }
 
                 if (oldPersonIdentList.isNotEmpty()) {
@@ -60,8 +59,8 @@ class IdenthendelseService(
     // Erfaringer fra andre team tilsier at vi burde dobbeltsjekke at ting har blitt oppdatert i PDL før vi gjør endringer
     private fun checkThatPdlIsUpdated(nyIdent: PersonIdentNumber) {
         runBlocking {
-            val pdlIdenter = pdlClient.getPdlIdenter(nyIdent)?.hentIdenter
-            if (nyIdent.value != pdlIdenter?.aktivIdent && pdlIdenter?.aktivIdentIsHistorisk(nyIdent) != true) {
+            val pdlIdenter = pdlClient.getPdlIdenter(nyIdent)?.hentIdenter ?: throw RuntimeException("Fant ingen identer fra PDL")
+            if (nyIdent.value != pdlIdenter.aktivIdent && pdlIdenter.identhendelseIsNotHistorisk(nyIdent.value)) {
                 throw IllegalStateException("Ny ident er ikke aktiv ident i PDL")
             }
         }
