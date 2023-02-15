@@ -93,20 +93,18 @@ fun main() {
         applicationState.ready = true
         application.environment.log.info("Application is ready, running Java VM ${Runtime.version()}")
 
-        if (environment.toggleKafkaConsumerIdenthendelseEnabled) {
-            val identhendelseService = IdenthendelseService(
-                database = applicationDatabase,
-                pdlClient = pdlClient,
-            )
-            val kafkaIdenthendelseConsumerService = IdenthendelseConsumerService(
-                identhendelseService = identhendelseService,
-            )
-            launchKafkaTaskIdenthendelse(
-                applicationState = applicationState,
-                applicationEnvironmentKafka = environment.kafka,
-                kafkaIdenthendelseConsumerService = kafkaIdenthendelseConsumerService,
-            )
-        }
+        val identhendelseService = IdenthendelseService(
+            database = applicationDatabase,
+            pdlClient = pdlClient,
+        )
+        val kafkaIdenthendelseConsumerService = IdenthendelseConsumerService(
+            identhendelseService = identhendelseService,
+        )
+        launchKafkaTaskIdenthendelse(
+            applicationState = applicationState,
+            applicationEnvironmentKafka = environment.kafka,
+            kafkaIdenthendelseConsumerService = kafkaIdenthendelseConsumerService,
+        )
     }
 
     val server = embeddedServer(
