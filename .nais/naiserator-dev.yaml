@@ -68,6 +68,7 @@ spec:
         - application: syfobehandlendeenhet-redis
   azure:
     application:
+      allowAllUsers: true
       enabled: true
       tenant: trygdeetaten.no
       claims:
