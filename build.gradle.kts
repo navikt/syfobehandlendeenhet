@@ -7,28 +7,28 @@ version = "1.0.0"
 
 object Versions {
     const val confluent = "7.3.1"
-    const val flyway = "9.15.1"
+    const val flyway = "8.5.13"
     const val hikari = "5.0.1"
-    const val jacksonDataType = "2.14.2"
-    const val jedis = "4.3.1"
-    const val kafka = "3.4.0"
-    const val kafkaEmbedded = "3.2.2"
-    const val ktor = "2.2.4"
-    const val kluent = "1.72"
-    const val logback = "1.4.5"
-    const val logstashEncoder = "7.3"
-    const val mockk = "1.13.4"
-    const val nimbusJoseJwt = "9.31"
-    const val micrometerRegistry = "1.10.4"
-    const val postgres = "42.5.4"
+    const val jackson = "2.13.4"
+    const val jedis = "4.2.3"
+    const val kafka = "3.3.1"
+    const val kafkaEmbedded = "3.2.1"
+    const val ktor = "2.0.3"
+    const val kluent = "1.68"
+    const val logback = "1.2.11"
+    const val logstashEncoder = "7.2"
+    const val mockk = "1.12.4"
+    const val nimbusJoseJwt = "9.23"
+    const val micrometerRegistry = "1.9.2"
+    const val postgres = "42.4.1"
     val postgresEmbedded = if (Os.isFamily(Os.FAMILY_MAC)) "1.0.0" else "0.13.4"
     const val redisEmbedded = "0.7.3"
     const val scala = "2.13.9"
-    const val spek = "2.0.19"
+    const val spek = "2.0.18"
 }
 
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.7.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
@@ -65,7 +65,7 @@ dependencies {
     testImplementation("it.ozimov:embedded-redis:${Versions.redisEmbedded}")
 
     // (De-)serialization
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${Versions.jacksonDataType}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${Versions.jackson}")
 
     // Database
     implementation("org.flywaydb:flyway-core:${Versions.flyway}")
@@ -77,7 +77,7 @@ dependencies {
     val excludeLog4j = fun ExternalModuleDependency.() {
         exclude(group = "log4j")
     }
-    implementation("org.apache.kafka:kafka-clients:${Versions.kafka}", excludeLog4j)
+    implementation("org.apache.kafka:kafka_2.13:${Versions.kafka}", excludeLog4j)
     constraints {
         implementation("org.scala-lang:scala-library") {
             version {
