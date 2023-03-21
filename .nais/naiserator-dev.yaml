@@ -33,7 +33,6 @@ spec:
     enabled: true
     path: /internal/metrics
   ingresses:
-    - "https://syfobehandlendeenhet.dev.intern.nav.no"
     - "https://syfobehandlendeenhet.intern.dev.nav.no"
   accessPolicy:
     inbound:
