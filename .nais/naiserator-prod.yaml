@@ -62,10 +62,11 @@ spec:
       external:
         - host: "norg2.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
-        - host: "skjermede-personer-pip.intern.nav.no"
         - host: "syfo-tilgangskontroll.prod-fss-pub.nais.io"
       rules:
         - application: syfobehandlendeenhet-redis
+        - application: skjermede-personer-pip
+          namespace: nom
   azure:
     application:
       allowAllUsers: true
@@ -98,7 +99,7 @@ spec:
     - name: SKJERMEDEPERSONERPIP_CLIENT_ID
       value: "prod-gcp.nom.skjermede-personer-pip"
     - name: SKJERMEDEPERSONERPIP_URL
-      value: "https://skjermede-personer-pip.intern.nav.no"
+      value: "http://skjermede-personer-pip.nom"
     - name: SYFOTILGANGSKONTROLL_CLIENT_ID
       value: "prod-fss.teamsykefravr.syfo-tilgangskontroll"
     - name: SYFOTILGANGSKONTROLL_URL
