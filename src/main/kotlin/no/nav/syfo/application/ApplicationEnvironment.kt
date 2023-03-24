@@ -43,13 +43,11 @@ data class Environment(
 
     val ispersonoppgaveApplicationName: String = "ispersonoppgave",
     val syfomotebehovApplicationName: String = "syfomotebehov",
-    val syfooversikthendelsetilfelleApplicationName: String = "syfooversikthendelsetilfelle",
     val syfooversiktsrvApplicationName: String = "syfooversiktsrv",
     val syfotilgangskontrollApplicationName: String = "syfo-tilgangskontroll",
     val systemAPIAuthorizedConsumerApplicationNameList: List<String> = listOf(
         ispersonoppgaveApplicationName,
         syfomotebehovApplicationName,
-        syfooversikthendelsetilfelleApplicationName,
         syfooversiktsrvApplicationName,
         syfotilgangskontrollApplicationName,
     ),
