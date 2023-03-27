@@ -49,9 +49,6 @@ spec:
         - application: syfomotebehov
           namespace: team-esyfo
           cluster: dev-fss
-        - application: syfooversikthendelsetilfelle
-          namespace: teamsykefravr
-          cluster: dev-fss
         - application: syfooversiktsrv
           namespace: teamsykefravr
           cluster: dev-gcp
