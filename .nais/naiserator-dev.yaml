@@ -46,6 +46,9 @@ spec:
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: dev-fss
+        - application: syfomodiaperson
+          namespace: teamsykefravr
+          cluster: dev-gcp
         - application: syfomotebehov
           namespace: team-esyfo
           cluster: dev-fss
