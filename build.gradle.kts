@@ -1,6 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.syfo"
 version = "1.0.0"
@@ -114,6 +113,10 @@ dependencies {
     }
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 tasks {
     withType<Jar> {
         manifest.attributes["Main-Class"] = "no.nav.syfo.AppKt"
@@ -123,10 +126,6 @@ tasks {
         doLast {
             println(project.version)
         }
-    }
-
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
     }
 
     withType<ShadowJar> {
