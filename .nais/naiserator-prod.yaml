@@ -45,9 +45,6 @@ spec:
           cluster: prod-gcp
         - application: syfomodiaperson
           namespace: teamsykefravr
-          cluster: prod-fss
-        - application: syfomodiaperson
-          namespace: teamsykefravr
           cluster: prod-gcp
         - application: syfomotebehov
           namespace: team-esyfo
