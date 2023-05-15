@@ -54,9 +54,6 @@ spec:
           cluster: prod-gcp
         - application: syfo-tilgangskontroll
           namespace: teamsykefravr
-          cluster: prod-fss
-        - application: syfo-tilgangskontroll
-          namespace: teamsykefravr
           cluster: prod-gcp
     outbound:
       external:
