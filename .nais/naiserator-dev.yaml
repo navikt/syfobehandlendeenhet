@@ -54,6 +54,9 @@ spec:
         - application: syfo-tilgangskontroll
           namespace: teamsykefravr
           cluster: dev-gcp
+        - application: istilgangskontroll
+          namespace: teamsykefravr
+          cluster: dev-gcp
     outbound:
       external:
         - host: "norg2.prod-fss-pub.nais.io"
