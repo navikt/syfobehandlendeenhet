@@ -45,11 +45,13 @@ data class Environment(
     val syfomotebehovApplicationName: String = "syfomotebehov",
     val syfooversiktsrvApplicationName: String = "syfooversiktsrv",
     val syfotilgangskontrollApplicationName: String = "syfo-tilgangskontroll",
+    val istilgangskontrollApplicationName: String = "istilgangskontroll",
     val systemAPIAuthorizedConsumerApplicationNameList: List<String> = listOf(
         ispersonoppgaveApplicationName,
         syfomotebehovApplicationName,
         syfooversiktsrvApplicationName,
         syfotilgangskontrollApplicationName,
+        istilgangskontrollApplicationName,
     ),
 ) {
     fun jdbcUrl(): String {
