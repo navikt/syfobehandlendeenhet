@@ -35,7 +35,7 @@ fun testEnvironment(
     pdlUrl = pdlUrl,
     skjermedePersonerPipClientId = "dev-gcp.nom.skjermede-personer-pip",
     skjermedePersonerPipUrl = skjermedePersonerPipUrl,
-    istilgangskontrollClientId = "dev-fss.teamsykefravr.istilgangskontroll",
+    istilgangskontrollClientId = "dev-gcp.teamsykefravr.istilgangskontroll",
     istilgangskontrollUrl = istilgangskontrollUrl,
     syfobehandlendeenhetDbHost = "localhost",
     syfobehandlendeenhetDbPort = "5432",
