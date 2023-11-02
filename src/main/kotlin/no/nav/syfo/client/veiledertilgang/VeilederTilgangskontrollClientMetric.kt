@@ -10,11 +10,11 @@ const val CALL_TILGANGSKONTROLL_SYFO_FAIL = "${CALL_TILGANGSKONTROLL_SYFO_BASE}_
 const val CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN = "${CALL_TILGANGSKONTROLL_SYFO_BASE}_forbidden_count"
 
 val COUNT_CALL_TILGANGSKONTROLL_SYFO_SUCCESS: Counter = Counter.builder(CALL_TILGANGSKONTROLL_SYFO_SUCCESS)
-    .description("Counts the number of successful calls to syfo-tilgangskontroll - person")
+    .description("Counts the number of successful calls to istilgangskontroll - person")
     .register(METRICS_REGISTRY)
 val COUNT_CALL_TILGANGSKONTROLL_SYFO_FAIL: Counter = Counter.builder(CALL_TILGANGSKONTROLL_SYFO_FAIL)
-    .description("Counts the number of failed calls to syfo-tilgangskontroll - person")
+    .description("Counts the number of failed calls to istilgangskontroll - person")
     .register(METRICS_REGISTRY)
 val COUNT_CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN: Counter = Counter.builder(CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN)
-    .description("Counts the number of forbidden calls to syfo-tilgangskontroll - person")
+    .description("Counts the number of forbidden calls to istilgangskontroll - person")
     .register(METRICS_REGISTRY)

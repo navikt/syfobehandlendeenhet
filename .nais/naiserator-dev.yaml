@@ -63,7 +63,7 @@ spec:
         - host: "pdl-api.dev-fss-pub.nais.io"
       rules:
         - application: syfobehandlendeenhet-redis
-        - application: syfo-tilgangskontroll
+        - application: istilgangskontroll
         - application: skjermede-personer-pip
           namespace: nom
   azure:
@@ -99,7 +99,7 @@ spec:
       value: "dev-gcp.nom.skjermede-personer-pip"
     - name: SKJERMEDEPERSONERPIP_URL
       value: "http://skjermede-personer-pip.nom"
-    - name: SYFOTILGANGSKONTROLL_CLIENT_ID
-      value: "dev-gcp.teamsykefravr.syfo-tilgangskontroll"
-    - name: SYFOTILGANGSKONTROLL_URL
-      value: "http://syfo-tilgangskontroll"
+    - name: ISTILGANGSKONTROLL_CLIENT_ID
+      value: "dev-gcp.teamsykefravr.istilgangskontroll"
+    - name: ISTILGANGSKONTROLL_URL
+      value: "http://istilgangskontroll"

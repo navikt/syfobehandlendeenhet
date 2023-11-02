@@ -44,7 +44,7 @@ class VeilederTilgangskontrollClient(
             scopeClientId = clientId,
             token = token,
         )?.accessToken
-            ?: throw RuntimeException("Failed to request access to SYFO from Syfo-tilgangskontroll: Failed to get OBO token from AzureAD")
+            ?: throw RuntimeException("Failed to request access to SYFO from istilgangskontroll: Failed to get OBO token from AzureAD")
 
         return try {
             val response: HttpResponse = httpClient.get(tilgangskontrollSYFOUrl) {
@@ -52,13 +52,13 @@ class VeilederTilgangskontrollClient(
                 accept(ContentType.Application.Json)
             }
             COUNT_CALL_TILGANGSKONTROLL_SYFO_SUCCESS.increment()
-            response.body<TilgangDTO>().harTilgang
+            response.body<TilgangDTO>().erGodkjent
         } catch (e: ResponseException) {
             if (e.response.status == HttpStatusCode.Forbidden) {
                 COUNT_CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN.increment()
             } else {
                 log.error(
-                    "Error while requesting access to SYFO from syfo-tilgangskontroll with {}, {}",
+                    "Error while requesting access to SYFO from istilgangskontroll with {}, {}",
                     StructuredArguments.keyValue("statusCode", e.response.status.value.toString()),
                     callIdArgument(callId)
                 )
@@ -67,7 +67,7 @@ class VeilederTilgangskontrollClient(
             false
         } catch (e: ClosedReceiveChannelException) {
             log.error(
-                "ClosedReceiveChannelException while requesting access to SYFO from syfo-tilgangskontroll, callId=$callId",
+                "ClosedReceiveChannelException while requesting access to SYFO from istilgangskontroll, callId=$callId",
                 e
             )
             COUNT_CALL_TILGANGSKONTROLL_SYFO_FAIL.increment()
@@ -76,7 +76,7 @@ class VeilederTilgangskontrollClient(
     }
 
     companion object {
-        const val ACCESS_TO_SYFO_PATH = "/syfo-tilgangskontroll/api/tilgang/navident/syfo"
+        const val ACCESS_TO_SYFO_PATH = "/api/tilgang/navident/syfo"
 
         private val log = LoggerFactory.getLogger(VeilederTilgangskontrollClient::class.java)
     }

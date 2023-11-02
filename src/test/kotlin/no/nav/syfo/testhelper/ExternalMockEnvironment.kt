@@ -29,7 +29,7 @@ class ExternalMockEnvironment private constructor() {
         norg2Url = norg2Mock.url,
         pdlUrl = pdlMock.url,
         skjermedePersonerPipUrl = skjermedPersonerPipMock.url,
-        syfotilgangskontrollUrl = veilederTilgangskontrollMock.url,
+        istilgangskontrollUrl = veilederTilgangskontrollMock.url,
     )
 
     val redisServer = testRedis(
