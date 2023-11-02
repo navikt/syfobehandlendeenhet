@@ -100,6 +100,6 @@ spec:
     - name: SKJERMEDEPERSONERPIP_URL
       value: "http://skjermede-personer-pip.nom"
     - name: ISTILGANGSKONTROLL_CLIENT_ID
-      value: "dev-gcp.teamsykefravr.istilgangskontroll"
+      value: "prod-gcp.teamsykefravr.istilgangskontroll"
     - name: ISTILGANGSKONTROLL_URL
       value: "http://istilgangskontroll"
