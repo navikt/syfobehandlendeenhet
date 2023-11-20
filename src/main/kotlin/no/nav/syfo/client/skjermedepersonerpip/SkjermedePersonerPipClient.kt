@@ -68,7 +68,7 @@ class SkjermedePersonerPipClient(
 
     companion object {
         const val CACHE_SKJERMET_PERSONIDENT_KEY_PREFIX = "skjermet-personident"
-        const val CACHE_SKJERMET_PERSONIDENT_EXPIRE_SECONDS = 60 * 60L
+        const val CACHE_SKJERMET_PERSONIDENT_EXPIRE_SECONDS = 12 * 60 * 60L
 
         private val log = LoggerFactory.getLogger(SkjermedePersonerPipClient::class.java)
     }
