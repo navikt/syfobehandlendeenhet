@@ -39,9 +39,6 @@ spec:
         - application: isdialogmote
           namespace: teamsykefravr
           cluster: dev-gcp
-        - application: ispersonoppgave
-          namespace: teamsykefravr
-          cluster: dev-gcp
         - application: syfomodiaperson
           namespace: teamsykefravr
           cluster: dev-gcp
@@ -52,9 +49,6 @@ spec:
           namespace: team-esyfo
           cluster: dev-gcp
         - application: syfooversiktsrv
-          namespace: teamsykefravr
-          cluster: dev-gcp
-        - application: syfo-tilgangskontroll
           namespace: teamsykefravr
           cluster: dev-gcp
         - application: istilgangskontroll
