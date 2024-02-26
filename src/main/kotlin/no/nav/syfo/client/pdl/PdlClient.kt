@@ -37,7 +37,7 @@ class PdlClient(
         try {
             val pdlPersonResponse: PdlGeografiskTilknytningResponse = httpClient.post(baseUrl) {
                 header(HttpHeaders.Authorization, bearerHeader(systemToken))
-                header(TEMA_HEADER, ALLE_TEMA_HEADERVERDI)
+                header(BEHANDLINGSNUMMER_HEADER_KEY, BEHANDLINGSNUMMER_HEADER_VALUE)
                 header(NAV_CALL_ID_HEADER, callId)
                 header(GT_HEADER, GT_HEADER)
                 contentType(ContentType.Application.Json)
@@ -89,7 +89,7 @@ class PdlClient(
         try {
             val pdlPersonResponse: PdlPersonResponse = httpClient.post(baseUrl) {
                 header(HttpHeaders.Authorization, bearerHeader(systemToken))
-                header(TEMA_HEADER, ALLE_TEMA_HEADERVERDI)
+                header(BEHANDLINGSNUMMER_HEADER_KEY, BEHANDLINGSNUMMER_HEADER_VALUE)
                 header(NAV_CALL_ID_HEADER, callId)
                 contentType(ContentType.Application.Json)
                 setBody(request)
@@ -141,7 +141,7 @@ class PdlClient(
         val response: HttpResponse = httpClient.post(baseUrl) {
             header(HttpHeaders.Authorization, bearerHeader(token))
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header(TEMA_HEADER, ALLE_TEMA_HEADERVERDI)
+            header(BEHANDLINGSNUMMER_HEADER_KEY, BEHANDLINGSNUMMER_HEADER_VALUE)
             header(NAV_CALL_ID_HEADER, callId)
             header(IDENTER_HEADER, IDENTER_HEADER)
             setBody(request)
@@ -179,5 +179,10 @@ class PdlClient(
         private val log = LoggerFactory.getLogger(PdlClient::class.java)
         const val IDENTER_HEADER = "identer"
         const val GT_HEADER = "geografisktilknytning"
+
+        // Se behandlingskatalog https://behandlingskatalog.intern.nav.no/
+        // Behandling: Sykefraværsoppfølging: Vurdere behov for oppfølging og rett til sykepenger etter §§ 8-4 og 8-8
+        private const val BEHANDLINGSNUMMER_HEADER_KEY = "behandlingsnummer"
+        private const val BEHANDLINGSNUMMER_HEADER_VALUE = "B426"
     }
 }
