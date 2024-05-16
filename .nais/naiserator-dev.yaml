@@ -54,6 +54,8 @@ spec:
         - application: istilgangskontroll
           namespace: teamsykefravr
           cluster: dev-gcp
+        - application: meroppfolging-backend
+          namespace: team-esyfo
     outbound:
       external:
         - host: "norg2.prod-fss-pub.nais.io"
