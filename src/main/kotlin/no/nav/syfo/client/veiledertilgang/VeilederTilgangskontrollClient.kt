@@ -9,6 +9,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.application.api.ForbiddenAccessVeilederException
+import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.client.azuread.AzureAdClient
 import no.nav.syfo.client.httpClientDefault
 import no.nav.syfo.util.bearerHeader
@@ -26,7 +27,7 @@ class VeilederTilgangskontrollClient(
 
     suspend fun throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
         callId: String,
-        token: String,
+        token: Token,
     ) {
         val hasAccess = isVeilederGrantedAccessToSYFOWithOBO(
             callId = callId,
@@ -37,9 +38,9 @@ class VeilederTilgangskontrollClient(
         }
     }
 
-    suspend fun isVeilederGrantedAccessToSYFOWithOBO(
+    private suspend fun isVeilederGrantedAccessToSYFOWithOBO(
         callId: String,
-        token: String,
+        token: Token,
     ): Boolean {
         val oboToken = azureAdClient.getOnBehalfOfToken(
             scopeClientId = clientId,

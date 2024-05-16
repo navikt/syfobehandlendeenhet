@@ -4,7 +4,8 @@ import com.auth0.jwt.JWT
 import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
-import no.nav.syfo.application.api.authentication.getNAVIdentFromToken
+import no.nav.syfo.application.api.authentication.Token
+import no.nav.syfo.application.api.authentication.getNAVIdent
 import no.nav.syfo.client.azuread.AzureAdTokenResponse
 import no.nav.syfo.client.wellknown.WellKnown
 import no.nav.syfo.testhelper.generateJWT
@@ -33,7 +34,7 @@ fun generateAzureAdTokenResponse(
         val accessToken = generateJWT(
             audience = deodedToken.audience.first(),
             issuer = deodedToken.issuer,
-            navIdent = getNAVIdentFromToken(assertion),
+            navIdent = Token(assertion).getNAVIdent(),
         )
         AzureAdTokenResponse(
             access_token = accessToken,
