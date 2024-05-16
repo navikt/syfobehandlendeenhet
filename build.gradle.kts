@@ -4,24 +4,22 @@ import org.apache.tools.ant.taskdefs.condition.Os
 group = "no.nav.syfo"
 version = "1.0.0"
 
-object Versions {
-    const val confluent = "7.5.1"
-    const val flyway = "9.22.3"
-    const val hikari = "5.1.0"
-    const val jacksonDataType = "2.16.0"
-    const val jedis = "5.1.0"
-    const val kafka = "3.6.1"
-    const val ktor = "2.3.8"
-    const val kluent = "1.73"
-    const val logback = "1.4.14"
-    const val logstashEncoder = "7.4"
-    const val mockk = "1.13.8"
-    const val nimbusJoseJwt = "9.37.2"
-    const val micrometerRegistry = "1.12.2"
-    const val postgres = "42.7.2"
-    val postgresEmbedded = if (Os.isFamily(Os.FAMILY_MAC)) "1.0.0" else "0.13.4"
-    const val spek = "2.0.19"
-}
+val confluentVersion = "7.5.1"
+val flywayVersion = "9.22.3"
+val hikariVersion = "5.1.0"
+val jacksonDataTypeVersion = "2.16.0"
+val jedisVersion = "5.1.0"
+val kafkaVersion = "3.6.1"
+val ktorVersion = "2.3.8"
+val kluentVersion = "1.73"
+val logbackVersion = "1.4.14"
+val logstashEncoderVersion = "7.4"
+val mockkVersion = "1.13.8"
+val nimbusJoseJwtVersion = "9.37.2"
+val micrometerRegistryVersion = "1.12.2"
+val postgresVersion = "42.7.2"
+val postgresEmbeddedVersion = if (Os.isFamily(Os.FAMILY_MAC)) "1.0.0" else "0.13.4"
+val spekVersion = "2.0.19"
 
 plugins {
     kotlin("jvm") version "1.9.22"
@@ -38,45 +36,45 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-    implementation("io.ktor:ktor-client-apache:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-cio:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-content-negotiation:${Versions.ktor}")
-    implementation("io.ktor:ktor-serialization-jackson:${Versions.ktor}")
-    implementation("io.ktor:ktor-server-content-negotiation:${Versions.ktor}")
-    implementation("io.ktor:ktor-server-auth-jwt:${Versions.ktor}")
-    implementation("io.ktor:ktor-server-call-id:${Versions.ktor}")
-    implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
-    implementation("io.ktor:ktor-server-status-pages:${Versions.ktor}")
+    implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
+    implementation("io.ktor:ktor-server-call-id:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:${Versions.logback}")
-    implementation("net.logstash.logback:logstash-logback-encoder:${Versions.logstashEncoder}")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
     // Metrics and Prometheus
-    implementation("io.ktor:ktor-server-metrics-micrometer:${Versions.ktor}")
-    implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
+    implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryVersion")
 
     // Cache
-    implementation("redis.clients:jedis:${Versions.jedis}")
+    implementation("redis.clients:jedis:$jedisVersion")
 
     // (De-)serialization
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${Versions.jacksonDataType}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDataTypeVersion")
 
     // Database
-    implementation("org.flywaydb:flyway-core:${Versions.flyway}")
-    implementation("com.zaxxer:HikariCP:${Versions.hikari}")
-    implementation("org.postgresql:postgresql:${Versions.postgres}")
-    testImplementation("com.opentable.components:otj-pg-embedded:${Versions.postgresEmbedded}")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
+    testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
 
     // Kafka
     val excludeLog4j = fun ExternalModuleDependency.() {
         exclude(group = "log4j")
     }
-    implementation("org.apache.kafka:kafka-clients:${Versions.kafka}", excludeLog4j)
-    implementation("io.confluent:kafka-avro-serializer:${Versions.confluent}", excludeLog4j)
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion", excludeLog4j)
+    implementation("io.confluent:kafka-avro-serializer:$confluentVersion", excludeLog4j)
     constraints {
         implementation("org.apache.avro:avro") {
-            because("io.confluent:kafka-schema-registry:${Versions.confluent} -> https://www.cve.org/CVERecord?id=CVE-2023-39410")
+            because("io.confluent:kafka-schema-registry:$confluentVersion -> https://www.cve.org/CVERecord?id=CVE-2023-39410")
             version {
                 require("1.11.3")
             }
@@ -89,15 +87,15 @@ dependencies {
         }
     }
 
-    testImplementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbusJoseJwt}")
-    testImplementation("io.ktor:ktor-server-test-host:${Versions.ktor}")
-    testImplementation("io.ktor:ktor-client-mock:${Versions.ktor}")
-    testImplementation("io.mockk:mockk:${Versions.mockk}")
-    testImplementation("org.amshove.kluent:kluent:${Versions.kluent}")
-    testImplementation("org.spekframework.spek2:spek-dsl-jvm:${Versions.spek}") {
+    testImplementation("com.nimbusds:nimbus-jose-jwt:$nimbusJoseJwtVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.amshove.kluent:kluent:$kluentVersion")
+    testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:${Versions.spek}") {
+    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion") {
         exclude(group = "org.jetbrains.kotlin")
     }
 }
