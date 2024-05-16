@@ -1,5 +1,6 @@
 package no.nav.syfo.client.norg
 
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
@@ -13,8 +14,8 @@ import org.slf4j.LoggerFactory.getLogger
 
 class NorgClient(
     baseUrl: String,
+    private val httpClient: HttpClient = httpClientDefault(),
 ) {
-    private val httpClient = httpClientDefault()
 
     private val norg2ArbeidsfordelingBestmatchUrl: String = "$baseUrl$ARBEIDSFORDELING_BESTMATCH_PATH"
 

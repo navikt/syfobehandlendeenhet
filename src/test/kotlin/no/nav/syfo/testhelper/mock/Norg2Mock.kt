@@ -1,18 +1,11 @@
 package no.nav.syfo.testhelper.mock
 
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.request.*
-import no.nav.syfo.application.api.installContentNegotiation
-import no.nav.syfo.client.norg.NorgClient
+import io.ktor.client.engine.mock.*
+import io.ktor.client.request.*
 import no.nav.syfo.client.norg.domain.ArbeidsfordelingCriteria
 import no.nav.syfo.client.norg.domain.ArbeidsfordelingCriteriaBehandlingstype
 import no.nav.syfo.client.norg.domain.Enhetsstatus
 import no.nav.syfo.client.norg.domain.NorgEnhet
-import no.nav.syfo.testhelper.getRandomPort
 
 const val ENHET_NR = "0101"
 const val ENHET_NAVN = "Enhet"
@@ -39,36 +32,14 @@ fun generateNorgEnhet(): NorgEnhet {
     )
 }
 
-class Norg2Mock {
-    private val port = getRandomPort()
-    val url = "http://localhost:$port"
+val norg2Response = listOf(generateNorgEnhet())
+val norg2ResponseNavUtland = listOf(generateNorgEnhet().copy(enhetNr = "0393", navn = "NAV Utland"))
 
-    val norg2Response = listOf(
-        generateNorgEnhet(),
-    )
-
-    val norg2ResponseNavUtland = norg2Response.map {
-        it.copy(
-            enhetNr = "0393",
-            navn = "NAV Utland"
-        )
-    }
-
-    val name = "norg2"
-    val server = embeddedServer(
-        factory = Netty,
-        port = port,
-    ) {
-        installContentNegotiation()
-        routing {
-            post(NorgClient.ARBEIDSFORDELING_BESTMATCH_PATH) {
-                val body = call.receive<ArbeidsfordelingCriteria>()
-                if (body.behandlingstype == ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype) {
-                    call.respond(norg2ResponseNavUtland)
-                } else {
-                    call.respond(norg2Response)
-                }
-            }
-        }
+suspend fun MockRequestHandleScope.getNorg2Response(request: HttpRequestData): HttpResponseData {
+    val body = request.receiveBody<ArbeidsfordelingCriteria>()
+    return if (body.behandlingstype == ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype) {
+        respond(norg2ResponseNavUtland)
+    } else {
+        respond(norg2Response)
     }
 }

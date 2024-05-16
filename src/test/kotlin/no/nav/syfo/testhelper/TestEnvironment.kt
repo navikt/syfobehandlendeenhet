@@ -5,11 +5,10 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.behandlendeenhet.api.access.PreAuthorizedClient
 import no.nav.syfo.util.configuredJacksonMapper
-import java.net.ServerSocket
 
 fun testEnvironment(
     azureOpenIdTokenEndpoint: String = "azureTokenEndpoint",
-    kafkaBootstrapServers: String,
+    kafkaBootstrapServers: String = "boostrapserver",
     norg2Url: String = "norg2",
     pdlUrl: String = "pdl",
     skjermedePersonerPipUrl: String = "skjermedepersonerpip",
@@ -50,10 +49,6 @@ fun testAppState() = ApplicationState(
     alive = true,
     ready = true,
 )
-
-fun getRandomPort() = ServerSocket(0).use {
-    it.localPort
-}
 
 const val testIspersonoppgaveClientId = "ispersonoppgave-client-id"
 const val testIsdialogmoteClientId = "isdialogmote-client-id"

@@ -11,7 +11,6 @@ object Versions {
     const val jacksonDataType = "2.16.0"
     const val jedis = "5.1.0"
     const val kafka = "3.6.1"
-    const val kafkaEmbedded = "3.2.3"
     const val ktor = "2.3.8"
     const val kluent = "1.73"
     const val logback = "1.4.14"
@@ -21,7 +20,6 @@ object Versions {
     const val micrometerRegistry = "1.12.2"
     const val postgres = "42.7.2"
     val postgresEmbedded = if (Os.isFamily(Os.FAMILY_MAC)) "1.0.0" else "0.13.4"
-    const val redisEmbedded = "0.7.3"
     const val spek = "2.0.19"
 }
 
@@ -60,7 +58,6 @@ dependencies {
 
     // Cache
     implementation("redis.clients:jedis:${Versions.jedis}")
-    testImplementation("it.ozimov:embedded-redis:${Versions.redisEmbedded}")
 
     // (De-)serialization
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${Versions.jacksonDataType}")
@@ -92,24 +89,9 @@ dependencies {
         }
     }
 
-    testImplementation("no.nav:kafka-embedded-env:${Versions.kafkaEmbedded}", excludeLog4j)
-    constraints {
-        implementation("org.eclipse.jetty.http2:http2-server") {
-            because("no.nav:kafka-embedded-env:${Versions.kafkaEmbedded} -> https://advisory.checkmarx.net/advisory/vulnerability/CVE-2022-2048/")
-            version {
-                require("9.4.54.v20240208")
-            }
-        }
-        implementation("com.google.protobuf:protobuf-java") {
-            because("no.nav:kafka-embedded-env:${Versions.kafkaEmbedded} -> https://cwe.mitre.org/data/definitions/400.html")
-            version {
-                require("3.21.7")
-            }
-        }
-    }
-
     testImplementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbusJoseJwt}")
     testImplementation("io.ktor:ktor-server-test-host:${Versions.ktor}")
+    testImplementation("io.ktor:ktor-client-mock:${Versions.ktor}")
     testImplementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("org.amshove.kluent:kluent:${Versions.kluent}")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:${Versions.spek}") {

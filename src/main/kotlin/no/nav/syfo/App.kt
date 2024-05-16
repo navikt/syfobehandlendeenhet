@@ -15,7 +15,10 @@ import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.behandlendeenhet.kafka.kafkaBehandlendeEnhetProducerConfig
 import no.nav.syfo.client.azuread.AzureAdClient
+import no.nav.syfo.client.norg.NorgClient
 import no.nav.syfo.client.pdl.PdlClient
+import no.nav.syfo.client.skjermedepersonerpip.SkjermedePersonerPipClient
+import no.nav.syfo.client.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.client.wellknown.getWellKnown
 import no.nav.syfo.identhendelse.IdenthendelseService
 import no.nav.syfo.identhendelse.kafka.IdenthendelseConsumerService
@@ -66,6 +69,23 @@ fun main() {
         clientId = environment.pdlClientId,
     )
 
+    val norgClient = NorgClient(
+        baseUrl = environment.norg2Url,
+    )
+
+    val skjermedePersonerPipClient = SkjermedePersonerPipClient(
+        azureAdClient = azureAdClient,
+        baseUrl = environment.skjermedePersonerPipUrl,
+        clientId = environment.skjermedePersonerPipClientId,
+        redisStore = redisStore,
+    )
+
+    val veilederTilgangskontrollClient = VeilederTilgangskontrollClient(
+        azureAdClient = azureAdClient,
+        clientId = environment.istilgangskontrollClientId,
+        baseUrl = environment.istilgangskontrollUrl,
+    )
+
     val applicationEngineEnvironment = applicationEngineEnvironment {
         log = LoggerFactory.getLogger("ktor.application")
         config = HoconApplicationConfig(ConfigFactory.load())
@@ -78,13 +98,15 @@ fun main() {
             databaseModule(environment = environment)
             apiModule(
                 applicationState = applicationState,
-                azureAdClient = azureAdClient,
                 environment = environment,
                 wellKnownInternalAzureAD = wellKnownInternalAzureAD,
                 database = applicationDatabase,
                 behandlendeEnhetProducer = behandlendeEnhetProducer,
                 pdlClient = pdlClient,
                 redisStore = redisStore,
+                norgClient = norgClient,
+                skjermedePersonerPipClient = skjermedePersonerPipClient,
+                veilederTilgangskontrollClient = veilederTilgangskontrollClient,
             )
         }
     }

@@ -1,30 +1,20 @@
 package no.nav.syfo.testhelper.mock
 
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import no.nav.syfo.application.api.installContentNegotiation
+import io.ktor.client.engine.mock.*
+import io.ktor.client.request.*
+import no.nav.syfo.client.skjermedepersonerpip.SkjermedePersonerRequestDTO
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
-import no.nav.syfo.testhelper.getRandomPort
 
-class SkjermedePersonerPipMock {
-    private val port = getRandomPort()
-    val url = "http://localhost:$port"
+suspend fun MockRequestHandleScope.getSkjermedePersonerResponse(request: HttpRequestData): HttpResponseData {
+    val skjermedePersonerRequestDTO = request.receiveBody<SkjermedePersonerRequestDTO>()
+    val personident = skjermedePersonerRequestDTO.personident
 
-    val name = "skjermedpersonerpip"
-    val server = embeddedServer(
-        factory = Netty,
-        port = port,
-    ) {
-        installContentNegotiation()
-        routing {
-            get("/skjermet") {
-                if (call.request.queryParameters["personident"] == ARBEIDSTAKER_PERSONIDENT.value) {
-                    call.respond(true)
-                }
-            }
+    return when (personident) {
+        ARBEIDSTAKER_PERSONIDENT.value -> {
+            respond(true)
+        }
+        else -> {
+            respond(false)
         }
     }
 }
