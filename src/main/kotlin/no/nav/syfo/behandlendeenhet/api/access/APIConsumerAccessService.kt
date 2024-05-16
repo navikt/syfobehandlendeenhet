@@ -1,6 +1,7 @@
 package no.nav.syfo.behandlendeenhet.api.access
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.application.api.authentication.getConsumerClientId
 import no.nav.syfo.util.configuredJacksonMapper
 
@@ -12,9 +13,9 @@ class APIConsumerAccessService(
 
     fun validateConsumerApplicationAZP(
         authorizedApplicationNameList: List<String>,
-        token: String,
+        token: Token,
     ) {
-        val consumerClientIdAzp: String = getConsumerClientId(token = token)
+        val consumerClientIdAzp: String = token.getConsumerClientId()
         val clientIdList = preAuthorizedClientList
             .filter {
                 authorizedApplicationNameList.contains(

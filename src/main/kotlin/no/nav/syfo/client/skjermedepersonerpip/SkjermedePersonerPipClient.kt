@@ -6,6 +6,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.application.cache.RedisStore
 import no.nav.syfo.client.azuread.AzureAdClient
 import no.nav.syfo.client.httpClientDefault
@@ -24,10 +25,19 @@ class SkjermedePersonerPipClient(
     suspend fun isSkjermet(
         callId: String,
         personIdentNumber: PersonIdentNumber,
+        veilederToken: Token?,
     ): Boolean {
-        val oboToken = azureAdClient.getSystemToken(
-            scopeClientId = clientId,
-        )?.accessToken ?: throw RuntimeException("Failed to request access to Skjerming: Failed to get system token")
+        val token = if (veilederToken == null) {
+            azureAdClient.getSystemToken(
+                scopeClientId = clientId,
+            )
+        } else {
+            azureAdClient.getOnBehalfOfToken(
+                scopeClientId = clientId,
+                token = veilederToken,
+            )
+        }?.accessToken
+            ?: throw RuntimeException("Failed to request access to Skjerming: Failed to get token")
 
         val cacheKey = "$CACHE_SKJERMET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
         val cachedValue: Boolean? = redisStore.getObject(key = cacheKey)
@@ -40,7 +50,7 @@ class SkjermedePersonerPipClient(
                 val skjermedePersonerResponse: Boolean = httpClient.post(url) {
                     contentType(ContentType.Application.Json)
                     setBody(body)
-                    header(HttpHeaders.Authorization, bearerHeader(oboToken))
+                    header(HttpHeaders.Authorization, bearerHeader(token))
                     header(NAV_CALL_ID_HEADER, callId)
                     header(NAV_CONSUMER_ID_HEADER, NAV_APP_CONSUMER_ID)
                     accept(ContentType.Application.Json)
