@@ -1,5 +1,6 @@
 package no.nav.syfo.behandlendeenhet
 
+import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.application.cache.RedisStore
 import no.nav.syfo.application.database.DatabaseInterface
 import no.nav.syfo.behandlendeenhet.database.domain.toPerson
@@ -28,6 +29,7 @@ class EnhetService(
     suspend fun arbeidstakersBehandlendeEnhet(
         callId: String,
         personIdentNumber: PersonIdentNumber,
+        veilederToken: Token?,
     ): BehandlendeEnhet? {
         val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
         val cachedBehandlendeEnhet: BehandlendeEnhet? = redisStore.getObject(key = cacheKey)
@@ -41,6 +43,7 @@ class EnhetService(
             val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
+                veilederToken = veilederToken,
             )
 
             val graderingList = pdlClient.person(

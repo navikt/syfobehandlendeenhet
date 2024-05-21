@@ -7,8 +7,9 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.application.api.authentication.getConsumerClientId
-import no.nav.syfo.application.api.authentication.getNAVIdentFromToken
+import no.nav.syfo.application.api.authentication.getNAVIdent
 import no.nav.syfo.application.cache.RedisStore
 import no.nav.syfo.client.httpClientProxy
 import org.slf4j.LoggerFactory
@@ -23,10 +24,10 @@ class AzureAdClient(
 
     suspend fun getOnBehalfOfToken(
         scopeClientId: String,
-        token: String,
+        token: Token,
     ): AzureAdToken? {
-        val azp: String = getConsumerClientId(token)
-        val veilederIdent: String = getNAVIdentFromToken(token)
+        val azp: String = token.getConsumerClientId()
+        val veilederIdent: String = token.getNAVIdent()
 
         val cacheKey = "$veilederIdent-$azp-$scopeClientId"
         val cachedToken: AzureAdToken? = redisStore.getObject(key = cacheKey)
@@ -41,19 +42,19 @@ class AzureAdClient(
                     append("client_secret", azureAppClientSecret)
                     append("client_assertion_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
                     append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                    append("assertion", token)
+                    append("assertion", token.value)
                     append("scope", scope)
                     append("requested_token_use", "on_behalf_of")
                 }
             )
 
-            return azureAdTokenResponse?.let { token ->
-                val azureAdToken = token.toAzureAdToken()
+            return azureAdTokenResponse?.let {
+                val azureAdToken = it.toAzureAdToken()
                 COUNT_CALL_AZUREAD_TOKEN_OBO_CACHE_MISS.increment()
                 redisStore.setObject(
                     key = cacheKey,
                     value = azureAdToken,
-                    expireSeconds = token.expires_in
+                    expireSeconds = it.expires_in
                 )
                 azureAdToken
             }

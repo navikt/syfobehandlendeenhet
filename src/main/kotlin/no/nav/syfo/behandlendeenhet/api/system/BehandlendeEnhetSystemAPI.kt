@@ -36,6 +36,7 @@ fun Route.registrerSystemApi(
             enhetService.arbeidstakersBehandlendeEnhet(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
+                veilederToken = null,
             )?.let { behandlendeEnhet ->
                 call.respond(behandlendeEnhet)
             } ?: call.respond(HttpStatusCode.NoContent)

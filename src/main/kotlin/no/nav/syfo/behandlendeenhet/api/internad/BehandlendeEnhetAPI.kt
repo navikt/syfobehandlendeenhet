@@ -43,6 +43,7 @@ fun Route.registrerPersonApi(
             enhetService.arbeidstakersBehandlendeEnhet(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
+                veilederToken = token,
             )?.let { behandlendeEnhet ->
                 call.respond(behandlendeEnhet)
             } ?: call.respond(HttpStatusCode.NoContent)
