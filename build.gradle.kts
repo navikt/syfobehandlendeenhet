@@ -22,7 +22,7 @@ val postgresEmbeddedVersion = if (Os.isFamily(Os.FAMILY_MAC)) "1.0.0" else "0.13
 val spekVersion = "2.0.19"
 
 plugins {
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "2.0.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
 }
