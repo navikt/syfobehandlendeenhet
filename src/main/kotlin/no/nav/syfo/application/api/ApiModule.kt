@@ -14,7 +14,6 @@ import no.nav.syfo.behandlendeenhet.api.access.APIConsumerAccessService
 import no.nav.syfo.behandlendeenhet.api.internad.registrerPersonApi
 import no.nav.syfo.behandlendeenhet.api.system.registrerSystemApi
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
-import no.nav.syfo.client.azuread.AzureAdClient
 import no.nav.syfo.client.norg.NorgClient
 import no.nav.syfo.client.pdl.PdlClient
 import no.nav.syfo.client.skjermedepersonerpip.SkjermedePersonerPipClient
@@ -23,12 +22,14 @@ import no.nav.syfo.client.wellknown.WellKnown
 
 fun Application.apiModule(
     applicationState: ApplicationState,
-    azureAdClient: AzureAdClient,
     environment: Environment,
     wellKnownInternalAzureAD: WellKnown,
     database: DatabaseInterface,
     behandlendeEnhetProducer: BehandlendeEnhetProducer,
     pdlClient: PdlClient,
+    norgClient: NorgClient,
+    skjermedePersonerPipClient: SkjermedePersonerPipClient,
+    veilederTilgangskontrollClient: VeilederTilgangskontrollClient,
     redisStore: RedisStore,
 ) {
     installMetrics()
@@ -44,18 +45,6 @@ fun Application.apiModule(
         ),
     )
     installStatusPages()
-
-    val norgClient = NorgClient(
-        baseUrl = environment.norg2Url,
-    )
-
-    val skjermedePersonerPipClient = SkjermedePersonerPipClient(
-        azureAdClient = azureAdClient,
-        baseUrl = environment.skjermedePersonerPipUrl,
-        clientId = environment.skjermedePersonerPipClientId,
-        redisStore = redisStore,
-    )
-
     val enhetService = EnhetService(
         norgClient = norgClient,
         pdlClient = pdlClient,
@@ -63,12 +52,6 @@ fun Application.apiModule(
         skjermedePersonerPipClient = skjermedePersonerPipClient,
         database = database,
         behandlendeEnhetProducer = behandlendeEnhetProducer,
-    )
-
-    val veilederTilgangskontrollClient = VeilederTilgangskontrollClient(
-        azureAdClient = azureAdClient,
-        clientId = environment.istilgangskontrollClientId,
-        baseUrl = environment.istilgangskontrollUrl,
     )
 
     val apiConsumerAccessService = APIConsumerAccessService(

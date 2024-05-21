@@ -9,6 +9,7 @@ import io.mockk.mockk
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.testhelper.*
+import no.nav.syfo.testhelper.mock.norg2Response
 import no.nav.syfo.util.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
@@ -59,8 +60,8 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                                 response.status() shouldBeEqualTo HttpStatusCode.OK
                                 val behandlendeEnhet: BehandlendeEnhet = objectMapper.readValue(response.content!!)
 
-                                behandlendeEnhet.enhetId shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2Response.first().enhetNr
-                                behandlendeEnhet.navn shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2Response.first().navn
+                                behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
+                                behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
                             }
                         }
 

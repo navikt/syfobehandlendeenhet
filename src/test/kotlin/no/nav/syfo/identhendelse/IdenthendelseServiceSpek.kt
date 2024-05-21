@@ -11,6 +11,7 @@ import no.nav.syfo.testhelper.ExternalMockEnvironment
 import no.nav.syfo.testhelper.UserConstants
 import no.nav.syfo.testhelper.dropData
 import no.nav.syfo.testhelper.generator.generateKafkaIdenthendelseDTO
+import no.nav.syfo.testhelper.mock.mockHttpClient
 import org.amshove.kluent.internal.assertFailsWith
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
@@ -42,11 +43,13 @@ object IdenthendelseServiceSpek : Spek({
                         externalMockEnvironment.environment.redisSecret,
                     )
                 ),
+                httpClient = externalMockEnvironment.mockHttpClient,
             )
             val pdlClient = PdlClient(
                 azureAdClient = azureAdClient,
                 baseUrl = externalMockEnvironment.environment.pdlUrl,
                 clientId = externalMockEnvironment.environment.pdlClientId,
+                httpClient = externalMockEnvironment.mockHttpClient,
             )
 
             val identhendelseService = IdenthendelseService(

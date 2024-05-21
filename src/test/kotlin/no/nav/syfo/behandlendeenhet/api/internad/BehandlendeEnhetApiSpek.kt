@@ -16,6 +16,8 @@ import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
 import no.nav.syfo.testhelper.generator.generatePersonDTO
+import no.nav.syfo.testhelper.mock.norg2Response
+import no.nav.syfo.testhelper.mock.norg2ResponseNavUtland
 import no.nav.syfo.util.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeLessThan
@@ -73,8 +75,8 @@ class BehandlendeEnhetApiSpek : Spek({
                             response.status() shouldBeEqualTo HttpStatusCode.OK
                             val behandlendeEnhet: BehandlendeEnhet = objectMapper.readValue(response.content!!)
 
-                            behandlendeEnhet.enhetId shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2Response.first().enhetNr
-                            behandlendeEnhet.navn shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2Response.first().navn
+                            behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
+                            behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
                         }
                     }
 
@@ -110,8 +112,8 @@ class BehandlendeEnhetApiSpek : Spek({
                         ) {
                             response.status() shouldBeEqualTo HttpStatusCode.OK
                             val behandlendeEnhet: BehandlendeEnhet = objectMapper.readValue(response.content!!)
-                            behandlendeEnhet.enhetId shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2ResponseNavUtland.first().enhetNr
-                            behandlendeEnhet.navn shouldBeEqualTo externalMockEnvironment.norg2Mock.norg2ResponseNavUtland.first().navn
+                            behandlendeEnhet.enhetId shouldBeEqualTo norg2ResponseNavUtland.first().enhetNr
+                            behandlendeEnhet.navn shouldBeEqualTo norg2ResponseNavUtland.first().navn
                         }
                     }
                 }

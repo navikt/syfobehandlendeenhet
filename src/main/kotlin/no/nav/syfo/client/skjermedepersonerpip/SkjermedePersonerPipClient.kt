@@ -1,5 +1,6 @@
 package no.nav.syfo.client.skjermedepersonerpip
 
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
@@ -17,8 +18,8 @@ class SkjermedePersonerPipClient(
     private val baseUrl: String,
     private val clientId: String,
     private val redisStore: RedisStore,
+    private val httpClient: HttpClient = httpClientDefault(),
 ) {
-    private val httpClient = httpClientDefault()
 
     suspend fun isSkjermet(
         callId: String,
@@ -34,12 +35,15 @@ class SkjermedePersonerPipClient(
             return cachedValue
         } else {
             try {
-                val url = getSkjermedePersonerPipUrl(personIdentNumber = personIdentNumber)
-                val skjermedePersonerResponse: Boolean = httpClient.get(url) {
+                val url = "$baseUrl/skjermet"
+                val body = SkjermedePersonerRequestDTO(personident = personIdentNumber.value)
+                val skjermedePersonerResponse: Boolean = httpClient.post(url) {
+                    contentType(ContentType.Application.Json)
+                    setBody(body)
                     header(HttpHeaders.Authorization, bearerHeader(oboToken))
                     header(NAV_CALL_ID_HEADER, callId)
                     header(NAV_CONSUMER_ID_HEADER, NAV_APP_CONSUMER_ID)
-                    header(NAV_PERSONIDENTER_HEADER, personIdentNumber.value)
+                    accept(ContentType.Application.Json)
                 }.body()
 
                 COUNT_CALL_SKJERMEDE_PERSONER_SKJERMET_SUCCESS.increment()
@@ -60,10 +64,6 @@ class SkjermedePersonerPipClient(
                 throw e
             }
         }
-    }
-
-    private fun getSkjermedePersonerPipUrl(personIdentNumber: PersonIdentNumber): String {
-        return "$baseUrl/skjermet?personident=${personIdentNumber.value}"
     }
 
     companion object {

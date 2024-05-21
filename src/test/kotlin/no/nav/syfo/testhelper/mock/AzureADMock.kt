@@ -1,19 +1,13 @@
 package no.nav.syfo.testhelper.mock
 
 import com.auth0.jwt.JWT
-import io.ktor.server.application.*
-import io.ktor.http.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.client.engine.mock.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import no.nav.syfo.application.api.authentication.getNAVIdentFromToken
-import no.nav.syfo.application.api.installContentNegotiation
 import no.nav.syfo.client.azuread.AzureAdTokenResponse
 import no.nav.syfo.client.wellknown.WellKnown
 import no.nav.syfo.testhelper.generateJWT
-import no.nav.syfo.testhelper.getRandomPort
 import java.nio.file.Paths
 
 fun wellKnownInternalAzureAD(): WellKnown {
@@ -49,29 +43,18 @@ fun generateAzureAdTokenResponse(
     }
 }
 
-class AzureAdMock {
-    private val port = getRandomPort()
-    val url = "http://localhost:$port"
-
-    val name = "azuread"
-    val server = embeddedServer(
-        factory = Netty,
-        port = port,
-    ) {
-        installContentNegotiation()
-        routing {
-            post {
-                val requestBody: Parameters = call.receive()
-                val assertion = requestBody["assertion"]
-                if (assertion != null) {
-                    val response = generateAzureAdTokenResponse(
-                        assertion = assertion,
-                    )
-                    call.respond(response)
-                } else {
-                    call.respond(generateAzureAdTokenResponse())
-                }
-            }
+fun MockRequestHandleScope.getAzureAdResponse(request: HttpRequestData): HttpResponseData {
+    val assertion = (request.body as FormDataContent).formData["assertion"]
+    return when {
+        assertion != null -> {
+            respond(
+                generateAzureAdTokenResponse(
+                    assertion = assertion,
+                )
+            )
+        }
+        else -> {
+            respond(generateAzureAdTokenResponse())
         }
     }
 }
