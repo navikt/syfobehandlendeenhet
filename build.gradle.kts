@@ -5,7 +5,7 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 val confluentVersion = "7.5.1"
-val flywayVersion = "9.22.3"
+val flywayVersion = "10.13.0"
 val hikariVersion = "5.1.0"
 val jacksonDataTypeVersion = "2.16.0"
 val jedisVersion = "5.1.0"
