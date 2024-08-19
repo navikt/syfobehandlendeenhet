@@ -58,6 +58,7 @@ const val testSyfooversiktsrvClientId = "syfooversiktsrv-client-id"
 const val testSyfotilgangskontrollClientId = "syfo-tilgangskontroll-client-id"
 const val testIstilgangskontrollClientId = "istilgangskontroll-client-id"
 const val testMeroppfolgingClientId = "meroppfolging-backend-client-id"
+const val testEsyfovarselClientId = "esyfovarsel-client-id"
 
 val testAzureAppPreAuthorizedApps = listOf(
     PreAuthorizedClient(
@@ -91,5 +92,9 @@ val testAzureAppPreAuthorizedApps = listOf(
     PreAuthorizedClient(
         name = "dev-gcp:team-esyfo:meroppfolging-backend",
         clientId = testMeroppfolgingClientId,
+    ),
+    PreAuthorizedClient(
+        name = "dev-gcp:team-esyfo:esyfovarsel",
+        clientId = testEsyfovarselClientId,
     ),
 )

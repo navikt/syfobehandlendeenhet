@@ -56,6 +56,8 @@ spec:
           cluster: prod-gcp
         - application: meroppfolging-backend
           namespace: team-esyfo
+        - application: esyfovarsel
+          namespace: team-esyfo
     outbound:
       external:
         - host: "norg2.prod-fss-pub.nais.io"
