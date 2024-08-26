@@ -25,7 +25,7 @@ class BehandlendeEnhetProducer(
                         updatedAt,
                     ),
                 )
-            ).get()
+            ).also { it.get() }
         } catch (e: Exception) {
             log.error(
                 """
