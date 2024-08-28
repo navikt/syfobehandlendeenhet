@@ -14,7 +14,7 @@ val ktorVersion = "2.3.8"
 val kluentVersion = "1.73"
 val logbackVersion = "1.4.14"
 val logstashEncoderVersion = "7.4"
-val mockkVersion = "1.13.8"
+val mockkVersion = "1.13.12"
 val nimbusJoseJwtVersion = "9.37.2"
 val micrometerRegistryVersion = "1.12.2"
 val postgresVersion = "42.7.2"
@@ -22,7 +22,7 @@ val postgresEmbeddedVersion = if (Os.isFamily(Os.FAMILY_MAC)) "1.0.0" else "0.13
 val spekVersion = "2.0.19"
 
 plugins {
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "2.0.10"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
 }
@@ -101,7 +101,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 tasks {
