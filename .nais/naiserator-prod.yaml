@@ -60,13 +60,14 @@ spec:
           namespace: team-esyfo
     outbound:
       external:
-        - host: "norg2.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
       rules:
         - application: syfobehandlendeenhet-redis
         - application: istilgangskontroll
         - application: skjermede-personer-pip
           namespace: nom
+        - application: norg2
+          namespace: org
   azure:
     application:
       allowAllUsers: true
@@ -78,6 +79,7 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
+        tier: db-f1-micro
         databases:
           - name: syfobehandlendeenhet-db
         diskAutoresize: true
@@ -89,7 +91,7 @@ spec:
     - name: KTOR_ENV
       value: "production"
     - name: NORG2_URL
-      value: "https://norg2.prod-fss-pub.nais.io"
+      value: "http://norg2.org"
     - name: PDL_CLIENT_ID
       value: "prod-fss.pdl.pdl-api"
     - name: PDL_URL
