@@ -1,29 +1,26 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.apache.tools.ant.taskdefs.condition.Os
-
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val confluentVersion = "7.5.1"
+val confluentVersion = "7.7.0"
 val flywayVersion = "9.22.3"
 val hikariVersion = "5.1.0"
-val jacksonDataTypeVersion = "2.16.0"
-val jedisVersion = "5.1.0"
+val jacksonDataTypeVersion = "2.17.2"
+val jedisVersion = "5.1.4"
 val kafkaVersion = "3.6.1"
-val ktorVersion = "2.3.8"
+val ktorVersion = "2.3.12"
 val kluentVersion = "1.73"
-val logbackVersion = "1.4.14"
+val logbackVersion = "1.5.6"
 val logstashEncoderVersion = "7.4"
 val mockkVersion = "1.13.12"
-val nimbusJoseJwtVersion = "9.37.2"
-val micrometerRegistryVersion = "1.12.2"
-val postgresVersion = "42.7.2"
-val postgresEmbeddedVersion = if (Os.isFamily(Os.FAMILY_MAC)) "1.0.0" else "0.13.4"
+val nimbusJoseJwtVersion = "9.40"
+val micrometerRegistryVersion = "1.12.8"
+val postgresVersion = "42.7.3"
+val postgresEmbeddedVersion = "2.0.7"
 val spekVersion = "2.0.19"
 
 plugins {
-    kotlin("jvm") version "2.0.10"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    kotlin("jvm") version "2.0.20"
+    id("com.gradleup.shadow") version "8.3.2"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
 }
 
@@ -64,7 +61,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
-    testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
+    testImplementation("io.zonky.test:embedded-postgres:$postgresEmbeddedVersion")
 
     // Kafka
     val excludeLog4j = fun ExternalModuleDependency.() {
@@ -105,7 +102,7 @@ kotlin {
 }
 
 tasks {
-    withType<Jar> {
+    jar {
         manifest.attributes["Main-Class"] = "no.nav.syfo.AppKt"
     }
 
@@ -115,13 +112,14 @@ tasks {
         }
     }
 
-    withType<ShadowJar> {
+    shadowJar {
+        mergeServiceFiles()
         archiveBaseName.set("app")
         archiveClassifier.set("")
         archiveVersion.set("")
     }
 
-    withType<Test> {
+    test {
         useJUnitPlatform {
             includeEngines("spek2")
         }
