@@ -62,7 +62,6 @@ spec:
       external:
         - host: "pdl-api.prod-fss-pub.nais.io"
       rules:
-        - application: syfobehandlendeenhet-redis
         - application: istilgangskontroll
         - application: skjermede-personer-pip
           namespace: nom
@@ -76,6 +75,9 @@ spec:
       claims:
         extra:
           - "NAVident"
+  redis:
+    - instance: cache
+      access: readwrite
   gcp:
     sqlInstances:
       - type: POSTGRES_14
@@ -83,8 +85,6 @@ spec:
         databases:
           - name: syfobehandlendeenhet-db
         diskAutoresize: true
-  envFrom:
-    - secret: syfobehandlendeenhet-redis-password
   kafka:
     pool: nav-prod
   env:
@@ -96,8 +96,6 @@ spec:
       value: "prod-fss.pdl.pdl-api"
     - name: PDL_URL
       value: "https://pdl-api.prod-fss-pub.nais.io/graphql"
-    - name: REDIS_HOST
-      value: "syfobehandlendeenhet-redis.teamsykefravr.svc.cluster.local"
     - name: SKJERMEDEPERSONERPIP_CLIENT_ID
       value: "prod-gcp.nom.skjermede-personer-pip"
     - name: SKJERMEDEPERSONERPIP_URL

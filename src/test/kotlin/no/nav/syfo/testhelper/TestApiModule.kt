@@ -9,21 +9,21 @@ import no.nav.syfo.client.norg.NorgClient
 import no.nav.syfo.client.pdl.PdlClient
 import no.nav.syfo.client.skjermedepersonerpip.SkjermedePersonerPipClient
 import no.nav.syfo.client.veiledertilgang.VeilederTilgangskontrollClient
-import redis.clients.jedis.JedisPool
-import redis.clients.jedis.JedisPoolConfig
-import redis.clients.jedis.Protocol
+import redis.clients.jedis.*
 
 fun Application.testApiModule(
     externalMockEnvironment: ExternalMockEnvironment,
     behandlendeEnhetProducer: BehandlendeEnhetProducer,
 ) {
+    val redisConfig = externalMockEnvironment.environment.redisConfig
     val redisStore = RedisStore(
         JedisPool(
             JedisPoolConfig(),
-            externalMockEnvironment.environment.redisHost,
-            externalMockEnvironment.environment.redisPort,
-            Protocol.DEFAULT_TIMEOUT,
-            externalMockEnvironment.environment.redisSecret,
+            HostAndPort(redisConfig.host, redisConfig.port),
+            DefaultJedisClientConfig.builder()
+                .ssl(redisConfig.ssl)
+                .password(redisConfig.redisPassword)
+                .build()
         )
     )
     val azureAdClient = AzureAdClient(

@@ -3,8 +3,10 @@ package no.nav.syfo.testhelper
 import no.nav.syfo.application.ApplicationEnvironmentKafka
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
+import no.nav.syfo.application.cache.RedisConfig
 import no.nav.syfo.behandlendeenhet.api.access.PreAuthorizedClient
 import no.nav.syfo.util.configuredJacksonMapper
+import java.net.URI
 
 fun testEnvironment(
     azureOpenIdTokenEndpoint: String = "azureTokenEndpoint",
@@ -41,8 +43,13 @@ fun testEnvironment(
     syfobehandlendeenhetDbName = "syfobehandlendeenhet_dev",
     syfobehandlendeenhetDbUsername = "username",
     syfobehandlendeenhetDbPassword = "password",
-    redisHost = "localhost",
-    redisSecret = "password",
+    redisConfig = RedisConfig(
+        redisUri = URI("http://localhost:6379"),
+        redisDB = 0,
+        redisUsername = "redisUser",
+        redisPassword = "redisPassword",
+        ssl = false,
+    ),
 )
 
 fun testAppState() = ApplicationState(
