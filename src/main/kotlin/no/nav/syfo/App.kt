@@ -25,9 +25,7 @@ import no.nav.syfo.identhendelse.kafka.IdenthendelseConsumerService
 import no.nav.syfo.identhendelse.kafka.launchKafkaTaskIdenthendelse
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
-import redis.clients.jedis.JedisPool
-import redis.clients.jedis.JedisPoolConfig
-import redis.clients.jedis.Protocol
+import redis.clients.jedis.*
 import java.util.concurrent.TimeUnit
 
 const val applicationPort = 8080
@@ -45,15 +43,18 @@ fun main() {
             kafkaBehandlendeEnhetProducerConfig(environment.kafka)
         ),
     )
-
+    val redisConfig = environment.redisConfig
     val redisStore = RedisStore(
-        jedisPool = JedisPool(
+        JedisPool(
             JedisPoolConfig(),
-            environment.redisHost,
-            environment.redisPort,
-            Protocol.DEFAULT_TIMEOUT,
-            environment.redisSecret,
-        ),
+            HostAndPort(redisConfig.host, redisConfig.port),
+            DefaultJedisClientConfig.builder()
+                .ssl(redisConfig.ssl)
+                .user(redisConfig.redisUsername)
+                .password(redisConfig.redisPassword)
+                .database(redisConfig.redisDB)
+                .build()
+        )
     )
 
     val azureAdClient = AzureAdClient(

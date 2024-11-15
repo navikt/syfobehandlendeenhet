@@ -17,9 +17,7 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import redis.clients.jedis.JedisPool
-import redis.clients.jedis.JedisPoolConfig
-import redis.clients.jedis.Protocol
+import redis.clients.jedis.*
 
 object IdenthendelseServiceSpek : Spek({
 
@@ -30,19 +28,22 @@ object IdenthendelseServiceSpek : Spek({
 
             val externalMockEnvironment = ExternalMockEnvironment.instance
             val database = externalMockEnvironment.database
+            val redisConfig = externalMockEnvironment.environment.redisConfig
+            val redisStore = RedisStore(
+                JedisPool(
+                    JedisPoolConfig(),
+                    HostAndPort(redisConfig.host, redisConfig.port),
+                    DefaultJedisClientConfig.builder()
+                        .ssl(redisConfig.ssl)
+                        .password(redisConfig.redisPassword)
+                        .build()
+                )
+            )
             val azureAdClient = AzureAdClient(
                 azureAppClientId = externalMockEnvironment.environment.azureAppClientId,
                 azureAppClientSecret = externalMockEnvironment.environment.azureAppClientSecret,
                 azureOpenidConfigTokenEndpoint = externalMockEnvironment.environment.azureOpenidConfigTokenEndpoint,
-                redisStore = RedisStore(
-                    JedisPool(
-                        JedisPoolConfig(),
-                        externalMockEnvironment.environment.redisHost,
-                        externalMockEnvironment.environment.redisPort,
-                        Protocol.DEFAULT_TIMEOUT,
-                        externalMockEnvironment.environment.redisSecret,
-                    )
-                ),
+                redisStore = redisStore,
                 httpClient = externalMockEnvironment.mockHttpClient,
             )
             val pdlClient = PdlClient(
