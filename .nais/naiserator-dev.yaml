@@ -56,8 +56,6 @@ spec:
           cluster: dev-gcp
         - application: meroppfolging-backend
           namespace: team-esyfo
-        - application: esyfovarsel
-          namespace: team-esyfo
     outbound:
       external:
         - host: "pdl-api.dev-fss-pub.nais.io"
