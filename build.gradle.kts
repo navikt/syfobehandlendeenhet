@@ -1,27 +1,27 @@
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val confluentVersion = "7.7.0"
-val flywayVersion = "9.22.3"
+val confluentVersion = "7.8.0"
+val flywayVersion = "10.17.2"
 val hikariVersion = "5.1.0"
-val jacksonDataTypeVersion = "2.17.2"
+val jacksonDataTypeVersion = "2.18.0"
 val jedisVersion = "5.1.4"
-val kafkaVersion = "3.6.1"
-val ktorVersion = "2.3.12"
+val kafkaVersion = "3.9.0"
+val ktorVersion = "3.0.2"
 val kluentVersion = "1.73"
-val logbackVersion = "1.5.6"
+val logbackVersion = "1.5.12"
 val logstashEncoderVersion = "7.4"
 val mockkVersion = "1.13.12"
-val nimbusJoseJwtVersion = "9.40"
+val nimbusJoseJwtVersion = "9.47"
 val micrometerRegistryVersion = "1.12.8"
-val postgresVersion = "42.7.3"
+val postgresVersion = "42.7.4"
 val postgresEmbeddedVersion = "2.0.7"
 val spekVersion = "2.0.19"
 
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version "2.0.21"
     id("com.gradleup.shadow") version "8.3.2"
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
 }
 
 repositories {
@@ -58,7 +58,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDataTypeVersion")
 
     // Database
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
     testImplementation("io.zonky.test:embedded-postgres:$postgresEmbeddedVersion")
@@ -73,13 +73,13 @@ dependencies {
         implementation("org.apache.avro:avro") {
             because("io.confluent:kafka-schema-registry:$confluentVersion -> https://www.cve.org/CVERecord?id=CVE-2023-39410")
             version {
-                require("1.11.3")
+                require("1.11.4")
             }
         }
         implementation("org.apache.commons:commons-compress") {
             because("org.apache.commons:commons-compress:1.22 -> https://www.cve.org/CVERecord?id=CVE-2012-2098")
             version {
-                require("1.26.0")
+                require("1.27.1")
             }
         }
     }
