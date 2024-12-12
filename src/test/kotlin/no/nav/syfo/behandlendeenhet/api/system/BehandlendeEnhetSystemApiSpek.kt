@@ -1,8 +1,11 @@
 package no.nav.syfo.behandlendeenhet.api.system
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import io.mockk.justRun
 import io.mockk.mockk
@@ -16,110 +19,108 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
 class BehandlendeEnhetSystemApiSpek : Spek({
-    val objectMapper: ObjectMapper = configuredJacksonMapper()
-
     describe(BehandlendeEnhetSystemApiSpek::class.java.simpleName) {
+        val externalMockEnvironment = ExternalMockEnvironment.instance
 
-        with(TestApplicationEngine()) {
-            start()
+        val behandlendeEnhetProducer = mockk<BehandlendeEnhetProducer>()
+        justRun { behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(any(), any()) }
 
-            val externalMockEnvironment = ExternalMockEnvironment.instance
+        fun ApplicationTestBuilder.setupApiAndClient(): HttpClient {
+            application {
+                testApiModule(
+                    externalMockEnvironment = externalMockEnvironment,
+                    behandlendeEnhetProducer = behandlendeEnhetProducer,
+                )
+            }
+            val client = createClient {
+                install(ContentNegotiation) {
+                    jackson { configure() }
+                }
+            }
+            return client
+        }
 
-            val behandlendeEnhetProducer = mockk<BehandlendeEnhetProducer>()
-            justRun { behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(any(), any()) }
+        val url = "$systemBehandlendeEnhetApiV2BasePath$systemdBehandlendeEnhetApiV2PersonIdentPath"
 
-            application.testApiModule(
-                externalMockEnvironment = externalMockEnvironment,
-                behandlendeEnhetProducer = behandlendeEnhetProducer,
-            )
+        describe("Get BehandlendeEnhet for PersonIdent as System") {
+            describe("Happy path") {
+                externalMockEnvironment.environment.systemAPIAuthorizedConsumerApplicationNameList.forEach { consumerApplicationName ->
 
-            val url = "$systemBehandlendeEnhetApiV2BasePath$systemdBehandlendeEnhetApiV2PersonIdentPath"
+                    val azp = testAzureAppPreAuthorizedApps.find { preAuthorizedClient ->
+                        preAuthorizedClient.clientId.contains(consumerApplicationName)
+                    }?.clientId ?: ""
 
-            describe("Get BehandlendeEnhet for PersonIdent as System") {
-                describe("Happy path") {
-                    externalMockEnvironment.environment.systemAPIAuthorizedConsumerApplicationNameList.forEach { consumerApplicationName ->
+                    val validToken = generateJWT(
+                        audience = externalMockEnvironment.environment.azureAppClientId,
+                        issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
+                        azp = azp,
+                    )
 
-                        val azp = testAzureAppPreAuthorizedApps.find { preAuthorizedClient ->
-                            preAuthorizedClient.clientId.contains(consumerApplicationName)
-                        }?.clientId ?: ""
-
-                        val validToken = generateJWT(
-                            audience = externalMockEnvironment.environment.azureAppClientId,
-                            issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
-                            azp = azp,
-                        )
-
-                        it("Get BehandlendeEnhet for PersonIdent as $consumerApplicationName") {
-                            with(
-                                handleRequest(HttpMethod.Get, url) {
-                                    addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
-                                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                                    addHeader(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
-                                }
-                            ) {
-                                response.status() shouldBeEqualTo HttpStatusCode.OK
-                                val behandlendeEnhet: BehandlendeEnhet = objectMapper.readValue(response.content!!)
-
-                                behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
-                                behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
+                    it("Get BehandlendeEnhet for PersonIdent as $consumerApplicationName") {
+                        testApplication {
+                            val client = setupApiAndClient()
+                            val response = client.get(url) {
+                                bearerAuth(validToken)
+                                header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
                             }
+                            response.status shouldBeEqualTo HttpStatusCode.OK
+                            val behandlendeEnhet = response.body<BehandlendeEnhet>()
+
+                            behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
+                            behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
                         }
+                    }
 
-                        it("should return NoContent if GeografiskTilknyning was not found for PersonIdent as $consumerApplicationName") {
-                            with(
-                                handleRequest(HttpMethod.Get, url) {
-                                    addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
-                                    addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                                    addHeader(
-                                        NAV_PERSONIDENT_HEADER,
-                                        UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value
-                                    )
-                                }
-                            ) {
-                                response.status() shouldBeEqualTo HttpStatusCode.NoContent
+                    it("should return NoContent if GeografiskTilknyning was not found for PersonIdent as $consumerApplicationName") {
+                        testApplication {
+                            val client = setupApiAndClient()
+                            val response = client.get(url) {
+                                bearerAuth(validToken)
+                                header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value)
                             }
+                            response.status shouldBeEqualTo HttpStatusCode.NoContent
                         }
                     }
                 }
-                describe("Unhappy paths") {
-                    it("should return status Unauthorized if no token is supplied") {
-                        with(
-                            handleRequest(HttpMethod.Get, url) {}
-                        ) {
-                            response.status() shouldBeEqualTo HttpStatusCode.Unauthorized
-                        }
+            }
+            describe("Unhappy paths") {
+                it("should return status Unauthorized if no token is supplied") {
+                    testApplication {
+                        val client = setupApiAndClient()
+                        val response = client.get(url) {}
+                        response.status shouldBeEqualTo HttpStatusCode.Unauthorized
                     }
+                }
 
-                    it("should return status Forbidden if unauthorized $testIsdialogmoteClientId AZP is supplied") {
+                it("should return status Forbidden if unauthorized $testIsdialogmoteClientId AZP is supplied") {
+                    testApplication {
                         val validTokenUnauthorizedAZP = generateJWT(
                             audience = externalMockEnvironment.environment.azureAppClientId,
                             issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
                             azp = testIsdialogmoteClientId,
                         )
-
-                        with(
-                            handleRequest(HttpMethod.Get, url) {
-                                addHeader(HttpHeaders.Authorization, bearerHeader(validTokenUnauthorizedAZP))
-                            }
-                        ) {
-                            response.status() shouldBeEqualTo HttpStatusCode.Forbidden
+                        val client = setupApiAndClient()
+                        val response = client.get(url) {
+                            bearerAuth(validTokenUnauthorizedAZP)
+                            header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value)
                         }
+                        response.status shouldBeEqualTo HttpStatusCode.Forbidden
                     }
+                }
 
-                    it("should return status Forbidden if unauthorized $testSyfomodiapersonClientId AZP is supplied") {
+                it("should return status Forbidden if unauthorized $testSyfomodiapersonClientId AZP is supplied") {
+                    testApplication {
                         val validTokenUnauthorizedAZP = generateJWT(
                             audience = externalMockEnvironment.environment.azureAppClientId,
                             issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
                             azp = testSyfomodiapersonClientId,
                         )
-
-                        with(
-                            handleRequest(HttpMethod.Get, url) {
-                                addHeader(HttpHeaders.Authorization, bearerHeader(validTokenUnauthorizedAZP))
-                            }
-                        ) {
-                            response.status() shouldBeEqualTo HttpStatusCode.Forbidden
+                        val client = setupApiAndClient()
+                        val response = client.get(url) {
+                            bearerAuth(validTokenUnauthorizedAZP)
+                            header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value)
                         }
+                        response.status shouldBeEqualTo HttpStatusCode.Forbidden
                     }
                 }
             }
