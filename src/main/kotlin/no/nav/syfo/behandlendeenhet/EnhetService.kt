@@ -1,7 +1,7 @@
 package no.nav.syfo.behandlendeenhet
 
 import no.nav.syfo.application.api.authentication.Token
-import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.cache.ValkeyStore
 import no.nav.syfo.application.database.DatabaseInterface
 import no.nav.syfo.behandlendeenhet.database.domain.toPerson
 import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
@@ -18,7 +18,7 @@ import no.nav.syfo.domain.PersonIdentNumber
 class EnhetService(
     private val norgClient: NorgClient,
     private val pdlClient: PdlClient,
-    private val redisStore: RedisStore,
+    private val valkeyStore: ValkeyStore,
     private val skjermedePersonerPipClient: SkjermedePersonerPipClient,
     private val database: DatabaseInterface,
     private val behandlendeEnhetProducer: BehandlendeEnhetProducer,
@@ -32,7 +32,7 @@ class EnhetService(
         veilederToken: Token?,
     ): BehandlendeEnhet? {
         val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
-        val cachedBehandlendeEnhet: BehandlendeEnhet? = redisStore.getObject(key = cacheKey)
+        val cachedBehandlendeEnhet: BehandlendeEnhet? = valkeyStore.getObject(key = cacheKey)
         if (cachedBehandlendeEnhet != null) {
             return cachedBehandlendeEnhet
         } else {
@@ -66,7 +66,7 @@ class EnhetService(
             } else {
                 behandlendeEnhet
             }
-            redisStore.setObject(
+            valkeyStore.setObject(
                 key = cacheKey,
                 value = behandlendeEnhetResponse,
                 expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
@@ -80,7 +80,7 @@ class EnhetService(
         val person = pPerson?.toPerson()
         if (person != null) {
             val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}"
-            redisStore.setObject(
+            valkeyStore.setObject(
                 key = cacheKey,
                 value = null,
                 expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,

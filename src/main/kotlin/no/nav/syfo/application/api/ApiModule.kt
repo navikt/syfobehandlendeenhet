@@ -6,7 +6,7 @@ import io.ktor.server.routing.*
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.application.api.authentication.*
-import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.cache.ValkeyStore
 import no.nav.syfo.application.database.DatabaseInterface
 import no.nav.syfo.application.metric.api.registerMetricApi
 import no.nav.syfo.behandlendeenhet.EnhetService
@@ -30,7 +30,7 @@ fun Application.apiModule(
     norgClient: NorgClient,
     skjermedePersonerPipClient: SkjermedePersonerPipClient,
     veilederTilgangskontrollClient: VeilederTilgangskontrollClient,
-    redisStore: RedisStore,
+    valkeyStore: ValkeyStore,
 ) {
     installMetrics()
     installCallId()
@@ -48,7 +48,7 @@ fun Application.apiModule(
     val enhetService = EnhetService(
         norgClient = norgClient,
         pdlClient = pdlClient,
-        redisStore = redisStore,
+        valkeyStore = valkeyStore,
         skjermedePersonerPipClient = skjermedePersonerPipClient,
         database = database,
         behandlendeEnhetProducer = behandlendeEnhetProducer,

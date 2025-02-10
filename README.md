@@ -14,7 +14,7 @@ To find BehandlendeEnhet, the application makes requests to PersonDataLøsningen
 * Gradle
 * Kotlin
 * Ktor
-* Redis
+* Valkey
 
 ## Lokal utvikling
 Build the application with `gradle` 
@@ -31,10 +31,7 @@ Apply checking: `./gradlew addKtlintCheckGitPreCommitHook`
 Apply formatting: `./gradlew addKtlintFormatGitPreCommitHook`
 
 ## Cache
-A single Redis pod is responsible for caching.
-This application uses Redis for caching. Redis is deployed automatically on changes to workflow or config on master
-branch. For manual deploy, run: `kubectl apply -f .nais/redis/redis-config.yaml`
-    or `kubectl apply -f .nais/redis/redisexporter.yaml`.
+This application uses Valkey on Aiven for caching.
 
 ### Pipeline
 Pipeline is run with Github Action workflows.

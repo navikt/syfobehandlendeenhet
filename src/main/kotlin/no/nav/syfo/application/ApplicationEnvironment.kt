@@ -1,7 +1,7 @@
 package no.nav.syfo.application
 
 import io.ktor.server.application.*
-import no.nav.syfo.application.cache.RedisConfig
+import no.nav.syfo.application.cache.ValkeyConfig
 import java.net.URI
 
 data class Environment(
@@ -21,11 +21,11 @@ data class Environment(
         aivenTruststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
         aivenKeystoreLocation = getEnvVar("KAFKA_KEYSTORE_PATH"),
     ),
-    val redisConfig: RedisConfig = RedisConfig(
-        redisUri = URI(getEnvVar("REDIS_URI_CACHE")),
-        redisDB = 17, // se https://github.com/navikt/istilgangskontroll/blob/master/README.md
-        redisUsername = getEnvVar("REDIS_USERNAME_CACHE"),
-        redisPassword = getEnvVar("REDIS_PASSWORD_CACHE"),
+    val valkeyConfig: ValkeyConfig = ValkeyConfig(
+        valkeyUri = URI(getEnvVar("VALKEY_URI_CACHE")),
+        valkeyDB = 17, // se https://github.com/navikt/istilgangskontroll/blob/master/README.md
+        valkeyUsername = getEnvVar("VALKEY_USERNAME_CACHE"),
+        valkeyPassword = getEnvVar("VALKEY_PASSWORD_CACHE"),
     ),
 
     val norg2Url: String = getEnvVar("NORG2_URL"),
