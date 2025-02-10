@@ -2,7 +2,7 @@ package no.nav.syfo.testhelper
 
 import io.ktor.server.application.*
 import no.nav.syfo.application.api.apiModule
-import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.cache.ValkeyStore
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.client.azuread.AzureAdClient
 import no.nav.syfo.client.norg.NorgClient
@@ -15,14 +15,14 @@ fun Application.testApiModule(
     externalMockEnvironment: ExternalMockEnvironment,
     behandlendeEnhetProducer: BehandlendeEnhetProducer,
 ) {
-    val redisConfig = externalMockEnvironment.environment.redisConfig
-    val redisStore = RedisStore(
+    val valkeyConfig = externalMockEnvironment.environment.valkeyConfig
+    val valkeyStore = ValkeyStore(
         JedisPool(
             JedisPoolConfig(),
-            HostAndPort(redisConfig.host, redisConfig.port),
+            HostAndPort(valkeyConfig.host, valkeyConfig.port),
             DefaultJedisClientConfig.builder()
-                .ssl(redisConfig.ssl)
-                .password(redisConfig.redisPassword)
+                .ssl(valkeyConfig.ssl)
+                .password(valkeyConfig.valkeyPassword)
                 .build()
         )
     )
@@ -30,7 +30,7 @@ fun Application.testApiModule(
         azureAppClientId = externalMockEnvironment.environment.azureAppClientId,
         azureAppClientSecret = externalMockEnvironment.environment.azureAppClientSecret,
         azureOpenidConfigTokenEndpoint = externalMockEnvironment.environment.azureOpenidConfigTokenEndpoint,
-        redisStore = redisStore,
+        valkeyStore = valkeyStore,
         httpClient = externalMockEnvironment.mockHttpClient,
     )
     val pdlClient = PdlClient(
@@ -49,7 +49,7 @@ fun Application.testApiModule(
         azureAdClient = azureAdClient,
         baseUrl = externalMockEnvironment.environment.skjermedePersonerPipUrl,
         clientId = externalMockEnvironment.environment.skjermedePersonerPipClientId,
-        redisStore = redisStore,
+        valkeyStore = valkeyStore,
         httpClient = externalMockEnvironment.mockHttpClient,
     )
 
@@ -67,7 +67,7 @@ fun Application.testApiModule(
         database = externalMockEnvironment.database,
         behandlendeEnhetProducer = behandlendeEnhetProducer,
         pdlClient = pdlClient,
-        redisStore = redisStore,
+        valkeyStore = valkeyStore,
         norgClient = norgClient,
         skjermedePersonerPipClient = skjermedePersonerPipClient,
         veilederTilgangskontrollClient = veilederTilgangskontrollClient,

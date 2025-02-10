@@ -10,7 +10,7 @@ import io.ktor.http.*
 import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.application.api.authentication.getConsumerClientId
 import no.nav.syfo.application.api.authentication.getNAVIdent
-import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.cache.ValkeyStore
 import no.nav.syfo.client.httpClientProxy
 import org.slf4j.LoggerFactory
 
@@ -18,7 +18,7 @@ class AzureAdClient(
     private val azureAppClientId: String,
     private val azureAppClientSecret: String,
     private val azureOpenidConfigTokenEndpoint: String,
-    private val redisStore: RedisStore,
+    private val valkeyStore: ValkeyStore,
     private val httpClient: HttpClient = httpClientProxy(),
 ) {
 
@@ -30,7 +30,7 @@ class AzureAdClient(
         val veilederIdent: String = token.getNAVIdent()
 
         val cacheKey = "$veilederIdent-$azp-$scopeClientId"
-        val cachedToken: AzureAdToken? = redisStore.getObject(key = cacheKey)
+        val cachedToken: AzureAdToken? = valkeyStore.getObject(key = cacheKey)
         if (cachedToken?.isExpired() == false) {
             COUNT_CALL_AZUREAD_TOKEN_OBO_CACHE_HIT.increment()
             return cachedToken
@@ -51,7 +51,7 @@ class AzureAdClient(
             return azureAdTokenResponse?.let {
                 val azureAdToken = it.toAzureAdToken()
                 COUNT_CALL_AZUREAD_TOKEN_OBO_CACHE_MISS.increment()
-                redisStore.setObject(
+                valkeyStore.setObject(
                     key = cacheKey,
                     value = azureAdToken,
                     expireSeconds = it.expires_in
@@ -63,7 +63,7 @@ class AzureAdClient(
 
     suspend fun getSystemToken(scopeClientId: String): AzureAdToken? {
         val cacheKey = "${CACHE_AZUREAD_TOKEN_SYSTEM_KEY_PREFIX}$scopeClientId"
-        val cachedToken: AzureAdToken? = redisStore.getObject(key = cacheKey)
+        val cachedToken: AzureAdToken? = valkeyStore.getObject(key = cacheKey)
         if (cachedToken?.isExpired() == false) {
             COUNT_CALL_AZUREAD_TOKEN_SYSTEM_CACHE_HIT.increment()
             return cachedToken
@@ -79,7 +79,7 @@ class AzureAdClient(
             return azureAdTokenResponse?.let { token ->
                 val azureAdToken = token.toAzureAdToken()
                 COUNT_CALL_AZUREAD_TOKEN_SYSTEM_CACHE_MISS.increment()
-                redisStore.setObject(
+                valkeyStore.setObject(
                     key = cacheKey,
                     value = azureAdToken,
                     expireSeconds = token.expires_in

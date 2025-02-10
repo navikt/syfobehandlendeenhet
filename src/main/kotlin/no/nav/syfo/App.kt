@@ -8,7 +8,7 @@ import io.ktor.server.netty.*
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.application.api.apiModule
-import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.cache.ValkeyStore
 import no.nav.syfo.application.database.applicationDatabase
 import no.nav.syfo.application.database.databaseModule
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
@@ -43,16 +43,16 @@ fun main() {
             kafkaBehandlendeEnhetProducerConfig(environment.kafka)
         ),
     )
-    val redisConfig = environment.redisConfig
-    val redisStore = RedisStore(
+    val valkeyConfig = environment.valkeyConfig
+    val valkeyStore = ValkeyStore(
         JedisPool(
             JedisPoolConfig(),
-            HostAndPort(redisConfig.host, redisConfig.port),
+            HostAndPort(valkeyConfig.host, valkeyConfig.port),
             DefaultJedisClientConfig.builder()
-                .ssl(redisConfig.ssl)
-                .user(redisConfig.redisUsername)
-                .password(redisConfig.redisPassword)
-                .database(redisConfig.redisDB)
+                .ssl(valkeyConfig.ssl)
+                .user(valkeyConfig.valkeyUsername)
+                .password(valkeyConfig.valkeyPassword)
+                .database(valkeyConfig.valkeyDB)
                 .build()
         )
     )
@@ -61,7 +61,7 @@ fun main() {
         azureAppClientId = environment.azureAppClientId,
         azureAppClientSecret = environment.azureAppClientSecret,
         azureOpenidConfigTokenEndpoint = environment.azureOpenidConfigTokenEndpoint,
-        redisStore = redisStore,
+        valkeyStore = valkeyStore,
     )
 
     val pdlClient = PdlClient(
@@ -78,7 +78,7 @@ fun main() {
         azureAdClient = azureAdClient,
         baseUrl = environment.skjermedePersonerPipUrl,
         clientId = environment.skjermedePersonerPipClientId,
-        redisStore = redisStore,
+        valkeyStore = valkeyStore,
     )
 
     val veilederTilgangskontrollClient = VeilederTilgangskontrollClient(
@@ -112,7 +112,7 @@ fun main() {
                 database = applicationDatabase,
                 behandlendeEnhetProducer = behandlendeEnhetProducer,
                 pdlClient = pdlClient,
-                redisStore = redisStore,
+                valkeyStore = valkeyStore,
                 norgClient = norgClient,
                 skjermedePersonerPipClient = skjermedePersonerPipClient,
                 veilederTilgangskontrollClient = veilederTilgangskontrollClient,

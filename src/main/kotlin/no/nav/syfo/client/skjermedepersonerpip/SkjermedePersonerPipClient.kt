@@ -7,7 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.application.api.authentication.Token
-import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.cache.ValkeyStore
 import no.nav.syfo.client.azuread.AzureAdClient
 import no.nav.syfo.client.httpClientDefault
 import no.nav.syfo.domain.PersonIdentNumber
@@ -18,7 +18,7 @@ class SkjermedePersonerPipClient(
     private val azureAdClient: AzureAdClient,
     private val baseUrl: String,
     private val clientId: String,
-    private val redisStore: RedisStore,
+    private val valkeyStore: ValkeyStore,
     private val httpClient: HttpClient = httpClientDefault(),
 ) {
 
@@ -40,7 +40,7 @@ class SkjermedePersonerPipClient(
             ?: throw RuntimeException("Failed to request access to Skjerming: Failed to get token")
 
         val cacheKey = "$CACHE_SKJERMET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
-        val cachedValue: Boolean? = redisStore.getObject(key = cacheKey)
+        val cachedValue: Boolean? = valkeyStore.getObject(key = cacheKey)
         if (cachedValue != null) {
             return cachedValue
         } else {
@@ -57,7 +57,7 @@ class SkjermedePersonerPipClient(
                 }.body()
 
                 COUNT_CALL_SKJERMEDE_PERSONER_SKJERMET_SUCCESS.increment()
-                redisStore.setObject(
+                valkeyStore.setObject(
                     expireSeconds = CACHE_SKJERMET_PERSONIDENT_EXPIRE_SECONDS,
                     key = cacheKey,
                     value = skjermedePersonerResponse,

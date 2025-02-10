@@ -1,7 +1,7 @@
 package no.nav.syfo.identhendelse
 
 import kotlinx.coroutines.*
-import no.nav.syfo.application.cache.RedisStore
+import no.nav.syfo.application.cache.ValkeyStore
 import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
 import no.nav.syfo.behandlendeenhet.database.createOrUpdatePerson
 import no.nav.syfo.client.azuread.AzureAdClient
@@ -22,14 +22,14 @@ object IdenthendelseServiceSpek : Spek({
     describe(IdenthendelseServiceSpek::class.java.simpleName) {
         val externalMockEnvironment = ExternalMockEnvironment.instance
         val database = externalMockEnvironment.database
-        val redisConfig = externalMockEnvironment.environment.redisConfig
-        val redisStore = RedisStore(
+        val redisConfig = externalMockEnvironment.environment.valkeyConfig
+        val valkeyStore = ValkeyStore(
             JedisPool(
                 JedisPoolConfig(),
                 HostAndPort(redisConfig.host, redisConfig.port),
                 DefaultJedisClientConfig.builder()
                     .ssl(redisConfig.ssl)
-                    .password(redisConfig.redisPassword)
+                    .password(redisConfig.valkeyPassword)
                     .build()
             )
         )
@@ -37,7 +37,7 @@ object IdenthendelseServiceSpek : Spek({
             azureAppClientId = externalMockEnvironment.environment.azureAppClientId,
             azureAppClientSecret = externalMockEnvironment.environment.azureAppClientSecret,
             azureOpenidConfigTokenEndpoint = externalMockEnvironment.environment.azureOpenidConfigTokenEndpoint,
-            redisStore = redisStore,
+            valkeyStore = valkeyStore,
             httpClient = externalMockEnvironment.mockHttpClient,
         )
         val pdlClient = PdlClient(
