@@ -2,13 +2,14 @@ package no.nav.syfo.testhelper
 
 import io.ktor.server.application.*
 import no.nav.syfo.application.api.apiModule
-import no.nav.syfo.application.cache.ValkeyStore
+import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
-import no.nav.syfo.client.azuread.AzureAdClient
-import no.nav.syfo.client.norg.NorgClient
-import no.nav.syfo.client.pdl.PdlClient
-import no.nav.syfo.client.skjermedepersonerpip.SkjermedePersonerPipClient
-import no.nav.syfo.client.veiledertilgang.VeilederTilgangskontrollClient
+import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
+import no.nav.syfo.infrastructure.client.norg.NorgClient
+import no.nav.syfo.infrastructure.client.pdl.PdlClient
+import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
+import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient
+import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import redis.clients.jedis.*
 
 fun Application.testApiModule(
@@ -59,12 +60,12 @@ fun Application.testApiModule(
         baseUrl = externalMockEnvironment.environment.istilgangskontrollUrl,
         httpClient = externalMockEnvironment.mockHttpClient,
     )
-
+    val repository = EnhetRepository(externalMockEnvironment.database)
     this.apiModule(
         applicationState = externalMockEnvironment.applicationState,
         environment = externalMockEnvironment.environment,
         wellKnownInternalAzureAD = externalMockEnvironment.wellKnownInternalAzureAD,
-        database = externalMockEnvironment.database,
+        repository = repository,
         behandlendeEnhetProducer = behandlendeEnhetProducer,
         pdlClient = pdlClient,
         valkeyStore = valkeyStore,

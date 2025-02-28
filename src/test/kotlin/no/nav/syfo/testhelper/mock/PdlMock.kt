@@ -3,8 +3,8 @@ package no.nav.syfo.testhelper.mock
 import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.syfo.client.pdl.PdlClient.Companion.GT_HEADER
-import no.nav.syfo.client.pdl.domain.*
+import no.nav.syfo.infrastructure.client.pdl.PdlClient.Companion.GT_HEADER
+import no.nav.syfo.infrastructure.client.pdl.domain.*
 import no.nav.syfo.testhelper.UserConstants
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 

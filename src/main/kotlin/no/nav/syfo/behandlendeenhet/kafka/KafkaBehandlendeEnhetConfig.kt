@@ -1,8 +1,8 @@
 package no.nav.syfo.behandlendeenhet.kafka
 
 import no.nav.syfo.application.ApplicationEnvironmentKafka
-import no.nav.syfo.application.kafka.JacksonKafkaSerializer
-import no.nav.syfo.application.kafka.commonKafkaAivenProducerConfig
+import no.nav.syfo.infrastructure.kafka.JacksonKafkaSerializer
+import no.nav.syfo.infrastructure.kafka.commonKafkaAivenProducerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import java.util.*

@@ -8,21 +8,22 @@ import io.ktor.server.netty.*
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.application.api.apiModule
-import no.nav.syfo.application.cache.ValkeyStore
-import no.nav.syfo.application.database.applicationDatabase
-import no.nav.syfo.application.database.databaseModule
+import no.nav.syfo.infrastructure.cache.ValkeyStore
+import no.nav.syfo.infrastructure.database.applicationDatabase
+import no.nav.syfo.infrastructure.database.databaseModule
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.behandlendeenhet.kafka.kafkaBehandlendeEnhetProducerConfig
-import no.nav.syfo.client.azuread.AzureAdClient
-import no.nav.syfo.client.norg.NorgClient
-import no.nav.syfo.client.pdl.PdlClient
-import no.nav.syfo.client.skjermedepersonerpip.SkjermedePersonerPipClient
-import no.nav.syfo.client.veiledertilgang.VeilederTilgangskontrollClient
-import no.nav.syfo.client.wellknown.getWellKnown
+import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
+import no.nav.syfo.infrastructure.client.norg.NorgClient
+import no.nav.syfo.infrastructure.client.pdl.PdlClient
+import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
+import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient
+import no.nav.syfo.infrastructure.client.wellknown.getWellKnown
 import no.nav.syfo.identhendelse.IdenthendelseService
 import no.nav.syfo.identhendelse.kafka.IdenthendelseConsumerService
 import no.nav.syfo.identhendelse.kafka.launchKafkaTaskIdenthendelse
+import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.*
@@ -105,11 +106,12 @@ fun main() {
         },
         module = {
             databaseModule(environment = environment)
+            val repository = EnhetRepository(database = applicationDatabase)
             apiModule(
                 applicationState = applicationState,
                 environment = environment,
                 wellKnownInternalAzureAD = wellKnownInternalAzureAD,
-                database = applicationDatabase,
+                repository = repository,
                 behandlendeEnhetProducer = behandlendeEnhetProducer,
                 pdlClient = pdlClient,
                 valkeyStore = valkeyStore,
@@ -121,7 +123,7 @@ fun main() {
                 applicationState.ready = true
                 log.info("Application is ready, running Java VM ${Runtime.version()}")
                 val identhendelseService = IdenthendelseService(
-                    database = applicationDatabase,
+                    repository = repository,
                     pdlClient = pdlClient,
                 )
                 val kafkaIdenthendelseConsumerService = IdenthendelseConsumerService(

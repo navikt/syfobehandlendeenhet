@@ -3,7 +3,7 @@ package no.nav.syfo.testhelper
 import no.nav.syfo.application.ApplicationEnvironmentKafka
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
-import no.nav.syfo.application.cache.ValkeyConfig
+import no.nav.syfo.infrastructure.cache.ValkeyConfig
 import no.nav.syfo.behandlendeenhet.api.access.PreAuthorizedClient
 import no.nav.syfo.util.configuredJacksonMapper
 import java.net.URI

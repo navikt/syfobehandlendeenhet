@@ -5,7 +5,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.application.api.authentication.getNAVIdent
-import no.nav.syfo.client.veiledertilgang.TilgangDTO
+import no.nav.syfo.infrastructure.client.veiledertilgang.TilgangDTO
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
 
 val tilgangFalse = TilgangDTO(

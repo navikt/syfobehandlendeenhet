@@ -1,11 +1,10 @@
 package no.nav.syfo.identhendelse
 
 import kotlinx.coroutines.*
-import no.nav.syfo.application.cache.ValkeyStore
-import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
-import no.nav.syfo.behandlendeenhet.database.createOrUpdatePerson
-import no.nav.syfo.client.azuread.AzureAdClient
-import no.nav.syfo.client.pdl.PdlClient
+import no.nav.syfo.infrastructure.cache.ValkeyStore
+import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
+import no.nav.syfo.infrastructure.client.pdl.PdlClient
+import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import no.nav.syfo.testhelper.ExternalMockEnvironment
 import no.nav.syfo.testhelper.UserConstants
 import no.nav.syfo.testhelper.dropData
@@ -22,6 +21,7 @@ object IdenthendelseServiceSpek : Spek({
     describe(IdenthendelseServiceSpek::class.java.simpleName) {
         val externalMockEnvironment = ExternalMockEnvironment.instance
         val database = externalMockEnvironment.database
+        val repository = EnhetRepository(database)
         val redisConfig = externalMockEnvironment.environment.valkeyConfig
         val valkeyStore = ValkeyStore(
             JedisPool(
@@ -48,7 +48,7 @@ object IdenthendelseServiceSpek : Spek({
         )
 
         val identhendelseService = IdenthendelseService(
-            database = database,
+            repository = repository,
             pdlClient = pdlClient,
         )
 
@@ -62,7 +62,7 @@ object IdenthendelseServiceSpek : Spek({
                 val newIdent = kafkaIdenthendelseDTO.getActivePersonident()!!
                 val oldIdent = kafkaIdenthendelseDTO.getInactivePersonidenter().first()
 
-                val oldUpdatedAt = database.createOrUpdatePerson(
+                val oldUpdatedAt = repository.createOrUpdatePerson(
                     personIdent = oldIdent,
                     isNavUtland = false,
                 )?.updatedAt
@@ -71,11 +71,11 @@ object IdenthendelseServiceSpek : Spek({
                     identhendelseService.handleIdenthendelse(kafkaIdenthendelseDTO)
                 }
 
-                val updatedPerson = database.getPersonByIdent(newIdent)
-                updatedPerson?.personident shouldBeEqualTo newIdent.value
+                val updatedPerson = repository.getPersonByIdent(newIdent)
+                updatedPerson?.personident?.value shouldBeEqualTo newIdent.value
                 updatedPerson?.updatedAt shouldNotBeEqualTo oldUpdatedAt
 
-                val oldPerson = database.getPersonByIdent(oldIdent)
+                val oldPerson = repository.getPersonByIdent(oldIdent)
                 oldPerson shouldBeEqualTo null
             }
 
@@ -84,12 +84,12 @@ object IdenthendelseServiceSpek : Spek({
                 val newIdent = kafkaIdenthendelseDTO.getActivePersonident()!!
                 val oldIdent = kafkaIdenthendelseDTO.getInactivePersonidenter().first()
 
-                database.createOrUpdatePerson(
+                repository.createOrUpdatePerson(
                     personIdent = newIdent,
                     isNavUtland = true,
                 )
 
-                database.createOrUpdatePerson(
+                repository.createOrUpdatePerson(
                     personIdent = oldIdent,
                     isNavUtland = false,
                 )
@@ -98,10 +98,10 @@ object IdenthendelseServiceSpek : Spek({
                     identhendelseService.handleIdenthendelse(kafkaIdenthendelseDTO)
                 }
 
-                val updatedPerson = database.getPersonByIdent(newIdent)
-                updatedPerson?.personident shouldBeEqualTo newIdent.value
+                val updatedPerson = repository.getPersonByIdent(newIdent)
+                updatedPerson?.personident?.value shouldBeEqualTo newIdent.value
 
-                val oldPerson = database.getPersonByIdent(oldIdent)
+                val oldPerson = repository.getPersonByIdent(oldIdent)
                 oldPerson shouldBeEqualTo null
             }
         }
@@ -114,7 +114,7 @@ object IdenthendelseServiceSpek : Spek({
                 )
                 val oldIdent = kafkaIdenthendelseDTO.getInactivePersonidenter().first()
 
-                database.createOrUpdatePerson(
+                repository.createOrUpdatePerson(
                     personIdent = oldIdent,
                     isNavUtland = false,
                 )

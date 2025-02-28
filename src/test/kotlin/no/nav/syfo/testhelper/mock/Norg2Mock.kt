@@ -2,10 +2,10 @@ package no.nav.syfo.testhelper.mock
 
 import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
-import no.nav.syfo.client.norg.domain.ArbeidsfordelingCriteria
-import no.nav.syfo.client.norg.domain.ArbeidsfordelingCriteriaBehandlingstype
-import no.nav.syfo.client.norg.domain.Enhetsstatus
-import no.nav.syfo.client.norg.domain.NorgEnhet
+import no.nav.syfo.infrastructure.client.norg.domain.ArbeidsfordelingCriteriaBehandlingstype
+import no.nav.syfo.infrastructure.client.norg.domain.Enhetsstatus
+import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
+import no.nav.syfo.infrastructure.client.norg.domain.ArbeidsfordelingCriteria
 
 const val ENHET_NR = "0101"
 const val ENHET_NAVN = "Enhet"
