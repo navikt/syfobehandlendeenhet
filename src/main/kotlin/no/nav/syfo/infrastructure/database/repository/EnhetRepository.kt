@@ -92,13 +92,7 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 ON CONFLICT (personident)
                 DO
                     UPDATE SET is_nav_utland = EXCLUDED.is_nav_utland, updated_at = EXCLUDED.updated_at
-                RETURNING
-                id,
-                uuid,
-                personident,
-                is_nav_utland,
-                created_at,
-                updated_at;
+                RETURNING *
             """
 
         private const val queryPersonByIdent =
