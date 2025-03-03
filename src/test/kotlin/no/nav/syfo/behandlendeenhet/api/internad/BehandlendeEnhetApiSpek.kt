@@ -10,10 +10,10 @@ import io.ktor.server.testing.*
 import io.mockk.*
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
 import no.nav.syfo.behandlendeenhet.api.PersonDTO
-import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.PersonIdentNumber
+import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
@@ -33,6 +33,7 @@ import org.spekframework.spek2.style.specification.describe
 class BehandlendeEnhetApiSpek : Spek({
     val externalMockEnvironment = ExternalMockEnvironment.instance
     val database = externalMockEnvironment.database
+    val repository = EnhetRepository(database)
 
     val kafkaProducerMock = mockk<KafkaProducer<String, KBehandlendeEnhetUpdate>>(relaxed = true)
     val behandlendeEnhetProducer = BehandlendeEnhetProducer(kafkaProducerMock)
@@ -178,14 +179,14 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     response.body<PersonDTO>() shouldBeEqualTo personDTO
 
-                    val pPerson = database.getPersonByIdent(PersonIdentNumber(personDTO.personident))
-                    pPerson?.isNavUtland shouldBeEqualTo true
-                    pPerson?.personident shouldBeEqualTo personDTO.personident
+                    val person = repository.getPersonByIdent(PersonIdentNumber(personDTO.personident))
+                    person?.isNavUtland shouldBeEqualTo true
+                    person?.personident?.value shouldBeEqualTo personDTO.personident
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
                     verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo pPerson?.personident
-                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo pPerson?.updatedAt
+                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo person?.personident?.value
+                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo person?.updatedAt
                 }
             }
 
@@ -198,7 +199,7 @@ class BehandlendeEnhetApiSpek : Spek({
                         setBody(personDTO)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val pPersonInsert = database.getPersonByIdent(PersonIdentNumber(personDTO.personident))
+                    val pPersonInsert = repository.getPersonByIdent(PersonIdentNumber(personDTO.personident))
                     pPersonInsert?.isNavUtland shouldBeEqualTo true
 
                     val updatePersonDTO = personDTO.copy(isNavUtland = false)
@@ -209,14 +210,14 @@ class BehandlendeEnhetApiSpek : Spek({
                     }
                     responsePost.status shouldBeEqualTo HttpStatusCode.OK
 
-                    val pPersonUpdate = database.getPersonByIdent(PersonIdentNumber(updatePersonDTO.personident))
-                    pPersonUpdate?.isNavUtland shouldBeEqualTo false
-                    pPersonUpdate?.id shouldBeEqualTo pPersonInsert?.id
+                    val personUpdate = repository.getPersonByIdent(PersonIdentNumber(updatePersonDTO.personident))
+                    personUpdate?.isNavUtland shouldBeEqualTo false
+                    personUpdate?.uuid shouldBeEqualTo pPersonInsert?.uuid
 
                     val kafkaRecordSlot = mutableListOf<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
                     verify(exactly = 2) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot[0].value().personident shouldBeEqualTo pPersonUpdate?.personident
-                    kafkaRecordSlot[1].value().updatedAt shouldBeEqualTo pPersonUpdate?.updatedAt
+                    kafkaRecordSlot[0].value().personident shouldBeEqualTo personUpdate?.personident?.value
+                    kafkaRecordSlot[1].value().updatedAt shouldBeEqualTo personUpdate?.updatedAt
                     kafkaRecordSlot[0].value().updatedAt shouldBeLessThan kafkaRecordSlot[1].value().updatedAt
                 }
             }

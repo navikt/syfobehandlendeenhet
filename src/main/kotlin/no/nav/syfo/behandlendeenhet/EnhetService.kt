@@ -1,18 +1,14 @@
 package no.nav.syfo.behandlendeenhet
 
 import no.nav.syfo.application.api.authentication.Token
-import no.nav.syfo.application.cache.ValkeyStore
-import no.nav.syfo.application.database.DatabaseInterface
-import no.nav.syfo.behandlendeenhet.database.domain.toPerson
-import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
-import no.nav.syfo.behandlendeenhet.database.createOrUpdatePerson
+import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.behandlendeenhet.domain.Person
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
-import no.nav.syfo.client.norg.NorgClient
-import no.nav.syfo.client.pdl.PdlClient
-import no.nav.syfo.client.pdl.domain.gradering
-import no.nav.syfo.client.pdl.domain.toArbeidsfordelingCriteriaDiskresjonskode
-import no.nav.syfo.client.skjermedepersonerpip.SkjermedePersonerPipClient
+import no.nav.syfo.infrastructure.client.norg.NorgClient
+import no.nav.syfo.infrastructure.client.pdl.PdlClient
+import no.nav.syfo.infrastructure.client.pdl.domain.gradering
+import no.nav.syfo.infrastructure.client.pdl.domain.toArbeidsfordelingCriteriaDiskresjonskode
+import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
 import no.nav.syfo.domain.PersonIdentNumber
 
 class EnhetService(
@@ -20,7 +16,7 @@ class EnhetService(
     private val pdlClient: PdlClient,
     private val valkeyStore: ValkeyStore,
     private val skjermedePersonerPipClient: SkjermedePersonerPipClient,
-    private val database: DatabaseInterface,
+    private val repository: IEnhetRepository,
     private val behandlendeEnhetProducer: BehandlendeEnhetProducer,
 ) {
     private val geografiskTilknytningUtvandret = "NOR"
@@ -76,8 +72,7 @@ class EnhetService(
     }
 
     fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? {
-        val pPerson = database.createOrUpdatePerson(personIdent, isNavUtland)
-        val person = pPerson?.toPerson()
+        val person = repository.createOrUpdatePerson(personIdent, isNavUtland)
         if (person != null) {
             val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}"
             valkeyStore.setObject(
@@ -85,13 +80,13 @@ class EnhetService(
                 value = null,
                 expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
             )
-            behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(person, pPerson.updatedAt)
+            behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(person, person.updatedAt)
         }
         return person
     }
 
     private fun getPerson(personIdent: PersonIdentNumber): Person? {
-        return database.getPersonByIdent(personIdent)?.toPerson()
+        return repository.getPersonByIdent(personIdent)
     }
 
     private fun isEnhetUtvandret(enhet: BehandlendeEnhet): Boolean {

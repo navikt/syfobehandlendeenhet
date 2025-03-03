@@ -1,8 +1,8 @@
 package no.nav.syfo.identhendelse.kafka
 
 import io.micrometer.core.instrument.Counter
-import no.nav.syfo.application.metric.METRICS_NS
-import no.nav.syfo.application.metric.METRICS_REGISTRY
+import no.nav.syfo.infrastructure.metric.METRICS_NS
+import no.nav.syfo.infrastructure.metric.METRICS_REGISTRY
 
 const val KAFKA_CONSUMER_PDL_AKTOR_BASE = "${METRICS_NS}_kafka_consumer_pdl_aktor_v2"
 const val KAFKA_CONSUMER_PDL_AKTOR_UPDATES = "${KAFKA_CONSUMER_PDL_AKTOR_BASE}_updates"

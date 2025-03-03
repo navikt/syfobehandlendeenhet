@@ -1,7 +1,7 @@
 package no.nav.syfo.application
 
 import io.ktor.server.application.*
-import no.nav.syfo.application.cache.ValkeyConfig
+import no.nav.syfo.infrastructure.cache.ValkeyConfig
 import java.net.URI
 
 data class Environment(

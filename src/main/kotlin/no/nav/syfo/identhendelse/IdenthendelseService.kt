@@ -1,19 +1,16 @@
 package no.nav.syfo.identhendelse
 
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.application.database.DatabaseInterface
-import no.nav.syfo.behandlendeenhet.database.getPersonByIdent
-import no.nav.syfo.client.pdl.PdlClient
+import no.nav.syfo.behandlendeenhet.IEnhetRepository
+import no.nav.syfo.infrastructure.client.pdl.PdlClient
 import no.nav.syfo.domain.PersonIdentNumber
-import no.nav.syfo.identhendelse.database.deletePerson
-import no.nav.syfo.identhendelse.database.updatePerson
 import no.nav.syfo.identhendelse.kafka.COUNT_KAFKA_CONSUMER_PDL_AKTOR_UPDATES
 import no.nav.syfo.identhendelse.kafka.KafkaIdenthendelseDTO
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class IdenthendelseService(
-    private val database: DatabaseInterface,
+    private val repository: IEnhetRepository,
     private val pdlClient: PdlClient,
 ) {
 
@@ -25,7 +22,7 @@ class IdenthendelseService(
             if (activeIdent != null) {
                 val inactiveIdenter = identhendelse.getInactivePersonidenter()
                 val oldPersonIdentList = inactiveIdenter.mapNotNull { personident ->
-                    database.getPersonByIdent(personident)?.let { PersonIdentNumber(it.personident) }
+                    repository.getPersonByIdent(personident)?.personident
                 }
 
                 if (oldPersonIdentList.isNotEmpty()) {
@@ -45,13 +42,13 @@ class IdenthendelseService(
         oldPersonIdentList: List<PersonIdentNumber>
     ): Int {
         var updatedRows = 0
-        val personActiveIdent = database.getPersonByIdent(activeIdent)
+        val personActiveIdent = repository.getPersonByIdent(activeIdent)
         if (personActiveIdent != null) {
             var deletedRows = 0
-            oldPersonIdentList.forEach { deletedRows += database.deletePerson(it) }
+            oldPersonIdentList.forEach { deletedRows += repository.deletePerson(it) }
             log.info("Identhendelse: Deleted $deletedRows entries with an inactive personident from database.")
         } else {
-            updatedRows += database.updatePerson(activeIdent, oldPersonIdentList.first())
+            updatedRows += repository.updatePersonident(activeIdent, oldPersonIdentList.first())
         }
         return updatedRows
     }

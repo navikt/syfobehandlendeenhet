@@ -10,9 +10,9 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig
-import no.nav.syfo.application.metric.METRICS_REGISTRY
+import no.nav.syfo.infrastructure.metric.METRICS_REGISTRY
 import no.nav.syfo.behandlendeenhet.api.access.ForbiddenAccessSystemConsumer
-import no.nav.syfo.client.pdl.GeografiskTilknytningNotFoundException
+import no.nav.syfo.infrastructure.client.pdl.GeografiskTilknytningNotFoundException
 import no.nav.syfo.util.*
 import java.time.Duration
 import java.util.*

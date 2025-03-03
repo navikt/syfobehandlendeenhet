@@ -2,12 +2,14 @@ package no.nav.syfo.behandlendeenhet.domain
 
 import no.nav.syfo.behandlendeenhet.api.PersonDTO
 import no.nav.syfo.domain.PersonIdentNumber
+import java.time.OffsetDateTime
 import java.util.*
 
 data class Person(
     val uuid: UUID,
     val personident: PersonIdentNumber,
-    val isNavUtland: Boolean
+    val isNavUtland: Boolean,
+    val updatedAt: OffsetDateTime,
 )
 
 fun Person.toPersonDTO() = PersonDTO(
