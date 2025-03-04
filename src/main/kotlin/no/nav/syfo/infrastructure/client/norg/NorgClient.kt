@@ -18,6 +18,22 @@ class NorgClient(
 
     private val norg2ArbeidsfordelingBestmatchUrl: String = "$baseUrl$ARBEIDSFORDELING_BESTMATCH_PATH"
 
+    private val norg2Enhetsnavn: String = "$baseUrl$ENHETSNAVN_PATH"
+
+    suspend fun getEnhetsnavn(
+        enhetsnr: String,
+    ): String? {
+        try {
+            val response: NorgEnhet? = httpClient.get("$norg2Enhetsnavn$enhetsnr") {
+                accept(ContentType.Application.Json)
+            }.body()
+            return response?.navn
+        } catch (e: ResponseException) {
+            log.error("Call to NORG2-enhet failed with status HTTP-{} for enhetsnr {}", e.response.status, enhetsnr)
+            return null
+        }
+    }
+
     suspend fun getArbeidsfordelingEnhet(
         callId: String,
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
@@ -93,5 +109,6 @@ class NorgClient(
         private val log = getLogger(NorgClient::class.java)
 
         const val ARBEIDSFORDELING_BESTMATCH_PATH = "/norg2/api/v1/arbeidsfordeling/enheter/bestmatch"
+        const val ENHETSNAVN_PATH = "/norg2/api/v1/enhet/"
     }
 }

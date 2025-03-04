@@ -1,6 +1,7 @@
 package no.nav.syfo.identhendelse
 
 import kotlinx.coroutines.*
+import no.nav.syfo.domain.Enhet
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.client.pdl.PdlClient
@@ -64,7 +65,7 @@ object IdenthendelseServiceSpek : Spek({
 
                 val oldUpdatedAt = repository.createOrUpdatePerson(
                     personIdent = oldIdent,
-                    isNavUtland = false,
+                    enhet = null,
                 )?.updatedAt
 
                 runBlocking {
@@ -86,12 +87,12 @@ object IdenthendelseServiceSpek : Spek({
 
                 repository.createOrUpdatePerson(
                     personIdent = newIdent,
-                    isNavUtland = true,
+                    enhet = Enhet(Enhet.enhetnrNAVUtland),
                 )
 
                 repository.createOrUpdatePerson(
                     personIdent = oldIdent,
-                    isNavUtland = false,
+                    enhet = null,
                 )
 
                 runBlocking {
@@ -116,7 +117,7 @@ object IdenthendelseServiceSpek : Spek({
 
                 repository.createOrUpdatePerson(
                     personIdent = oldIdent,
-                    isNavUtland = false,
+                    enhet = null,
                 )
 
                 runBlocking {

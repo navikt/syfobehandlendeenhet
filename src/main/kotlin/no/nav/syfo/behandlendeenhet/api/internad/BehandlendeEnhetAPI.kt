@@ -62,7 +62,7 @@ fun Route.registrerPersonApi(
 
             val person = enhetService.updatePerson(
                 personIdent = PersonIdentNumber(body.personident),
-                isNavUtland = body.isNavUtland
+                isNavUtland = body.isNavUtland,
             )
 
             if (person != null) {

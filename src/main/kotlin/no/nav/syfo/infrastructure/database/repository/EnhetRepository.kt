@@ -2,6 +2,7 @@ package no.nav.syfo.infrastructure.database.repository
 
 import no.nav.syfo.behandlendeenhet.IEnhetRepository
 import no.nav.syfo.behandlendeenhet.domain.Person
+import no.nav.syfo.domain.Enhet
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
@@ -14,14 +15,14 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
 
     override fun createOrUpdatePerson(
         personIdent: PersonIdentNumber,
-        isNavUtland: Boolean
+        enhet: Enhet?,
     ): Person? =
         database.connection.use { connection ->
             val now = OffsetDateTime.now()
             connection.prepareStatement(queryUpdatePerson).use {
                 it.setObject(1, UUID.randomUUID())
                 it.setString(2, personIdent.value)
-                it.setBoolean(3, isNavUtland)
+                it.setString(3, enhet?.value)
                 it.setObject(4, now)
                 it.setObject(5, now)
                 it.executeQuery().toList { toPPerson() }
@@ -44,7 +45,7 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
             id = getInt("id"),
             uuid = UUID.fromString(getString("uuid")),
             personident = getString("personident"),
-            isNavUtland = getBoolean("is_nav_utland"),
+            oppfolgingsenhet = getString("oppfolgingsenhet"),
             createdAt = getObject("created_at", OffsetDateTime::class.java),
             updatedAt = getObject("updated_at", OffsetDateTime::class.java),
         )
@@ -85,21 +86,21 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 id,
                 uuid,
                 personident,
-                is_nav_utland,
+                oppfolgingsenhet,
                 created_at,
                 updated_at
                 ) VALUES (DEFAULT, ?, ?, ?, ?, ?)
                 ON CONFLICT (personident)
                 DO
-                    UPDATE SET is_nav_utland = EXCLUDED.is_nav_utland, updated_at = EXCLUDED.updated_at
+                    UPDATE SET oppfolgingsenhet = EXCLUDED.oppfolgingsenhet, updated_at = EXCLUDED.updated_at
                 RETURNING *
             """
 
         private const val queryPersonByIdent =
             """
                 SELECT *
-                FROM PERSON N
-                WHERE N.personident = ?
+                FROM PERSON
+                WHERE personident = ?
             """
 
         private const val queryUpdatePersonident =

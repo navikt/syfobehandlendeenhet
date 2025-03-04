@@ -3,7 +3,10 @@ package no.nav.syfo.behandlendeenhet
 import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.behandlendeenhet.domain.Person
+import no.nav.syfo.behandlendeenhet.domain.isOppfolgingsenhetNavUtland
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
+import no.nav.syfo.domain.Enhet
+import no.nav.syfo.domain.Enhet.Companion.enhetnrNAVUtland
 import no.nav.syfo.infrastructure.client.norg.NorgClient
 import no.nav.syfo.infrastructure.client.pdl.PdlClient
 import no.nav.syfo.infrastructure.client.pdl.domain.gradering
@@ -20,7 +23,7 @@ class EnhetService(
     private val behandlendeEnhetProducer: BehandlendeEnhetProducer,
 ) {
     private val geografiskTilknytningUtvandret = "NOR"
-    private val enhetnrNAVUtland = "0393"
+    private val enhetsnavnMangler = "Enhetsnavn mangler"
 
     suspend fun arbeidstakersBehandlendeEnhet(
         callId: String,
@@ -29,38 +32,45 @@ class EnhetService(
     ): BehandlendeEnhet? {
         val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
         val cachedBehandlendeEnhet: BehandlendeEnhet? = valkeyStore.getObject(key = cacheKey)
-        if (cachedBehandlendeEnhet != null) {
+        if (cachedBehandlendeEnhet != null && cachedBehandlendeEnhet.navn != enhetsnavnMangler) {
             return cachedBehandlendeEnhet
         } else {
-            val geografiskTilknytning = pdlClient.geografiskTilknytning(
-                callId = callId,
-                personIdentNumber = personIdentNumber,
-            )
-            val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
-                callId = callId,
-                personIdentNumber = personIdentNumber,
-                veilederToken = veilederToken,
-            )
-
-            val graderingList = pdlClient.person(
-                callId = callId,
-                personIdentNumber = personIdentNumber,
-            )?.gradering()
-
-            val person = getPerson(personIdentNumber)
-
-            val behandlendeEnhet = norgClient.getArbeidsfordelingEnhet(
-                callId = callId,
-                diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
-                geografiskTilknytning = geografiskTilknytning,
-                isEgenAnsatt = isEgenAnsatt,
-                isNavUtland = person?.isNavUtland ?: false,
-            ) ?: return null
-
-            val behandlendeEnhetResponse = if (isEnhetUtvandret(behandlendeEnhet)) {
-                getEnhetNAVUtland(behandlendeEnhet)
+            val oppfolgingsenhet = repository.getPersonByIdent(personIdentNumber)?.oppfolgingsenhet
+            val behandlendeEnhetResponse = if (oppfolgingsenhet != null) {
+                BehandlendeEnhet(
+                    enhetId = oppfolgingsenhet.value,
+                    navn = norgClient.getEnhetsnavn(oppfolgingsenhet.value) ?: enhetsnavnMangler,
+                )
             } else {
-                behandlendeEnhet
+                val geografiskTilknytning = pdlClient.geografiskTilknytning(
+                    callId = callId,
+                    personIdentNumber = personIdentNumber,
+                )
+                val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
+                    callId = callId,
+                    personIdentNumber = personIdentNumber,
+                    veilederToken = veilederToken,
+                )
+                val graderingList = pdlClient.person(
+                    callId = callId,
+                    personIdentNumber = personIdentNumber,
+                )?.gradering()
+
+                val person = getPerson(personIdentNumber)
+
+                val behandlendeEnhet = norgClient.getArbeidsfordelingEnhet(
+                    callId = callId,
+                    diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
+                    geografiskTilknytning = geografiskTilknytning,
+                    isEgenAnsatt = isEgenAnsatt,
+                    isNavUtland = person?.isOppfolgingsenhetNavUtland() ?: false,
+                ) ?: return null
+
+                if (isEnhetUtvandret(behandlendeEnhet)) {
+                    getEnhetNAVUtland(behandlendeEnhet)
+                } else {
+                    behandlendeEnhet
+                }
             }
             valkeyStore.setObject(
                 key = cacheKey,
@@ -71,8 +81,11 @@ class EnhetService(
         }
     }
 
-    fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? {
-        val person = repository.createOrUpdatePerson(personIdent, isNavUtland)
+    fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? =
+        updatePerson(personIdent, if (isNavUtland) Enhet(enhetnrNAVUtland) else null)
+
+    fun updatePerson(personIdent: PersonIdentNumber, oppfolgingsenhet: Enhet?): Person? {
+        val person = repository.createOrUpdatePerson(personIdent, oppfolgingsenhet)
         if (person != null) {
             val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}"
             valkeyStore.setObject(
@@ -95,7 +108,7 @@ class EnhetService(
 
     private fun getEnhetNAVUtland(enhet: BehandlendeEnhet): BehandlendeEnhet {
         return BehandlendeEnhet(
-            enhetId = enhetnrNAVUtland,
+            enhetId = Enhet.enhetnrNAVUtland,
             navn = enhet.navn,
         )
     }

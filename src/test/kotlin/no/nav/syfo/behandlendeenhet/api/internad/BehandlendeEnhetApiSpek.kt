@@ -23,6 +23,7 @@ import no.nav.syfo.testhelper.generator.generatePersonDTO
 import no.nav.syfo.testhelper.mock.norg2Response
 import no.nav.syfo.testhelper.mock.norg2ResponseNavUtland
 import no.nav.syfo.util.*
+import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeLessThan
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -180,7 +181,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.body<PersonDTO>() shouldBeEqualTo personDTO
 
                     val person = repository.getPersonByIdent(PersonIdentNumber(personDTO.personident))
-                    person?.isNavUtland shouldBeEqualTo true
+                    person?.oppfolgingsenhet?.isNavUtland() shouldBeEqualTo true
                     person?.personident?.value shouldBeEqualTo personDTO.personident
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
@@ -199,8 +200,8 @@ class BehandlendeEnhetApiSpek : Spek({
                         setBody(personDTO)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val pPersonInsert = repository.getPersonByIdent(PersonIdentNumber(personDTO.personident))
-                    pPersonInsert?.isNavUtland shouldBeEqualTo true
+                    val person = repository.getPersonByIdent(PersonIdentNumber(personDTO.personident))
+                    person?.oppfolgingsenhet?.isNavUtland() shouldBeEqualTo true
 
                     val updatePersonDTO = personDTO.copy(isNavUtland = false)
                     val responsePost = client.post(personUrl) {
@@ -211,8 +212,8 @@ class BehandlendeEnhetApiSpek : Spek({
                     responsePost.status shouldBeEqualTo HttpStatusCode.OK
 
                     val personUpdate = repository.getPersonByIdent(PersonIdentNumber(updatePersonDTO.personident))
-                    personUpdate?.isNavUtland shouldBeEqualTo false
-                    personUpdate?.uuid shouldBeEqualTo pPersonInsert?.uuid
+                    personUpdate?.oppfolgingsenhet shouldBe null
+                    personUpdate?.uuid shouldBeEqualTo person?.uuid
 
                     val kafkaRecordSlot = mutableListOf<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
                     verify(exactly = 2) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }

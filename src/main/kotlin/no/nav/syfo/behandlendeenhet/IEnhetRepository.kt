@@ -1,12 +1,13 @@
 package no.nav.syfo.behandlendeenhet
 
 import no.nav.syfo.behandlendeenhet.domain.Person
+import no.nav.syfo.domain.Enhet
 import no.nav.syfo.domain.PersonIdentNumber
 
 interface IEnhetRepository {
     fun createOrUpdatePerson(
         personIdent: PersonIdentNumber,
-        isNavUtland: Boolean,
+        enhet: Enhet?,
     ): Person?
 
     fun getPersonByIdent(personIdent: PersonIdentNumber): Person?
