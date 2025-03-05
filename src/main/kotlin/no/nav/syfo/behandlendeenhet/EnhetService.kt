@@ -41,7 +41,7 @@ class EnhetService(
             val behandlendeEnhetResponse = if (oppfolgingsenhet != null) {
                 BehandlendeEnhet(
                     enhetId = oppfolgingsenhet.value,
-                    navn = norgClient.getEnhetsnavn(oppfolgingsenhet.value) ?: enhetsnavnMangler,
+                    navn = getEnhetsnavn(oppfolgingsenhet),
                 )
             } else {
                 val geografiskTilknytning = pdlClient.geografiskTilknytning(
@@ -112,6 +112,13 @@ class EnhetService(
             navn = enhetnavnNAVUtland,
         )
     }
+
+    private suspend fun getEnhetsnavn(oppfolgingsenhet: Enhet) =
+        if (oppfolgingsenhet.isNavUtland()) {
+            enhetnavnNAVUtland
+        } else {
+            norgClient.getEnhetsnavn(oppfolgingsenhet.value) ?: enhetsnavnMangler
+        }
 
     companion object {
         const val CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX = "behandlendeenhet-personident-"
