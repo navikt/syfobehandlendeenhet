@@ -13,6 +13,6 @@ data class Enhet(val value: String) {
 
     companion object {
         const val enhetnrNAVUtland = "0393"
-        const val enhetnavnNAVUtland = "Nav Utland"
+        const val enhetnavnNAVUtland = "Nav utland"
     }
 }

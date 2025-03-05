@@ -22,17 +22,16 @@ class NorgClient(
 
     suspend fun getEnhetsnavn(
         enhetsnr: String,
-    ): String? {
+    ): String? =
         try {
             val response: NorgEnhet? = httpClient.get("$norg2Enhetsnavn$enhetsnr") {
                 accept(ContentType.Application.Json)
             }.body()
-            return response?.navn
+            response?.navn
         } catch (e: ResponseException) {
             log.error("Call to NORG2-enhet failed with status HTTP-{} for enhetsnr {}", e.response.status, enhetsnr)
-            return null
+            null
         }
-    }
 
     suspend fun getArbeidsfordelingEnhet(
         callId: String,

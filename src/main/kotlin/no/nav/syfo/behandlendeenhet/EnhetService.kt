@@ -6,6 +6,7 @@ import no.nav.syfo.behandlendeenhet.domain.Person
 import no.nav.syfo.behandlendeenhet.domain.isOppfolgingsenhetNavUtland
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.domain.Enhet
+import no.nav.syfo.domain.Enhet.Companion.enhetnavnNAVUtland
 import no.nav.syfo.domain.Enhet.Companion.enhetnrNAVUtland
 import no.nav.syfo.infrastructure.client.norg.NorgClient
 import no.nav.syfo.infrastructure.client.pdl.PdlClient
@@ -67,7 +68,7 @@ class EnhetService(
                 ) ?: return null
 
                 if (isEnhetUtvandret(behandlendeEnhet)) {
-                    getEnhetNAVUtland(behandlendeEnhet)
+                    getEnhetNAVUtland()
                 } else {
                     behandlendeEnhet
                 }
@@ -106,10 +107,10 @@ class EnhetService(
         return enhet.enhetId == geografiskTilknytningUtvandret
     }
 
-    private fun getEnhetNAVUtland(enhet: BehandlendeEnhet): BehandlendeEnhet {
+    private fun getEnhetNAVUtland(): BehandlendeEnhet {
         return BehandlendeEnhet(
-            enhetId = Enhet.enhetnrNAVUtland,
-            navn = enhet.navn,
+            enhetId = enhetnrNAVUtland,
+            navn = enhetnavnNAVUtland,
         )
     }
 

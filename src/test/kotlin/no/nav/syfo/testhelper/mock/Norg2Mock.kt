@@ -41,7 +41,7 @@ suspend fun MockRequestHandleScope.getNorg2Response(request: HttpRequestData): H
     val path = request.url.encodedPath
     return if (path.endsWith(NorgClient.ARBEIDSFORDELING_BESTMATCH_PATH)) {
         val body = request.receiveBody<ArbeidsfordelingCriteria>()
-        return if (body.behandlingstype == ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype) {
+        if (body.behandlingstype == ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype) {
             respond(norg2ResponseNavUtland)
         } else {
             respond(norg2Response)
