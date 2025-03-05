@@ -36,7 +36,8 @@ class EnhetService(
         if (cachedBehandlendeEnhet != null && cachedBehandlendeEnhet.navn != enhetsnavnMangler) {
             return cachedBehandlendeEnhet
         } else {
-            val oppfolgingsenhet = repository.getPersonByIdent(personIdentNumber)?.oppfolgingsenhet
+            val person = getPerson(personIdentNumber)
+            val oppfolgingsenhet = person?.oppfolgingsenhet
             val behandlendeEnhetResponse = if (oppfolgingsenhet != null) {
                 BehandlendeEnhet(
                     enhetId = oppfolgingsenhet.value,
@@ -56,8 +57,6 @@ class EnhetService(
                     callId = callId,
                     personIdentNumber = personIdentNumber,
                 )?.gradering()
-
-                val person = getPerson(personIdentNumber)
 
                 val behandlendeEnhet = norgClient.getArbeidsfordelingEnhet(
                     callId = callId,
