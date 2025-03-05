@@ -87,7 +87,7 @@ object IdenthendelseServiceSpek : Spek({
 
                 repository.createOrUpdatePerson(
                     personIdent = newIdent,
-                    enhet = Enhet(Enhet.enhetnrNAVUtland),
+                    enhet = Enhet(Enhet.ENHETNR_NAV_UTLAND),
                 )
 
                 repository.createOrUpdatePerson(

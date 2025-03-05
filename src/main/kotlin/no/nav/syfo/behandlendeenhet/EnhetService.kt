@@ -6,8 +6,8 @@ import no.nav.syfo.behandlendeenhet.domain.Person
 import no.nav.syfo.behandlendeenhet.domain.isOppfolgingsenhetNavUtland
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.domain.Enhet
-import no.nav.syfo.domain.Enhet.Companion.enhetnavnNAVUtland
-import no.nav.syfo.domain.Enhet.Companion.enhetnrNAVUtland
+import no.nav.syfo.domain.Enhet.Companion.ENHETNAVN_NAV_UTLAND
+import no.nav.syfo.domain.Enhet.Companion.ENHETNR_NAV_UTLAND
 import no.nav.syfo.infrastructure.client.norg.NorgClient
 import no.nav.syfo.infrastructure.client.pdl.PdlClient
 import no.nav.syfo.infrastructure.client.pdl.domain.gradering
@@ -82,7 +82,7 @@ class EnhetService(
     }
 
     fun updatePerson(personIdent: PersonIdentNumber, isNavUtland: Boolean): Person? =
-        updatePerson(personIdent, if (isNavUtland) Enhet(enhetnrNAVUtland) else null)
+        updatePerson(personIdent, if (isNavUtland) Enhet(ENHETNR_NAV_UTLAND) else null)
 
     fun updatePerson(personIdent: PersonIdentNumber, oppfolgingsenhet: Enhet?): Person? {
         val person = repository.createOrUpdatePerson(personIdent, oppfolgingsenhet)
@@ -108,14 +108,14 @@ class EnhetService(
 
     private fun getEnhetNAVUtland(): BehandlendeEnhet {
         return BehandlendeEnhet(
-            enhetId = enhetnrNAVUtland,
-            navn = enhetnavnNAVUtland,
+            enhetId = ENHETNR_NAV_UTLAND,
+            navn = ENHETNAVN_NAV_UTLAND,
         )
     }
 
     private suspend fun getEnhetsnavn(oppfolgingsenhet: Enhet) =
         if (oppfolgingsenhet.isNavUtland()) {
-            enhetnavnNAVUtland
+            ENHETNAVN_NAV_UTLAND
         } else {
             norgClient.getEnhetsnavn(oppfolgingsenhet.value) ?: enhetsnavnMangler
         }

@@ -9,10 +9,10 @@ data class Enhet(val value: String) {
         }
     }
 
-    fun isNavUtland() = this.value == enhetnrNAVUtland
+    fun isNavUtland() = this.value == ENHETNR_NAV_UTLAND
 
     companion object {
-        const val enhetnrNAVUtland = "0393"
-        const val enhetnavnNAVUtland = "Nav utland"
+        const val ENHETNR_NAV_UTLAND = "0393"
+        const val ENHETNAVN_NAV_UTLAND = "Nav utland"
     }
 }

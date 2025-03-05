@@ -10,5 +10,5 @@ fun generatePersonDTO(
 ) = PersonDTO(
     personident = personident,
     isNavUtland = isNavUtland,
-    oppfolgingsenhet = if (isNavUtland) Enhet.enhetnrNAVUtland else null,
+    oppfolgingsenhet = if (isNavUtland) Enhet.ENHETNR_NAV_UTLAND else null,
 )

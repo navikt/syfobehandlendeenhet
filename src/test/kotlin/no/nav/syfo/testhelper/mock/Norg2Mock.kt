@@ -12,10 +12,10 @@ import no.nav.syfo.infrastructure.client.norg.domain.ArbeidsfordelingCriteria
 const val ENHET_NR = "0101"
 const val ENHET_NAVN = "Enhet"
 
-fun generateNorgEnhet(navUtland: Boolean = false): NorgEnhet {
+fun generateNorgEnhet(isNavUtland: Boolean = false): NorgEnhet {
     return NorgEnhet(
-        enhetNr = if (navUtland) Enhet.enhetnrNAVUtland else ENHET_NR,
-        navn = if (navUtland) Enhet.enhetnavnNAVUtland else ENHET_NAVN,
+        enhetNr = if (isNavUtland) Enhet.ENHETNR_NAV_UTLAND else ENHET_NR,
+        navn = if (isNavUtland) Enhet.ENHETNAVN_NAV_UTLAND else ENHET_NAVN,
         status = Enhetsstatus.AKTIV.formattedName,
         aktiveringsdato = null,
         antallRessurser = null,
@@ -49,7 +49,7 @@ suspend fun MockRequestHandleScope.getNorg2Response(request: HttpRequestData): H
     } else {
         // ENHETSNAVN_PATH
         respond(
-            if (path.endsWith(Enhet.enhetnrNAVUtland)) {
+            if (path.endsWith(Enhet.ENHETNR_NAV_UTLAND)) {
                 generateNorgEnhet(true)
             } else {
                 generateNorgEnhet(false)
