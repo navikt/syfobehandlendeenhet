@@ -33,7 +33,7 @@ fun generateNorgEnhet(): NorgEnhet {
 }
 
 val norg2Response = listOf(generateNorgEnhet())
-val norg2ResponseNavUtland = listOf(generateNorgEnhet().copy(enhetNr = "0393", navn = "NAV Utland"))
+val norg2ResponseNavUtland = listOf(generateNorgEnhet().copy(enhetNr = "0393", navn = "Nav utland"))
 
 suspend fun MockRequestHandleScope.getNorg2Response(request: HttpRequestData): HttpResponseData {
     val body = request.receiveBody<ArbeidsfordelingCriteria>()

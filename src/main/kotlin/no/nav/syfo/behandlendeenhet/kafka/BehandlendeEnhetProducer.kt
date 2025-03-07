@@ -1,6 +1,6 @@
 package no.nav.syfo.behandlendeenhet.kafka
 
-import no.nav.syfo.behandlendeenhet.domain.Person
+import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -11,17 +11,17 @@ class BehandlendeEnhetProducer(
     private val kafkaProducerBehandlendeEnhet: KafkaProducer<String, KBehandlendeEnhetUpdate>,
 ) {
     fun sendBehandlendeEnhetUpdate(
-        person: Person,
+        oppfolgingsenhet: Oppfolgingsenhet,
         updatedAt: OffsetDateTime,
     ) {
-        val key = UUID.nameUUIDFromBytes(person.personident.value.toByteArray()).toString()
+        val key = UUID.nameUUIDFromBytes(oppfolgingsenhet.personident.value.toByteArray()).toString()
         try {
             kafkaProducerBehandlendeEnhet.send(
                 ProducerRecord(
                     BEHANDLENDE_ENHET_UPDATE_TOPIC,
                     key,
                     KBehandlendeEnhetUpdate(
-                        person.personident.value,
+                        oppfolgingsenhet.personident.value,
                         updatedAt,
                     ),
                 )
@@ -30,7 +30,7 @@ class BehandlendeEnhetProducer(
             log.error(
                 """
                     Exception was thrown when attempting to send enhet update on person.
-                    Person-uuid: ${person.uuid}
+                    Person-uuid: ${oppfolgingsenhet.uuid}
                     Kafka-key: $key
                     Error-message: ${e.message}
                 """.trimIndent(),
