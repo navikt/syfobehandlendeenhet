@@ -61,15 +61,17 @@ fun Route.registrerPersonApi(
             val body = call.receive<PersonDTO>()
 
             val oppfolgingsenhet = enhetService.updateOppfolgingsenhet(
+                callId = callId,
                 personIdent = PersonIdentNumber(body.personident),
-                isNavUtland = body.isNavUtland
+                isNavUtland = body.isNavUtland,
+                veilederToken = token,
             )
 
             if (oppfolgingsenhet != null) {
                 call.respond(oppfolgingsenhet.toPersonDTO())
             } else {
                 log.error("Could not set oppfolgingsenhet in database")
-                call.respond(HttpStatusCode.InternalServerError)
+                call.respond(HttpStatusCode.Forbidden)
             }
         }
     }

@@ -1,6 +1,7 @@
 package no.nav.syfo.behandlendeenhet
 
 import no.nav.syfo.application.api.authentication.Token
+import no.nav.syfo.application.api.authentication.getNAVIdent
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
@@ -13,6 +14,8 @@ import no.nav.syfo.infrastructure.client.pdl.domain.gradering
 import no.nav.syfo.infrastructure.client.pdl.domain.toArbeidsfordelingCriteriaDiskresjonskode
 import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
 import no.nav.syfo.domain.PersonIdentNumber
+import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
+import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 
 class EnhetService(
     private val norgClient: NorgClient,
@@ -77,25 +80,55 @@ class EnhetService(
         }
     }
 
-    fun updateOppfolgingsenhet(personIdent: PersonIdentNumber, isNavUtland: Boolean): Oppfolgingsenhet? {
+    suspend fun updateOppfolgingsenhet(
+        callId: String,
+        personIdent: PersonIdentNumber,
+        isNavUtland: Boolean,
+        veilederToken: Token,
+    ): Oppfolgingsenhet? {
         val enhet = if (isNavUtland) {
             Enhet(ENHETNR_NAV_UTLAND)
         } else {
             null
         }
-        return updateOppfolgingsenhet(personIdent, enhet)
+        return updateOppfolgingsenhet(callId, personIdent, enhet, veilederToken)
     }
 
-    fun updateOppfolgingsenhet(personIdent: PersonIdentNumber, enhet: Enhet?): Oppfolgingsenhet {
-        // TODO: set veilederident from token
-        val oppfolgingenhet = repository.createOppfolgingsenhet(personIdent, enhet, SYSTEM_BRUKER)
-        valkeyStore.setObject(
-            key = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}",
-            value = null,
-            expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
+    suspend fun updateOppfolgingsenhet(
+        callId: String,
+        personIdent: PersonIdentNumber,
+        enhet: Enhet?,
+        veilederToken: Token,
+    ): Oppfolgingsenhet? =
+        if (validateForOppfolgingsenhet(callId, personIdent, veilederToken)) {
+            repository.createOppfolgingsenhet(personIdent, enhet, veilederToken.getNAVIdent()).also {
+                valkeyStore.setObject(
+                    key = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}",
+                    value = null,
+                    expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
+                )
+                behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
+            }
+        } else {
+            null
+        }
+
+    private suspend fun validateForOppfolgingsenhet(
+        callId: String,
+        personIdent: PersonIdentNumber,
+        veilederToken: Token,
+    ): Boolean {
+        val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
+            callId = callId,
+            personIdentNumber = personIdent,
+            veilederToken = veilederToken,
         )
-        behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(oppfolgingenhet, oppfolgingenhet.createdAt)
-        return oppfolgingenhet
+        val graderingList = pdlClient.person(
+            callId = callId,
+            personIdentNumber = personIdent,
+        )?.gradering()
+
+        return !isEgenAnsatt && (graderingList == null || graderingList.none { it.isKode6() || it.isKode7() })
     }
 
     private fun getOppfolgingsenhet(personIdent: PersonIdentNumber): Oppfolgingsenhet? {

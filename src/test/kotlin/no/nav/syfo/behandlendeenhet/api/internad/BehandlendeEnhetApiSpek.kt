@@ -15,6 +15,8 @@ import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import no.nav.syfo.testhelper.*
+import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
+import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_EGENANSATT
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
@@ -247,6 +249,28 @@ class BehandlendeEnhetApiSpek : Spek({
                         bearerAuth(validTokenNoAccess)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(personDTO)
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.Forbidden
+                }
+            }
+            it("should return status Forbidden if kode 6/7") {
+                testApplication {
+                    val client = setupApiAndClient()
+                    val response = client.post(personUrl) {
+                        bearerAuth(validToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(personDTO.copy(personident = ARBEIDSTAKER_ADRESSEBESKYTTET.value))
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.Forbidden
+                }
+            }
+            it("should return status Forbidden if egen ansatt") {
+                testApplication {
+                    val client = setupApiAndClient()
+                    val response = client.post(personUrl) {
+                        bearerAuth(validToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(personDTO.copy(personident = ARBEIDSTAKER_EGENANSATT.value))
                     }
                     response.status shouldBeEqualTo HttpStatusCode.Forbidden
                 }
