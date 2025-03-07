@@ -71,7 +71,7 @@ fun Route.registrerPersonApi(
                 call.respond(oppfolgingsenhet.toPersonDTO())
             } else {
                 log.error("Could not set oppfolgingsenhet in database")
-                call.respond(HttpStatusCode.Forbidden)
+                call.respond(HttpStatusCode.BadRequest)
             }
         }
     }

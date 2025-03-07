@@ -253,7 +253,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.Forbidden
                 }
             }
-            it("should return status Forbidden if kode 6/7") {
+            it("should return status BadRequest if kode 6/7") {
                 testApplication {
                     val client = setupApiAndClient()
                     val response = client.post(personUrl) {
@@ -261,10 +261,10 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(personDTO.copy(personident = ARBEIDSTAKER_ADRESSEBESKYTTET.value))
                     }
-                    response.status shouldBeEqualTo HttpStatusCode.Forbidden
+                    response.status shouldBeEqualTo HttpStatusCode.BadRequest
                 }
             }
-            it("should return status Forbidden if egen ansatt") {
+            it("should return status BadRequest if egen ansatt") {
                 testApplication {
                     val client = setupApiAndClient()
                     val response = client.post(personUrl) {
@@ -272,7 +272,7 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(personDTO.copy(personident = ARBEIDSTAKER_EGENANSATT.value))
                     }
-                    response.status shouldBeEqualTo HttpStatusCode.Forbidden
+                    response.status shouldBeEqualTo HttpStatusCode.BadRequest
                 }
             }
         }
