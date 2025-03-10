@@ -22,7 +22,7 @@ class IdenthendelseService(
             if (activeIdent != null) {
                 val inactiveIdenter = identhendelse.getInactivePersonidenter()
                 val oldPersonIdentList = inactiveIdenter.mapNotNull { personident ->
-                    repository.getPersonByIdent(personident)?.personident
+                    repository.getOppfolgingsenhetByPersonident(personident)?.personident
                 }
 
                 if (oldPersonIdentList.isNotEmpty()) {
@@ -42,7 +42,7 @@ class IdenthendelseService(
         oldPersonIdentList: List<PersonIdentNumber>
     ): Int {
         var updatedRows = 0
-        val personActiveIdent = repository.getPersonByIdent(activeIdent)
+        val personActiveIdent = repository.getOppfolgingsenhetByPersonident(activeIdent)
         if (personActiveIdent != null) {
             var deletedRows = 0
             oldPersonIdentList.forEach { deletedRows += repository.deletePerson(it) }

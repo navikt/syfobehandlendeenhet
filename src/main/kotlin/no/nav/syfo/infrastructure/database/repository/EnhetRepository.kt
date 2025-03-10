@@ -1,62 +1,61 @@
 package no.nav.syfo.infrastructure.database.repository
 
 import no.nav.syfo.behandlendeenhet.IEnhetRepository
-import no.nav.syfo.behandlendeenhet.domain.Person
+import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
+import no.nav.syfo.domain.Enhet
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
-import no.nav.syfo.util.nowUTC
 import java.sql.ResultSet
 import java.time.OffsetDateTime
 import java.util.*
 
 class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepository {
 
-    override fun createOrUpdatePerson(
+    override fun createOppfolgingsenhet(
         personIdent: PersonIdentNumber,
-        isNavUtland: Boolean
-    ): Person? =
+        enhet: Enhet?,
+        veilederident: String,
+    ): Oppfolgingsenhet =
         database.connection.use { connection ->
             val now = OffsetDateTime.now()
-            connection.prepareStatement(queryUpdatePerson).use {
+            connection.prepareStatement(createOppfolgingsenhet).use {
                 it.setObject(1, UUID.randomUUID())
                 it.setString(2, personIdent.value)
-                it.setBoolean(3, isNavUtland)
-                it.setObject(4, now)
+                it.setString(3, enhet?.value)
+                it.setString(4, veilederident)
                 it.setObject(5, now)
-                it.executeQuery().toList { toPPerson() }
+                it.executeQuery().toList { toPOppfolgingsenhet() }
             }.also {
                 connection.commit()
             }
-        }.firstOrNull()?.toPerson()
+        }.first().toOppfolgingsenhet()
 
-    override fun getPersonByIdent(personIdent: PersonIdentNumber): Person? =
+    override fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): Oppfolgingsenhet? =
         database.connection.use { connection ->
-            connection.prepareStatement(queryPersonByIdent)
+            connection.prepareStatement(queryOppfolgingsenhetByPersonident)
                 .use {
                     it.setString(1, personIdent.value)
-                    it.executeQuery().toList { toPPerson() }
+                    it.executeQuery().toList { toPOppfolgingsenhet() }
                 }
-        }.firstOrNull()?.toPerson()
+        }.firstOrNull()?.toOppfolgingsenhet()
 
-    private fun ResultSet.toPPerson() =
-        PPerson(
+    private fun ResultSet.toPOppfolgingsenhet() =
+        POppfolgingsenhet(
             id = getInt("id"),
             uuid = UUID.fromString(getString("uuid")),
             personident = getString("personident"),
-            isNavUtland = getBoolean("is_nav_utland"),
+            oppfolgingsenhet = getString("oppfolgingsenhet"),
+            veilederident = getString("veilederident"),
             createdAt = getObject("created_at", OffsetDateTime::class.java),
-            updatedAt = getObject("updated_at", OffsetDateTime::class.java),
         )
 
     override fun updatePersonident(nyPersonident: PersonIdentNumber, oldIdent: PersonIdentNumber): Int {
         var updatedRows: Int
-        val now = nowUTC()
         database.connection.use { connection ->
             updatedRows = connection.prepareStatement(queryUpdatePersonident).use {
                 it.setString(1, nyPersonident.value)
-                it.setObject(2, now)
-                it.setString(3, oldIdent.value)
+                it.setString(2, oldIdent.value)
                 it.executeUpdate()
             }.also {
                 connection.commit()
@@ -79,39 +78,37 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
     }
 
     companion object {
-        private const val queryUpdatePerson =
+        private const val createOppfolgingsenhet =
             """
-            INSERT INTO PERSON (
+            INSERT INTO OPPFOLGINGSENHET (
                 id,
                 uuid,
                 personident,
-                is_nav_utland,
-                created_at,
-                updated_at
+                oppfolgingsenhet,
+                veilederident,
+                created_at
                 ) VALUES (DEFAULT, ?, ?, ?, ?, ?)
-                ON CONFLICT (personident)
-                DO
-                    UPDATE SET is_nav_utland = EXCLUDED.is_nav_utland, updated_at = EXCLUDED.updated_at
                 RETURNING *
             """
 
-        private const val queryPersonByIdent =
+        private const val queryOppfolgingsenhetByPersonident =
             """
                 SELECT *
-                FROM PERSON N
-                WHERE N.personident = ?
+                FROM OPPFOLGINGSENHET
+                WHERE personident = ?
+                ORDER BY created_at DESC
             """
 
         private const val queryUpdatePersonident =
             """
-                UPDATE PERSON
-                SET personident = ?, updated_at = ?
+                UPDATE OPPFOLGINGSENHET
+                SET personident = ?
                 WHERE personident = ?
             """
 
         private const val queryDeletePerson =
             """
-                DELETE FROM PERSON
+                DELETE FROM OPPFOLGINGSENHET
                 WHERE personident = ?
             """
     }

@@ -1,6 +1,8 @@
 package no.nav.syfo.identhendelse
 
 import kotlinx.coroutines.*
+import no.nav.syfo.domain.Enhet
+import no.nav.syfo.domain.Enhet.Companion.ENHETNR_NAV_UTLAND
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.client.pdl.PdlClient
@@ -11,7 +13,6 @@ import no.nav.syfo.testhelper.dropData
 import no.nav.syfo.testhelper.generator.generateKafkaIdenthendelseDTO
 import org.amshove.kluent.internal.assertFailsWith
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import redis.clients.jedis.*
@@ -62,21 +63,21 @@ object IdenthendelseServiceSpek : Spek({
                 val newIdent = kafkaIdenthendelseDTO.getActivePersonident()!!
                 val oldIdent = kafkaIdenthendelseDTO.getInactivePersonidenter().first()
 
-                val oldUpdatedAt = repository.createOrUpdatePerson(
+                repository.createOppfolgingsenhet(
                     personIdent = oldIdent,
-                    isNavUtland = false,
-                )?.updatedAt
+                    enhet = null,
+                    veilederident = "Z999999",
+                )
 
                 runBlocking {
                     identhendelseService.handleIdenthendelse(kafkaIdenthendelseDTO)
                 }
 
-                val updatedPerson = repository.getPersonByIdent(newIdent)
-                updatedPerson?.personident?.value shouldBeEqualTo newIdent.value
-                updatedPerson?.updatedAt shouldNotBeEqualTo oldUpdatedAt
+                val updated = repository.getOppfolgingsenhetByPersonident(newIdent)
+                updated?.personident?.value shouldBeEqualTo newIdent.value
 
-                val oldPerson = repository.getPersonByIdent(oldIdent)
-                oldPerson shouldBeEqualTo null
+                val old = repository.getOppfolgingsenhetByPersonident(oldIdent)
+                old shouldBeEqualTo null
             }
 
             it("Skal slette gammel person når ny ident allerede finnes i databasen") {
@@ -84,25 +85,27 @@ object IdenthendelseServiceSpek : Spek({
                 val newIdent = kafkaIdenthendelseDTO.getActivePersonident()!!
                 val oldIdent = kafkaIdenthendelseDTO.getInactivePersonidenter().first()
 
-                repository.createOrUpdatePerson(
+                repository.createOppfolgingsenhet(
                     personIdent = newIdent,
-                    isNavUtland = true,
+                    enhet = Enhet(ENHETNR_NAV_UTLAND),
+                    veilederident = "Z999999",
                 )
 
-                repository.createOrUpdatePerson(
+                repository.createOppfolgingsenhet(
                     personIdent = oldIdent,
-                    isNavUtland = false,
+                    enhet = null,
+                    veilederident = "Z999999",
                 )
 
                 runBlocking {
                     identhendelseService.handleIdenthendelse(kafkaIdenthendelseDTO)
                 }
 
-                val updatedPerson = repository.getPersonByIdent(newIdent)
-                updatedPerson?.personident?.value shouldBeEqualTo newIdent.value
+                val updated = repository.getOppfolgingsenhetByPersonident(newIdent)
+                updated?.personident?.value shouldBeEqualTo newIdent.value
 
-                val oldPerson = repository.getPersonByIdent(oldIdent)
-                oldPerson shouldBeEqualTo null
+                val old = repository.getOppfolgingsenhetByPersonident(oldIdent)
+                old shouldBeEqualTo null
             }
         }
 
@@ -114,9 +117,10 @@ object IdenthendelseServiceSpek : Spek({
                 )
                 val oldIdent = kafkaIdenthendelseDTO.getInactivePersonidenter().first()
 
-                repository.createOrUpdatePerson(
+                repository.createOppfolgingsenhet(
                     personIdent = oldIdent,
-                    isNavUtland = false,
+                    enhet = null,
+                    veilederident = "Z999999",
                 )
 
                 runBlocking {

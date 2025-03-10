@@ -17,20 +17,32 @@ class NorgClient(
 ) {
 
     private val norg2ArbeidsfordelingBestmatchUrl: String = "$baseUrl$ARBEIDSFORDELING_BESTMATCH_PATH"
+    private val norg2Enhetsnavn: String = "$baseUrl$ENHETSNAVN_PATH"
+
+    suspend fun getEnhetsnavn(
+        enhetsnr: String,
+    ): String? =
+        try {
+            val response: NorgEnhet? = httpClient.get("$norg2Enhetsnavn$enhetsnr") {
+                accept(ContentType.Application.Json)
+            }.body()
+            response?.navn
+        } catch (e: ResponseException) {
+            log.error("Call to NORG2-enhet failed with status HTTP-{} for enhetsnr {}", e.response.status, enhetsnr)
+            null
+        }
 
     suspend fun getArbeidsfordelingEnhet(
         callId: String,
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
-        isNavUtland: Boolean,
     ): BehandlendeEnhet? {
         val enheter = getArbeidsfordelingEnheter(
             callId = callId,
             diskresjonskode = diskresjonskode,
             geografiskTilknytning = geografiskTilknytning,
             isEgenAnsatt = isEgenAnsatt,
-            isNavUtland = isNavUtland,
         )
         if (enheter.isEmpty()) {
             return null
@@ -51,11 +63,10 @@ class NorgClient(
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
-        isNavUtland: Boolean,
     ): List<NorgEnhet> {
         val requestBody = ArbeidsfordelingCriteria(
             diskresjonskode = diskresjonskode?.name,
-            behandlingstype = getBehandlingstype(isNavUtland),
+            behandlingstype = getBehandlingstype(),
             tema = "OPP",
             geografiskOmraade = geografiskTilknytning.value,
             skjermet = isEgenAnsatt,
@@ -81,17 +92,13 @@ class NorgClient(
         }
     }
 
-    private fun getBehandlingstype(isNavUtland: Boolean): String {
-        return if (isNavUtland) {
-            ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype
-        } else {
-            ArbeidsfordelingCriteriaBehandlingstype.SYKEFRAVAERSOPPFOLGING.behandlingstype
-        }
-    }
+    private fun getBehandlingstype() =
+        ArbeidsfordelingCriteriaBehandlingstype.SYKEFRAVAERSOPPFOLGING.behandlingstype
 
     companion object {
         private val log = getLogger(NorgClient::class.java)
 
         const val ARBEIDSFORDELING_BESTMATCH_PATH = "/norg2/api/v1/arbeidsfordeling/enheter/bestmatch"
+        const val ENHETSNAVN_PATH = "/norg2/api/v1/enhet/"
     }
 }
