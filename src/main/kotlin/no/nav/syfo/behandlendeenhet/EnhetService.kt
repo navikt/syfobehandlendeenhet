@@ -33,8 +33,8 @@ class EnhetService(
     ): BehandlendeEnhet? {
         val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
         val cachedBehandlendeEnhet: BehandlendeEnhet? = valkeyStore.getObject(key = cacheKey)
-        if (cachedBehandlendeEnhet != null && cachedBehandlendeEnhet.navn != ENHETSNAVN_MANGLER) {
-            return cachedBehandlendeEnhet
+        return if (cachedBehandlendeEnhet != null && cachedBehandlendeEnhet.navn != ENHETSNAVN_MANGLER) {
+            cachedBehandlendeEnhet
         } else {
             val oppfolgingsenhet = getOppfolgingsenhet(personIdentNumber)
             val behandlendeEnhetResponse = if (oppfolgingsenhet?.enhet != null) {
@@ -43,55 +43,15 @@ class EnhetService(
                     navn = getEnhetsnavn(oppfolgingsenhet.enhet),
                 )
             } else {
-                val geografiskTilknytning = pdlClient.geografiskTilknytning(
-                    callId = callId,
-                    personIdentNumber = personIdentNumber,
-                )
-                val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
-                    callId = callId,
-                    personIdentNumber = personIdentNumber,
-                    veilederToken = veilederToken,
-                )
-
-                val graderingList = pdlClient.person(
-                    callId = callId,
-                    personIdentNumber = personIdentNumber,
-                )?.gradering()
-
-                val behandlendeEnhet = norgClient.getArbeidsfordelingEnhet(
-                    callId = callId,
-                    diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
-                    geografiskTilknytning = geografiskTilknytning,
-                    isEgenAnsatt = isEgenAnsatt,
-                ) ?: return null
-
-                if (isEnhetUtvandret(behandlendeEnhet)) {
-                    getEnhetNAVUtland()
-                } else {
-                    behandlendeEnhet
-                }
+                findGeografiskEnhet(callId, personIdentNumber, veilederToken)
             }
             valkeyStore.setObject(
                 key = cacheKey,
                 value = behandlendeEnhetResponse,
                 expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
             )
-            return behandlendeEnhetResponse
+            behandlendeEnhetResponse
         }
-    }
-
-    suspend fun updateOppfolgingsenhet(
-        callId: String,
-        personIdent: PersonIdentNumber,
-        isNavUtland: Boolean,
-        veilederToken: Token,
-    ): Oppfolgingsenhet? {
-        val enhet = if (isNavUtland) {
-            Enhet(ENHETNR_NAV_UTLAND)
-        } else {
-            null
-        }
-        return updateOppfolgingsenhet(callId, personIdent, enhet, veilederToken)
     }
 
     suspend fun updateOppfolgingsenhet(
@@ -101,17 +61,62 @@ class EnhetService(
         veilederToken: Token,
     ): Oppfolgingsenhet? =
         if (validateForOppfolgingsenhet(callId, personIdent, veilederToken)) {
-            repository.createOppfolgingsenhet(personIdent, enhet, veilederToken.getNAVIdent()).also {
-                valkeyStore.setObject(
-                    key = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}",
-                    value = null,
-                    expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
-                )
-                behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
+            val geografiskEnhet = findGeografiskEnhet(
+                callId = callId,
+                personIdentNumber = personIdent,
+                veilederToken = veilederToken,
+            )
+            val newBehandlendeEnhet = if (enhet?.value != geografiskEnhet?.enhetId) enhet else null
+            val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
+            if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
+                repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, veilederToken.getNAVIdent()).also {
+                    valkeyStore.setObject(
+                        key = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}",
+                        value = null,
+                        expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
+                    )
+                    behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
+                }
+            } else {
+                null
             }
         } else {
             null
         }
+
+    private suspend fun findGeografiskEnhet(
+        callId: String,
+        personIdentNumber: PersonIdentNumber,
+        veilederToken: Token?
+    ): BehandlendeEnhet? {
+        val geografiskTilknytning = pdlClient.geografiskTilknytning(
+            callId = callId,
+            personIdentNumber = personIdentNumber,
+        )
+        val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
+            callId = callId,
+            personIdentNumber = personIdentNumber,
+            veilederToken = veilederToken,
+        )
+
+        val graderingList = pdlClient.person(
+            callId = callId,
+            personIdentNumber = personIdentNumber,
+        )?.gradering()
+
+        val behandlendeEnhet = norgClient.getArbeidsfordelingEnhet(
+            callId = callId,
+            diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
+            geografiskTilknytning = geografiskTilknytning,
+            isEgenAnsatt = isEgenAnsatt,
+        )
+
+        return if (isEnhetUtvandret(behandlendeEnhet)) {
+            getEnhetNAVUtland()
+        } else {
+            behandlendeEnhet
+        }
+    }
 
     private suspend fun validateForOppfolgingsenhet(
         callId: String,
@@ -142,8 +147,8 @@ class EnhetService(
             norgClient.getEnhetsnavn(oppfolgingsenhet.value) ?: ENHETSNAVN_MANGLER
         }
 
-    private fun isEnhetUtvandret(enhet: BehandlendeEnhet): Boolean {
-        return enhet.enhetId == GEOGRAFISK_TILKNYTNING_UTVANDRET
+    private fun isEnhetUtvandret(enhet: BehandlendeEnhet?): Boolean {
+        return enhet?.enhetId == GEOGRAFISK_TILKNYTNING_UTVANDRET
     }
 
     private fun getEnhetNAVUtland(): BehandlendeEnhet {
@@ -154,7 +159,6 @@ class EnhetService(
     }
 
     companion object {
-        const val SYSTEM_BRUKER = "Z999999"
         private const val GEOGRAFISK_TILKNYTNING_UTVANDRET = "NOR"
         private const val ENHETSNAVN_MANGLER = "Enhetsnavn mangler"
         const val CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX = "behandlendeenhet-personident-"

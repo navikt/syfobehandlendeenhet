@@ -12,4 +12,6 @@ object UserConstants {
 
     const val VEILEDER_IDENT = "Z999999"
     val VEILEDER_IDENT_NO_ACCESS = VEILEDER_IDENT.replace("9", "1")
+
+    const val ENHET_ID = "0314"
 }
