@@ -9,7 +9,7 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import io.mockk.*
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
-import no.nav.syfo.behandlendeenhet.api.PersonDTO
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.PersonIdentNumber
@@ -19,9 +19,11 @@ import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_EGENANSATT
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
+import no.nav.syfo.testhelper.UserConstants.ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
-import no.nav.syfo.testhelper.generator.generatePersonDTO
+import no.nav.syfo.testhelper.generator.generateBehandlendeEnhetDTO
+import no.nav.syfo.testhelper.mock.ENHET_NR
 import no.nav.syfo.testhelper.mock.norg2Response
 import no.nav.syfo.testhelper.mock.norg2ResponseNavUtland
 import no.nav.syfo.util.*
@@ -66,7 +68,7 @@ class BehandlendeEnhetApiSpek : Spek({
 
     val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentPath"
     val personUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonPath"
-    val personDTO = generatePersonDTO()
+    val behandlendeEnhetDTO = generateBehandlendeEnhetDTO()
     val validToken = generateJWT(
         audience = externalMockEnvironment.environment.azureAppClientId,
         issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
@@ -107,7 +109,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     val responsePost = client.post(personUrl) {
                         bearerAuth(validToken)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(personDTO)
+                        setBody(behandlendeEnhetDTO)
                     }
                     responsePost.status shouldBeEqualTo HttpStatusCode.OK
                     val response = client.get(behandlendeEnhetUrl) {
@@ -177,14 +179,79 @@ class BehandlendeEnhetApiSpek : Spek({
                     val response = client.post(personUrl) {
                         bearerAuth(validToken)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(personDTO)
+                        setBody(behandlendeEnhetDTO)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    response.body<PersonDTO>() shouldBeEqualTo personDTO
+                    response.body<BehandlendeEnhetDTO>() shouldBeEqualTo behandlendeEnhetDTO
 
-                    val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(personDTO.personident))
+                    val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
                     oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo true
-                    oppfolgingsenhet?.personident?.value shouldBeEqualTo personDTO.personident
+                    oppfolgingsenhet?.personident?.value shouldBeEqualTo behandlendeEnhetDTO.personident
+
+                    val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
+                    verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
+                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
+                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
+                }
+            }
+            it("should create oppfolgingsenhet other than Nav utland in db") {
+                testApplication {
+                    val client = setupApiAndClient()
+                    val behandlendeEnhetDTO = BehandlendeEnhetDTO(
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
+                        isNavUtland = false,
+                        oppfolgingsenhet = ENHET_ID,
+                    )
+                    val response = client.post(personUrl) {
+                        bearerAuth(validToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(behandlendeEnhetDTO)
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.OK
+                    response.body<BehandlendeEnhetDTO>() shouldBeEqualTo behandlendeEnhetDTO
+
+                    val oppfolgingsenhet =
+                        repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
+                    oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo false
+                    oppfolgingsenhet?.enhet?.value shouldBeEqualTo ENHET_ID
+                    oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
+
+                    val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
+                    verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
+                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
+                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
+                }
+            }
+            it("should store null as oppfolgingsenhet if same as geografisk and current oppfolgingsenhet is not null") {
+                testApplication {
+                    val client = setupApiAndClient()
+                    val behandlendeEnhetDTO = BehandlendeEnhetDTO(
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
+                        isNavUtland = false,
+                        oppfolgingsenhet = ENHET_ID,
+                    )
+                    client.post(personUrl) {
+                        bearerAuth(validToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(behandlendeEnhetDTO)
+                    }
+                    clearMocks(kafkaProducerMock)
+
+                    val behandlendeEnhetUpdateDTO = BehandlendeEnhetDTO(
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
+                        isNavUtland = false,
+                        oppfolgingsenhet = ENHET_NR, // norg2mock-value
+                    )
+                    val response = client.post(personUrl) {
+                        bearerAuth(validToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(behandlendeEnhetUpdateDTO)
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.OK
+
+                    val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
+                    oppfolgingsenhet?.enhet shouldBe null
+                    oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
                     verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
@@ -199,13 +266,13 @@ class BehandlendeEnhetApiSpek : Spek({
                     val response = client.post(personUrl) {
                         bearerAuth(validToken)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(personDTO)
+                        setBody(behandlendeEnhetDTO)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(personDTO.personident))
+                    val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
                     oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo true
 
-                    val updatePersonDTO = personDTO.copy(isNavUtland = false)
+                    val updatePersonDTO = behandlendeEnhetDTO.copy(isNavUtland = false, oppfolgingsenhet = null)
                     val responsePost = client.post(personUrl) {
                         bearerAuth(validToken)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -231,7 +298,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     val client = setupApiAndClient()
                     val response = client.post(personUrl) {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(personDTO)
+                        setBody(behandlendeEnhetDTO)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.Unauthorized
                 }
@@ -248,7 +315,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     val response = client.post(personUrl) {
                         bearerAuth(validTokenNoAccess)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(personDTO)
+                        setBody(behandlendeEnhetDTO)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.Forbidden
                 }
@@ -259,7 +326,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     val response = client.post(personUrl) {
                         bearerAuth(validToken)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(personDTO.copy(personident = ARBEIDSTAKER_ADRESSEBESKYTTET.value))
+                        setBody(behandlendeEnhetDTO.copy(personident = ARBEIDSTAKER_ADRESSEBESKYTTET.value))
                     }
                     response.status shouldBeEqualTo HttpStatusCode.BadRequest
                 }
@@ -270,7 +337,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     val response = client.post(personUrl) {
                         bearerAuth(validToken)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(personDTO.copy(personident = ARBEIDSTAKER_EGENANSATT.value))
+                        setBody(behandlendeEnhetDTO.copy(personident = ARBEIDSTAKER_EGENANSATT.value))
                     }
                     response.status shouldBeEqualTo HttpStatusCode.BadRequest
                 }

@@ -5,8 +5,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.syfo.behandlendeenhet.EnhetService
-import no.nav.syfo.behandlendeenhet.api.PersonDTO
-import no.nav.syfo.behandlendeenhet.domain.toPersonDTO
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
+import no.nav.syfo.behandlendeenhet.domain.toBehandlendeEnhetDTO
+import no.nav.syfo.domain.Enhet
 import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.util.*
@@ -58,17 +59,18 @@ fun Route.registrerPersonApi(
                 token = token,
             )
 
-            val body = call.receive<PersonDTO>()
+            val behandlendeEnhetDTO = call.receive<BehandlendeEnhetDTO>()
 
             val oppfolgingsenhet = enhetService.updateOppfolgingsenhet(
                 callId = callId,
-                personIdent = PersonIdentNumber(body.personident),
-                isNavUtland = body.isNavUtland,
+                personIdent = PersonIdentNumber(behandlendeEnhetDTO.personident),
+                enhet = behandlendeEnhetDTO.oppfolgingsenhet?.let { Enhet(it) }
+                    ?: if (behandlendeEnhetDTO.isNavUtland) Enhet(Enhet.ENHETNR_NAV_UTLAND) else null,
                 veilederToken = token,
             )
 
             if (oppfolgingsenhet != null) {
-                call.respond(oppfolgingsenhet.toPersonDTO())
+                call.respond(oppfolgingsenhet.toBehandlendeEnhetDTO())
             } else {
                 log.error("Could not set oppfolgingsenhet in database")
                 call.respond(HttpStatusCode.BadRequest)
