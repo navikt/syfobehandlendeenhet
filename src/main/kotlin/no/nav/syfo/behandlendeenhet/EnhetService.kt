@@ -14,6 +14,7 @@ import no.nav.syfo.infrastructure.client.pdl.domain.gradering
 import no.nav.syfo.infrastructure.client.pdl.domain.toArbeidsfordelingCriteriaDiskresjonskode
 import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
 import no.nav.syfo.domain.PersonIdentNumber
+import no.nav.syfo.domain.Stedtilknytning
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 
@@ -39,6 +40,17 @@ class EnhetService(
             )
         } else {
             findGeografiskEnhet(callId, personIdentNumber, veilederToken)
+        }
+    }
+
+    private suspend fun findOppfolgingsenhet(
+        personIdentNumber: PersonIdentNumber,
+    ): BehandlendeEnhet? {
+        return getOppfolgingsenhet(personIdentNumber)?.enhet?.let { enhet ->
+            BehandlendeEnhet(
+                enhetId = enhet.value,
+                navn = getEnhetsnavn(enhet),
+            )
         }
     }
 
@@ -128,6 +140,16 @@ class EnhetService(
         } else {
             emptyList()
         }
+    }
+
+    suspend fun arbeidstakersStedtilknytning(
+        callId: String,
+        personIdentNumber: PersonIdentNumber,
+        veilederToken: Token?,
+    ): Stedtilknytning {
+        val oppfolgingsenhet = findOppfolgingsenhet(personIdentNumber)
+        val geografiskEnhet = findGeografiskEnhet(callId, personIdentNumber, veilederToken)
+        return Stedtilknytning(geografiskEnhet, oppfolgingsenhet)
     }
 
     private suspend fun validateForOppfolgingsenhet(

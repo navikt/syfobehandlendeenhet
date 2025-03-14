@@ -4,6 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.syfo.StedtilknytningResponseDTO
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.domain.toBehandlendeEnhetDTO
@@ -42,13 +43,13 @@ fun Route.registrerPersonApi(
                 token = token,
             )
 
-            enhetService.arbeidstakersBehandlendeEnhet(
+            enhetService.arbeidstakersStedtilknytning(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
                 veilederToken = token,
-            )?.let { behandlendeEnhet ->
-                call.respond(behandlendeEnhet)
-            } ?: call.respond(HttpStatusCode.NoContent)
+            )
+                .let { StedtilknytningResponseDTO.fromStedtilknytning(it) ?: HttpStatusCode.NoContent }
+                .run { call.respond(this) }
         }
 
         get(internadBehandlendeEnhetApiV2TilordningsenheterPath) {

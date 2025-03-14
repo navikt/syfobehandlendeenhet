@@ -1,9 +1,9 @@
 package no.nav.syfo.behandlendeenhet.api.system
 
-import io.ktor.server.application.*
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.syfo.StedtilknytningResponseDTO
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.access.APIConsumerAccessService
 import no.nav.syfo.domain.PersonIdentNumber
@@ -33,13 +33,13 @@ fun Route.registrerSystemApi(
             }
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No $NAV_PERSONIDENT_HEADER supplied in request header")
 
-            enhetService.arbeidstakersBehandlendeEnhet(
+            enhetService.arbeidstakersStedtilknytning(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
                 veilederToken = null,
-            )?.let { behandlendeEnhet ->
-                call.respond(behandlendeEnhet)
-            } ?: call.respond(HttpStatusCode.NoContent)
+            )
+                .let { StedtilknytningResponseDTO.fromStedtilknytning(it) ?: HttpStatusCode.NoContent }
+                .run { call.respond(this) }
         }
     }
 }

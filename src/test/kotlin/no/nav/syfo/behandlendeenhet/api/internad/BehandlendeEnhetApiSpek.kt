@@ -8,7 +8,7 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import io.mockk.*
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import no.nav.syfo.StedtilknytningResponseDTO
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
@@ -87,10 +87,13 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val behandlendeEnhet = response.body<BehandlendeEnhet>()
+                    val stedtilknytning = response.body<StedtilknytningResponseDTO>()
 
-                    behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
-                    behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
+                    stedtilknytning.enhetId shouldBeEqualTo norg2Response.first().enhetNr
+                    stedtilknytning.navn shouldBeEqualTo norg2Response.first().navn
+                    stedtilknytning.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
+                    stedtilknytning.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
+                    stedtilknytning.oppfolgingsenhet shouldBe null
                 }
             }
 
@@ -119,9 +122,14 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val behandlendeEnhet = response.body<BehandlendeEnhet>()
-                    behandlendeEnhet.enhetId shouldBeEqualTo norg2ResponseNavUtland.first().enhetNr
-                    behandlendeEnhet.navn shouldBeEqualTo norg2ResponseNavUtland.first().navn
+                    val stedtilknytning = response.body<StedtilknytningResponseDTO>()
+
+                    stedtilknytning.enhetId shouldBeEqualTo norg2ResponseNavUtland.first().enhetNr
+                    stedtilknytning.navn shouldBeEqualTo norg2ResponseNavUtland.first().navn
+                    stedtilknytning.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
+                    stedtilknytning.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
+                    stedtilknytning.oppfolgingsenhet?.enhetId shouldBeEqualTo "0393"
+                    stedtilknytning.oppfolgingsenhet?.navn shouldBeEqualTo "Nav utland"
                 }
             }
         }
