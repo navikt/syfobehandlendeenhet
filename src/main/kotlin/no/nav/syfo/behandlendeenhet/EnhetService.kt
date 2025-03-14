@@ -14,6 +14,7 @@ import no.nav.syfo.infrastructure.client.pdl.domain.gradering
 import no.nav.syfo.infrastructure.client.pdl.domain.toArbeidsfordelingCriteriaDiskresjonskode
 import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
 import no.nav.syfo.domain.PersonIdentNumber
+import no.nav.syfo.domain.Stedtilknytning
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 
@@ -36,21 +37,26 @@ class EnhetService(
         return if (cachedBehandlendeEnhet != null && cachedBehandlendeEnhet.navn != ENHETSNAVN_MANGLER) {
             cachedBehandlendeEnhet
         } else {
-            val oppfolgingsenhet = getOppfolgingsenhet(personIdentNumber)
-            val behandlendeEnhetResponse = if (oppfolgingsenhet?.enhet != null) {
-                BehandlendeEnhet(
-                    enhetId = oppfolgingsenhet.enhet.value,
-                    navn = getEnhetsnavn(oppfolgingsenhet.enhet),
-                )
-            } else {
-                findGeografiskEnhet(callId, personIdentNumber, veilederToken)
-            }
+            val behandlendeEnhetResponse = findOppfolgingsenhet(personIdentNumber)
+                ?: findGeografiskEnhet(callId, personIdentNumber, veilederToken)
+
             valkeyStore.setObject(
                 key = cacheKey,
                 value = behandlendeEnhetResponse,
                 expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
             )
             behandlendeEnhetResponse
+        }
+    }
+
+    private suspend fun findOppfolgingsenhet(
+        personIdentNumber: PersonIdentNumber,
+    ): BehandlendeEnhet? {
+        return getOppfolgingsenhet(personIdentNumber)?.enhet?.let { enhet ->
+            BehandlendeEnhet(
+                enhetId = enhet.value,
+                navn = getEnhetsnavn(enhet),
+            )
         }
     }
 
@@ -116,6 +122,16 @@ class EnhetService(
         } else {
             behandlendeEnhet
         }
+    }
+
+    suspend fun arbeidstakersStedtilknytning(
+        callId: String,
+        personIdentNumber: PersonIdentNumber,
+        veilederToken: Token?,
+    ): Stedtilknytning {
+        val oppfolgingsenhet = findOppfolgingsenhet(personIdentNumber)
+        val geografiskEnhet = findGeografiskEnhet(callId, personIdentNumber, veilederToken)
+        return Stedtilknytning(geografiskEnhet, oppfolgingsenhet)
     }
 
     private suspend fun validateForOppfolgingsenhet(
