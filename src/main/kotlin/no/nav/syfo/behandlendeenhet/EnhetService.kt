@@ -118,6 +118,23 @@ class EnhetService(
         }
     }
 
+    suspend fun getMuligeOppfolgingsenheter(
+        callId: String,
+        underordnetEnhet: Enhet,
+    ): List<BehandlendeEnhet> {
+        val overordnet = norgClient.getOverordnetEnhet(callId, underordnetEnhet)
+        return if (overordnet != null) {
+            norgClient.getUnderenheter(callId, Enhet(overordnet.enhetNr)).map {
+                BehandlendeEnhet(
+                    enhetId = it.enhetNr,
+                    navn = it.navn,
+                )
+            }
+        } else {
+            emptyList()
+        }
+    }
+
     private suspend fun validateForOppfolgingsenhet(
         callId: String,
         personIdent: PersonIdentNumber,

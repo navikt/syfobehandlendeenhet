@@ -6,13 +6,14 @@ import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import no.nav.syfo.domain.Enhet
 import no.nav.syfo.infrastructure.client.norg.domain.*
 import no.nav.syfo.infrastructure.client.pdl.GeografiskTilknytning
 import no.nav.syfo.util.*
 import org.slf4j.LoggerFactory.getLogger
 
 class NorgClient(
-    baseUrl: String,
+    val baseUrl: String,
     private val httpClient: HttpClient = no.nav.syfo.infrastructure.client.httpClientDefault(),
 ) {
 
@@ -22,11 +23,15 @@ class NorgClient(
     suspend fun getEnhetsnavn(
         enhetsnr: String,
     ): String? =
+        getNorgEnhet(enhetsnr)?.navn
+
+    suspend fun getNorgEnhet(
+        enhetsnr: String,
+    ): NorgEnhet? =
         try {
-            val response: NorgEnhet? = httpClient.get("$norg2Enhetsnavn$enhetsnr") {
+            httpClient.get("$norg2Enhetsnavn$enhetsnr") {
                 accept(ContentType.Application.Json)
             }.body()
-            response?.navn
         } catch (e: ResponseException) {
             log.error("Call to NORG2-enhet failed with status HTTP-{} for enhetsnr {}", e.response.status, enhetsnr)
             null
@@ -92,13 +97,79 @@ class NorgClient(
         }
     }
 
+    suspend fun getOverordnetEnhet(
+        callId: String,
+        enhet: Enhet,
+    ): NorgEnhet? {
+        val url = getOverordnetEnheterForNAVKontorUrl(enhet.value)
+        try {
+            val response: List<NorgEnhet> = httpClient.get(url) {
+                header(NAV_CALL_ID_HEADER, callId)
+                accept(ContentType.Application.Json)
+            }.body()
+
+            if (response.isEmpty()) {
+                log.warn("No overordnede enheter returned from NORG2 for enhet $enhet, callId=$callId")
+            }
+            return response.firstOrNull()
+        } catch (e: ResponseException) {
+            if (e.response.status == HttpStatusCode.NotFound) {
+                return null
+            } else {
+                val message = "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhet, callId=$callId"
+                log.error(message)
+                throw e
+            }
+        }
+    }
+
+    suspend fun getUnderenheter(
+        callId: String,
+        enhet: Enhet,
+    ): List<NorgEnhet> {
+        val url = getOrganiseringForEnhetUrl(enhet.value)
+        try {
+            val response: List<RsOrganisering> = httpClient.get(url) {
+                header(NAV_CALL_ID_HEADER, callId)
+                accept(ContentType.Application.Json)
+            }.body()
+
+            if (response.isEmpty()) {
+                log.error("No underenheter returned from NORG2 for enhet $enhet, callId=$callId")
+                throw RuntimeException("No underenheter returned from NORG2 for enhet $enhet, callId=$callId")
+            }
+            return response
+                .mapNotNull { it.organisertUnder?.nr }
+                .mapNotNull { getNorgEnhet(it) }
+                .filter { it.type == ENHET_TYPE_LOKAL && it.status == Enhetsstatus.AKTIV.formattedName }
+        } catch (e: ResponseException) {
+            if (e.response.status == HttpStatusCode.NotFound) {
+                return emptyList()
+            } else {
+                val message = "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhet, callId=$callId"
+                log.error(message)
+                throw e
+            }
+        }
+    }
+
     private fun getBehandlingstype() =
         ArbeidsfordelingCriteriaBehandlingstype.SYKEFRAVAERSOPPFOLGING.behandlingstype
+
+    private fun getOverordnetEnheterForNAVKontorUrl(enhetNr: String): String {
+        return "$baseUrl/norg2/api/v1/enhet/$enhetNr/overordnet?organiseringsType=$ORGANISERINGSTYPE"
+    }
+
+    private fun getOrganiseringForEnhetUrl(enhetNr: String): String {
+        return "$baseUrl/norg2/api/v1/enhet/$enhetNr/organisering"
+    }
 
     companion object {
         private val log = getLogger(NorgClient::class.java)
 
         const val ARBEIDSFORDELING_BESTMATCH_PATH = "/norg2/api/v1/arbeidsfordeling/enheter/bestmatch"
         const val ENHETSNAVN_PATH = "/norg2/api/v1/enhet/"
+        const val ORGANISERINGSTYPE = "FYLKE"
+        const val ENHET_TYPE_LOKAL = "LOKAL"
     }
 }
