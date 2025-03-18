@@ -16,13 +16,12 @@ import org.slf4j.LoggerFactory
 
 const val internadBehandlendeEnhetApiV2BasePath = "/api/internad/v2"
 const val internadBehandlendeEnhetApiV2PersonIdentPath = "/personident"
-const val internadBehandlendeEnhetApiV2PersonPath = "/person"
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.behandlendeenhet.api.internad")
 
 fun Route.registrerPersonApi(
     enhetService: EnhetService,
-    veilederTilgangskontrollClient: VeilederTilgangskontrollClient
+    veilederTilgangskontrollClient: VeilederTilgangskontrollClient,
 ) {
     route(internadBehandlendeEnhetApiV2BasePath) {
         get(internadBehandlendeEnhetApiV2PersonIdentPath) {
@@ -49,7 +48,7 @@ fun Route.registrerPersonApi(
             } ?: call.respond(HttpStatusCode.NoContent)
         }
 
-        post(internadBehandlendeEnhetApiV2PersonPath) {
+        post("/person") {
             val callId = getCallId()
             val token = getBearerHeader()
                 ?: throw IllegalArgumentException("Could not retrieve Person: No Authorization header supplied")

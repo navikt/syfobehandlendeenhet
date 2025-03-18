@@ -11,7 +11,7 @@ import io.mockk.*
 import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
-import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
+import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetUpdateRecord
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import no.nav.syfo.testhelper.*
@@ -40,7 +40,7 @@ class BehandlendeEnhetApiSpek : Spek({
     val database = externalMockEnvironment.database
     val repository = EnhetRepository(database)
 
-    val kafkaProducerMock = mockk<KafkaProducer<String, KBehandlendeEnhetUpdate>>(relaxed = true)
+    val kafkaProducerMock = mockk<KafkaProducer<String, BehandlendeEnhetUpdateRecord>>(relaxed = true)
     val behandlendeEnhetProducer = BehandlendeEnhetProducer(kafkaProducerMock)
 
     fun ApplicationTestBuilder.setupApiAndClient(): HttpClient {
@@ -67,7 +67,7 @@ class BehandlendeEnhetApiSpek : Spek({
     }
 
     val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentPath"
-    val personUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonPath"
+    val personUrl = "$internadBehandlendeEnhetApiV2BasePath/person"
     val behandlendeEnhetDTO = generateBehandlendeEnhetDTO()
     val validToken = generateJWT(
         audience = externalMockEnvironment.environment.azureAppClientId,
@@ -188,10 +188,11 @@ class BehandlendeEnhetApiSpek : Spek({
                     oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo true
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo behandlendeEnhetDTO.personident
 
-                    val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
-                    verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
-                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
+                    val record = slot<ProducerRecord<String, BehandlendeEnhetUpdateRecord>>()
+                    verify(exactly = 1) { kafkaProducerMock.send(capture(record)) }
+                    record.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
+                    record.captured.value().oppfolgingsenhet shouldBeEqualTo oppfolgingsenhet?.enhet?.value
+                    record.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
                 }
             }
             it("should create oppfolgingsenhet other than Nav utland in db") {
@@ -216,10 +217,11 @@ class BehandlendeEnhetApiSpek : Spek({
                     oppfolgingsenhet?.enhet?.value shouldBeEqualTo ENHET_ID
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
 
-                    val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
-                    verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
-                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
+                    val record = slot<ProducerRecord<String, BehandlendeEnhetUpdateRecord>>()
+                    verify(exactly = 1) { kafkaProducerMock.send(capture(record)) }
+                    record.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
+                    record.captured.value().oppfolgingsenhet shouldBeEqualTo oppfolgingsenhet?.enhet?.value
+                    record.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
                 }
             }
             it("should store null as oppfolgingsenhet if same as geografisk and current oppfolgingsenhet is not null") {
@@ -253,10 +255,11 @@ class BehandlendeEnhetApiSpek : Spek({
                     oppfolgingsenhet?.enhet shouldBe null
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
 
-                    val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
-                    verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
-                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
+                    val record = slot<ProducerRecord<String, BehandlendeEnhetUpdateRecord>>()
+                    verify(exactly = 1) { kafkaProducerMock.send(capture(record)) }
+                    record.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
+                    record.captured.value().oppfolgingsenhet shouldBeEqualTo oppfolgingsenhet?.enhet?.value
+                    record.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
                 }
             }
 
@@ -283,11 +286,11 @@ class BehandlendeEnhetApiSpek : Spek({
                     val oppfolgingsenhetUpdate = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(updatePersonDTO.personident))
                     oppfolgingsenhetUpdate?.enhet shouldBe null
 
-                    val kafkaRecordSlot = mutableListOf<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
-                    verify(exactly = 2) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot[0].value().personident shouldBeEqualTo oppfolgingsenhetUpdate?.personident?.value
-                    kafkaRecordSlot[1].value().updatedAt shouldBeEqualTo oppfolgingsenhetUpdate?.createdAt
-                    kafkaRecordSlot[0].value().updatedAt shouldBeLessThan kafkaRecordSlot[1].value().updatedAt
+                    val record = mutableListOf<ProducerRecord<String, BehandlendeEnhetUpdateRecord>>()
+                    verify(exactly = 2) { kafkaProducerMock.send(capture(record)) }
+                    record[0].value().personident shouldBeEqualTo oppfolgingsenhetUpdate?.personident?.value
+                    record[1].value().updatedAt shouldBeEqualTo oppfolgingsenhetUpdate?.createdAt
+                    record[0].value().updatedAt shouldBeLessThan record[1].value().updatedAt
                 }
             }
         }

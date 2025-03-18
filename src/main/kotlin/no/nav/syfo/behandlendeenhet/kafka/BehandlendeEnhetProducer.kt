@@ -8,7 +8,7 @@ import java.time.OffsetDateTime
 import java.util.*
 
 class BehandlendeEnhetProducer(
-    private val kafkaProducerBehandlendeEnhet: KafkaProducer<String, KBehandlendeEnhetUpdate>,
+    private val producer: KafkaProducer<String, BehandlendeEnhetUpdateRecord>,
 ) {
     fun sendBehandlendeEnhetUpdate(
         oppfolgingsenhet: Oppfolgingsenhet,
@@ -16,13 +16,14 @@ class BehandlendeEnhetProducer(
     ) {
         val key = UUID.nameUUIDFromBytes(oppfolgingsenhet.personident.value.toByteArray()).toString()
         try {
-            kafkaProducerBehandlendeEnhet.send(
+            producer.send(
                 ProducerRecord(
-                    BEHANDLENDE_ENHET_UPDATE_TOPIC,
+                    TOPIC,
                     key,
-                    KBehandlendeEnhetUpdate(
-                        oppfolgingsenhet.personident.value,
-                        updatedAt,
+                    BehandlendeEnhetUpdateRecord(
+                        personident = oppfolgingsenhet.personident.value,
+                        oppfolgingsenhet = oppfolgingsenhet.enhet?.value,
+                        updatedAt = updatedAt,
                     ),
                 )
             ).also { it.get() }
@@ -41,7 +42,7 @@ class BehandlendeEnhetProducer(
     }
 
     companion object {
-        const val BEHANDLENDE_ENHET_UPDATE_TOPIC = "teamsykefravr.behandlendeenhet"
+        private const val TOPIC = "teamsykefravr.behandlendeenhet"
         private val log = LoggerFactory.getLogger(BehandlendeEnhetProducer::class.java)
     }
 }

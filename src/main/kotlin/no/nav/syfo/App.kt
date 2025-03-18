@@ -12,7 +12,7 @@ import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.infrastructure.database.applicationDatabase
 import no.nav.syfo.infrastructure.database.databaseModule
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
-import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
+import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetUpdateRecord
 import no.nav.syfo.behandlendeenhet.kafka.kafkaBehandlendeEnhetProducerConfig
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.client.norg.NorgClient
@@ -40,7 +40,7 @@ fun main() {
     )
 
     val behandlendeEnhetProducer = BehandlendeEnhetProducer(
-        kafkaProducerBehandlendeEnhet = KafkaProducer<String, KBehandlendeEnhetUpdate>(
+        producer = KafkaProducer<String, BehandlendeEnhetUpdateRecord>(
             kafkaBehandlendeEnhetProducerConfig(environment.kafka)
         ),
     )
