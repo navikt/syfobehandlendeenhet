@@ -8,7 +8,7 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import io.mockk.*
-import no.nav.syfo.StedtilknytningResponseDTO
+import no.nav.syfo.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
@@ -87,13 +87,13 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val stedtilknytning = response.body<StedtilknytningResponseDTO>()
+                    val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
-                    stedtilknytning.enhetId shouldBeEqualTo norg2Response.first().enhetNr
-                    stedtilknytning.navn shouldBeEqualTo norg2Response.first().navn
-                    stedtilknytning.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
-                    stedtilknytning.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
-                    stedtilknytning.oppfolgingsenhet shouldBe null
+                    behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
+                    behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
+                    behandlendeEnhet.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhet shouldBe null
                 }
             }
 
@@ -122,14 +122,14 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val stedtilknytning = response.body<StedtilknytningResponseDTO>()
+                    val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
-                    stedtilknytning.enhetId shouldBeEqualTo norg2ResponseNavUtland.first().enhetNr
-                    stedtilknytning.navn shouldBeEqualTo norg2ResponseNavUtland.first().navn
-                    stedtilknytning.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
-                    stedtilknytning.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
-                    stedtilknytning.oppfolgingsenhet?.enhetId shouldBeEqualTo "0393"
-                    stedtilknytning.oppfolgingsenhet?.navn shouldBeEqualTo "Nav utland"
+                    behandlendeEnhet.enhetId shouldBeEqualTo norg2ResponseNavUtland.first().enhetNr
+                    behandlendeEnhet.navn shouldBeEqualTo norg2ResponseNavUtland.first().navn
+                    behandlendeEnhet.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhet?.enhetId shouldBeEqualTo "0393"
+                    behandlendeEnhet.oppfolgingsenhet?.navn shouldBeEqualTo "Nav utland"
                 }
             }
         }
@@ -195,7 +195,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.body<BehandlendeEnhetDTO>() shouldBeEqualTo behandlendeEnhetDTO
 
                     val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo true
+                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo true
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo behandlendeEnhetDTO.personident
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
@@ -222,8 +222,8 @@ class BehandlendeEnhetApiSpek : Spek({
 
                     val oppfolgingsenhet =
                         repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo false
-                    oppfolgingsenhet?.enhet?.value shouldBeEqualTo ENHET_ID
+                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo false
+                    oppfolgingsenhet?.enhetId?.value shouldBeEqualTo ENHET_ID
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
@@ -260,7 +260,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
 
                     val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhet shouldBe null
+                    oppfolgingsenhet?.enhetId shouldBe null
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
@@ -280,7 +280,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo true
+                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo true
 
                     val updatePersonDTO = behandlendeEnhetDTO.copy(isNavUtland = false, oppfolgingsenhet = null)
                     val responsePost = client.post(personUrl) {
@@ -291,7 +291,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     responsePost.status shouldBeEqualTo HttpStatusCode.OK
 
                     val oppfolgingsenhetUpdate = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(updatePersonDTO.personident))
-                    oppfolgingsenhetUpdate?.enhet shouldBe null
+                    oppfolgingsenhetUpdate?.enhetId shouldBe null
 
                     val kafkaRecordSlot = mutableListOf<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
                     verify(exactly = 2) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }

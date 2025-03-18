@@ -1,6 +1,6 @@
 package no.nav.syfo.domain
 
-data class Enhet(val value: String) {
+data class EnhetId(val value: String) {
     private val fourDigits = Regex("^\\d{4}\$")
 
     init {

@@ -1,8 +1,8 @@
 package no.nav.syfo.identhendelse
 
 import kotlinx.coroutines.*
-import no.nav.syfo.domain.Enhet
-import no.nav.syfo.domain.Enhet.Companion.ENHETNR_NAV_UTLAND
+import no.nav.syfo.domain.EnhetId
+import no.nav.syfo.domain.EnhetId.Companion.ENHETNR_NAV_UTLAND
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.client.pdl.PdlClient
@@ -65,7 +65,7 @@ object IdenthendelseServiceSpek : Spek({
 
                 repository.createOppfolgingsenhet(
                     personIdent = oldIdent,
-                    enhet = null,
+                    enhetId = null,
                     veilederident = "Z999999",
                 )
 
@@ -87,13 +87,13 @@ object IdenthendelseServiceSpek : Spek({
 
                 repository.createOppfolgingsenhet(
                     personIdent = newIdent,
-                    enhet = Enhet(ENHETNR_NAV_UTLAND),
+                    enhetId = EnhetId(ENHETNR_NAV_UTLAND),
                     veilederident = "Z999999",
                 )
 
                 repository.createOppfolgingsenhet(
                     personIdent = oldIdent,
-                    enhet = null,
+                    enhetId = null,
                     veilederident = "Z999999",
                 )
 
@@ -119,7 +119,7 @@ object IdenthendelseServiceSpek : Spek({
 
                 repository.createOppfolgingsenhet(
                     personIdent = oldIdent,
-                    enhet = null,
+                    enhetId = null,
                     veilederident = "Z999999",
                 )
 
