@@ -102,7 +102,7 @@ class NorgClient(
         enhet: Enhet,
     ): NorgEnhet? {
         val url = getOverordnetEnheterForNAVKontorUrl(enhet.value)
-        try {
+        return try {
             val response: List<NorgEnhet> = httpClient.get(url) {
                 header(NAV_CALL_ID_HEADER, callId)
                 accept(ContentType.Application.Json)
@@ -111,10 +111,10 @@ class NorgClient(
             if (response.isEmpty()) {
                 log.warn("No overordnede enheter returned from NORG2 for enhet $enhet, callId=$callId")
             }
-            return response.firstOrNull()
+            response.firstOrNull()
         } catch (e: ResponseException) {
             if (e.response.status == HttpStatusCode.NotFound) {
-                return null
+                null
             } else {
                 val message = "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhet, callId=$callId"
                 log.error(message)
@@ -128,7 +128,7 @@ class NorgClient(
         enhet: Enhet,
     ): List<NorgEnhet> {
         val url = getOrganiseringForEnhetUrl(enhet.value)
-        try {
+        return try {
             val response: List<RsOrganisering> = httpClient.get(url) {
                 header(NAV_CALL_ID_HEADER, callId)
                 accept(ContentType.Application.Json)
@@ -138,13 +138,13 @@ class NorgClient(
                 log.error("No underenheter returned from NORG2 for enhet $enhet, callId=$callId")
                 throw RuntimeException("No underenheter returned from NORG2 for enhet $enhet, callId=$callId")
             }
-            return response
+            response
                 .mapNotNull { it.organisertUnder?.nr }
                 .mapNotNull { getNorgEnhet(it) }
                 .filter { it.type == ENHET_TYPE_LOKAL && it.status == Enhetsstatus.AKTIV.formattedName }
         } catch (e: ResponseException) {
             if (e.response.status == HttpStatusCode.NotFound) {
-                return emptyList()
+                emptyList()
             } else {
                 val message = "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhet, callId=$callId"
                 log.error(message)

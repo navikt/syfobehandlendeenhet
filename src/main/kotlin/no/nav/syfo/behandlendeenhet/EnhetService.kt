@@ -120,9 +120,9 @@ class EnhetService(
 
     suspend fun getMuligeOppfolgingsenheter(
         callId: String,
-        underordnetEnhet: Enhet,
+        enhet: Enhet,
     ): List<BehandlendeEnhet> {
-        val overordnet = norgClient.getOverordnetEnhet(callId, underordnetEnhet)
+        val overordnet = norgClient.getOverordnetEnhet(callId, enhet)
         return if (overordnet != null) {
             norgClient.getUnderenheter(callId, Enhet(overordnet.enhetNr)).map {
                 BehandlendeEnhet(
