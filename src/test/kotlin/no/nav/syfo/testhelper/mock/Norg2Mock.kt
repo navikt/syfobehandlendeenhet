@@ -2,12 +2,12 @@ package no.nav.syfo.testhelper.mock
 
 import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
-import no.nav.syfo.infrastructure.client.norg.domain.ArbeidsfordelingCriteriaBehandlingstype
-import no.nav.syfo.infrastructure.client.norg.domain.Enhetsstatus
-import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
-import no.nav.syfo.infrastructure.client.norg.domain.ArbeidsfordelingCriteria
+import no.nav.syfo.infrastructure.client.norg.NorgClient.Companion.ENHET_TYPE_LOKAL
+import no.nav.syfo.infrastructure.client.norg.domain.*
 
 const val ENHET_NR = "0101"
+const val OVERORDNET_NR = "0200"
+const val UNDERORDNET_NR = "0102"
 const val ENHET_NAVN = "Enhet"
 
 fun generateNorgEnhet(): NorgEnhet {
@@ -25,7 +25,7 @@ fun generateNorgEnhet(): NorgEnhet {
         orgNrTilKommunaltNavKontor = null,
         organisasjonsnummer = null,
         sosialeTjenester = null,
-        type = null,
+        type = ENHET_TYPE_LOKAL,
         underAvviklingDato = null,
         underEtableringDato = null,
         versjon = null,
@@ -34,12 +34,42 @@ fun generateNorgEnhet(): NorgEnhet {
 
 val norg2Response = listOf(generateNorgEnhet())
 val norg2ResponseNavUtland = listOf(generateNorgEnhet().copy(enhetNr = "0393", navn = "Nav utland"))
+val norg2ResponseOverordnet = listOf(generateNorgEnhet().copy(enhetNr = OVERORDNET_NR, navn = "Overordnet"))
 
 suspend fun MockRequestHandleScope.getNorg2Response(request: HttpRequestData): HttpResponseData {
-    val body = request.receiveBody<ArbeidsfordelingCriteria>()
-    return if (body.behandlingstype == ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype) {
-        respond(norg2ResponseNavUtland)
+    val path = request.url.encodedPath
+    return if (path.endsWith("bestmatch")) {
+        val body = request.receiveBody<ArbeidsfordelingCriteria>()
+        if (body.behandlingstype == ArbeidsfordelingCriteriaBehandlingstype.NAV_UTLAND.behandlingstype) {
+            respond(norg2ResponseNavUtland)
+        } else {
+            respond(norg2Response)
+        }
+    } else if (path.contains("overordnet")) {
+        respond(norg2ResponseOverordnet)
+    } else if (path.contains("organisering")) {
+        respond(
+            listOf(
+                RsOrganisering(
+                    orgType = "ENHET",
+                    organiserer = RsSimpleEnhet(OVERORDNET_NR, "Overordnet"),
+                    organisertUnder = RsSimpleEnhet(UNDERORDNET_NR, "Underordnet"),
+                    gyldigFra = null,
+                    gyldigTil = null,
+                ),
+                RsOrganisering(
+                    orgType = "ENHET",
+                    organiserer = RsSimpleEnhet(OVERORDNET_NR, "Overordnet"),
+                    organisertUnder = RsSimpleEnhet(ENHET_NR, ENHET_NAVN),
+                    gyldigFra = null,
+                    gyldigTil = null,
+                ),
+            )
+        )
+    } else if (path.contains("enhet")) {
+        val enhetNr = path.substring(path.length - 4)
+        respond(norg2Response.first().copy(enhetNr = enhetNr))
     } else {
-        respond(norg2Response)
+        throw Exception("Unhandled ${request.url}")
     }
 }
