@@ -62,37 +62,22 @@ class NorgClient(
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
     ): BehandlendeEnhet? {
-        val cacheKey = "${CACHE_NORGENHET_GEOGRAFISK_KEY_PREFIX}$geografiskTilknytning"
-        val cachedEnhet: BehandlendeEnhet? = valkeyStore.getObject(key = cacheKey)
-        return if (cachedEnhet != null) {
-            COUNT_CALL_NORG_ARBEIDSFORDELING_ENHET_CACHE_HIT.increment()
-            cachedEnhet
-        } else {
-            COUNT_CALL_NORG_ARBEIDSFORDELING_ENHET_CACHE_MISS.increment()
-            val enheter = getArbeidsfordelingEnheter(
-                callId = callId,
-                diskresjonskode = diskresjonskode,
-                geografiskTilknytning = geografiskTilknytning,
-                isEgenAnsatt = isEgenAnsatt,
-            )
-            val enhet = enheter
-                .filter { it.status == Enhetsstatus.AKTIV.formattedName }
-                .map {
-                    BehandlendeEnhet(
-                        it.enhetNr,
-                        it.navn
-                    )
-                }
-                .firstOrNull()
-            if (enhet != null) {
-                valkeyStore.setObject(
-                    key = cacheKey,
-                    value = enhet,
-                    expireSeconds = CACHE_NORG_EXPIRE_SECONDS
+        val enheter = getArbeidsfordelingEnheter(
+            callId = callId,
+            diskresjonskode = diskresjonskode,
+            geografiskTilknytning = geografiskTilknytning,
+            isEgenAnsatt = isEgenAnsatt,
+        )
+        val enhet = enheter
+            .filter { it.status == Enhetsstatus.AKTIV.formattedName }
+            .map {
+                BehandlendeEnhet(
+                    it.enhetNr,
+                    it.navn
                 )
             }
-            enhet
-        }
+            .firstOrNull()
+        return enhet
     }
 
     private suspend fun getArbeidsfordelingEnheter(
@@ -234,7 +219,6 @@ class NorgClient(
         private val log = getLogger(NorgClient::class.java)
 
         const val CACHE_NORGENHET_KEY_PREFIX = "norgenhet-enhetnr-"
-        const val CACHE_NORGENHET_GEOGRAFISK_KEY_PREFIX = "norgenhet-geografisktilknytning-"
         const val CACHE_NORGENHET_OVERORDNET_KEY_PREFIX = "norgenhet-overordnet-"
         const val CACHE_NORGENHET_UNDERORDNET_KEY_PREFIX = "norgenhet-underordnet-"
         const val CACHE_NORG_EXPIRE_SECONDS = 12 * 60 * 60L
