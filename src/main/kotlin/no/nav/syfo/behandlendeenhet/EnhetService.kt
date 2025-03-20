@@ -31,26 +31,14 @@ class EnhetService(
         personIdentNumber: PersonIdentNumber,
         veilederToken: Token?,
     ): BehandlendeEnhet? {
-        val cacheKey = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
-        val cachedBehandlendeEnhet: BehandlendeEnhet? = valkeyStore.getObject(key = cacheKey)
-        return if (cachedBehandlendeEnhet != null && cachedBehandlendeEnhet.navn != ENHETSNAVN_MANGLER) {
-            cachedBehandlendeEnhet
-        } else {
-            val oppfolgingsenhet = getOppfolgingsenhet(personIdentNumber)
-            val behandlendeEnhetResponse = if (oppfolgingsenhet?.enhet != null) {
-                BehandlendeEnhet(
-                    enhetId = oppfolgingsenhet.enhet.value,
-                    navn = getEnhetsnavn(oppfolgingsenhet.enhet),
-                )
-            } else {
-                findGeografiskEnhet(callId, personIdentNumber, veilederToken)
-            }
-            valkeyStore.setObject(
-                key = cacheKey,
-                value = behandlendeEnhetResponse,
-                expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
+        val oppfolgingsenhet = getOppfolgingsenhet(personIdentNumber)
+        return if (oppfolgingsenhet?.enhet != null) {
+            BehandlendeEnhet(
+                enhetId = oppfolgingsenhet.enhet.value,
+                navn = getEnhetsnavn(oppfolgingsenhet.enhet),
             )
-            behandlendeEnhetResponse
+        } else {
+            findGeografiskEnhet(callId, personIdentNumber, veilederToken)
         }
     }
 
@@ -70,11 +58,6 @@ class EnhetService(
             val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
             if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
                 repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, veilederToken.getNAVIdent()).also {
-                    valkeyStore.setObject(
-                        key = "$CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX${personIdent.value}",
-                        value = null,
-                        expireSeconds = CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS,
-                    )
                     behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
                 }
             } else {
@@ -89,31 +72,43 @@ class EnhetService(
         personIdentNumber: PersonIdentNumber,
         veilederToken: Token?
     ): BehandlendeEnhet? {
-        val geografiskTilknytning = pdlClient.geografiskTilknytning(
-            callId = callId,
-            personIdentNumber = personIdentNumber,
-        )
-        val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
-            callId = callId,
-            personIdentNumber = personIdentNumber,
-            veilederToken = veilederToken,
-        )
-
-        val graderingList = pdlClient.person(
-            callId = callId,
-            personIdentNumber = personIdentNumber,
-        )?.gradering()
-
-        val behandlendeEnhet = norgClient.getArbeidsfordelingEnhet(
-            callId = callId,
-            diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
-            geografiskTilknytning = geografiskTilknytning,
-            isEgenAnsatt = isEgenAnsatt,
-        )
-
-        return if (isEnhetUtvandret(behandlendeEnhet)) {
-            getEnhetNAVUtland()
+        val cacheKey = "$CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
+        val cachedBehandlendeEnhet: BehandlendeEnhet? = valkeyStore.getObject(key = cacheKey)
+        return if (cachedBehandlendeEnhet != null && cachedBehandlendeEnhet.navn != ENHETSNAVN_MANGLER) {
+            cachedBehandlendeEnhet
         } else {
+            val geografiskTilknytning = pdlClient.geografiskTilknytning(
+                callId = callId,
+                personIdentNumber = personIdentNumber,
+            )
+            val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
+                callId = callId,
+                personIdentNumber = personIdentNumber,
+                veilederToken = veilederToken,
+            )
+
+            val graderingList = pdlClient.person(
+                callId = callId,
+                personIdentNumber = personIdentNumber,
+            )?.gradering()
+
+            val behandlendeEnhetFraNorg = norgClient.getArbeidsfordelingEnhet(
+                callId = callId,
+                diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
+                geografiskTilknytning = geografiskTilknytning,
+                isEgenAnsatt = isEgenAnsatt,
+            )
+
+            val behandlendeEnhet = if (isEnhetUtvandret(behandlendeEnhetFraNorg)) {
+                getEnhetNAVUtland()
+            } else {
+                behandlendeEnhetFraNorg
+            }
+            valkeyStore.setObject(
+                key = cacheKey,
+                value = behandlendeEnhet,
+                expireSeconds = CACHE_GEOGRAFISKENHET_PERSONIDENT_EXPIRE_SECONDS,
+            )
             behandlendeEnhet
         }
     }
@@ -178,7 +173,7 @@ class EnhetService(
     companion object {
         private const val GEOGRAFISK_TILKNYTNING_UTVANDRET = "NOR"
         private const val ENHETSNAVN_MANGLER = "Enhetsnavn mangler"
-        const val CACHE_BEHANDLENDEENHET_PERSONIDENT_KEY_PREFIX = "behandlendeenhet-personident-"
-        const val CACHE_BEHANDLENDEENHET_PERSONIDENT_EXPIRE_SECONDS = 12 * 60 * 60L
+        const val CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX = "geografiskenhet-personident-"
+        const val CACHE_GEOGRAFISKENHET_PERSONIDENT_EXPIRE_SECONDS = 12 * 60 * 60L
     }
 }

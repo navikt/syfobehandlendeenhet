@@ -73,6 +73,7 @@ fun main() {
 
     val norgClient = NorgClient(
         baseUrl = environment.norg2Url,
+        valkeyStore = valkeyStore,
     )
 
     val skjermedePersonerPipClient = SkjermedePersonerPipClient(
