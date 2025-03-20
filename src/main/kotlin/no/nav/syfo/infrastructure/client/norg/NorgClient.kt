@@ -61,14 +61,13 @@ class NorgClient(
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
-    ): BehandlendeEnhet? {
-        val enheter = getArbeidsfordelingEnheter(
+    ): BehandlendeEnhet? =
+        getArbeidsfordelingEnheter(
             callId = callId,
             diskresjonskode = diskresjonskode,
             geografiskTilknytning = geografiskTilknytning,
             isEgenAnsatt = isEgenAnsatt,
         )
-        val enhet = enheter
             .filter { it.status == Enhetsstatus.AKTIV.formattedName }
             .map {
                 BehandlendeEnhet(
@@ -77,8 +76,6 @@ class NorgClient(
                 )
             }
             .firstOrNull()
-        return enhet
-    }
 
     private suspend fun getArbeidsfordelingEnheter(
         callId: String,
