@@ -140,7 +140,7 @@ class NorgClient(
             cachedEnhet
         } else {
             COUNT_CALL_NORG_OVERORDNET_ENHET_CACHE_MISS.increment()
-            val url = getOverordnetEnheterForNAVKontorUrl(enhet.value)
+            val url = getOverordnetEnhetForNAVKontorUrl(enhet.value)
             val enhet: NorgEnhet? = try {
                 val response: List<NorgEnhet> = httpClient.get(url) {
                     header(NAV_CALL_ID_HEADER, callId)
@@ -148,7 +148,7 @@ class NorgClient(
                 }.body()
 
                 if (response.isEmpty()) {
-                    log.warn("No overordnede enheter returned from NORG2 for enhet $enhet, callId=$callId")
+                    log.warn("No overordnet enhet returned from NORG2 for enhet $enhet, callId=$callId")
                 }
                 response.firstOrNull()
             } catch (e: ResponseException) {
@@ -222,7 +222,7 @@ class NorgClient(
     private fun getBehandlingstype() =
         ArbeidsfordelingCriteriaBehandlingstype.SYKEFRAVAERSOPPFOLGING.behandlingstype
 
-    private fun getOverordnetEnheterForNAVKontorUrl(enhetNr: String): String {
+    private fun getOverordnetEnhetForNAVKontorUrl(enhetNr: String): String {
         return "$baseUrl/norg2/api/v1/enhet/$enhetNr/overordnet?organiseringsType=$ORGANISERINGSTYPE"
     }
 
