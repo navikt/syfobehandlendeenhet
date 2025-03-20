@@ -74,7 +74,7 @@ class EnhetService(
     ): BehandlendeEnhet? {
         val cacheKey = "$CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
         val cachedBehandlendeEnhet: BehandlendeEnhet? = valkeyStore.getObject(key = cacheKey)
-        return if (cachedBehandlendeEnhet != null && cachedBehandlendeEnhet.navn != ENHETSNAVN_MANGLER) {
+        return if (cachedBehandlendeEnhet != null) {
             cachedBehandlendeEnhet
         } else {
             val geografiskTilknytning = pdlClient.geografiskTilknytning(
