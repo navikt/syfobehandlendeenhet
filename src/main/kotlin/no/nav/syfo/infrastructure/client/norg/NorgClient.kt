@@ -123,7 +123,7 @@ class NorgClient(
         } else {
             COUNT_CALL_NORG_OVERORDNET_ENHET_CACHE_MISS.increment()
             val url = getOverordnetEnhetForNAVKontorUrl(enhet.value)
-            val enhet: NorgEnhet? = try {
+            val norgEnhet: NorgEnhet? = try {
                 val response: List<NorgEnhet> = httpClient.get(url) {
                     header(NAV_CALL_ID_HEADER, callId)
                     accept(ContentType.Application.Json)
@@ -143,14 +143,14 @@ class NorgClient(
                     throw e
                 }
             }
-            if (enhet != null) {
+            if (norgEnhet != null) {
                 valkeyStore.setObject(
                     key = cacheKey,
-                    value = enhet,
+                    value = norgEnhet,
                     expireSeconds = CACHE_NORG_EXPIRE_SECONDS
                 )
             }
-            enhet
+            norgEnhet
         }
     }
 
