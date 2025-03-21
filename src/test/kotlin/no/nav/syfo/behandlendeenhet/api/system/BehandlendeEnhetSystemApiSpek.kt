@@ -14,7 +14,6 @@ import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.mock.norg2Response
 import no.nav.syfo.util.*
-import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
