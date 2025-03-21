@@ -54,7 +54,7 @@ class EnhetService(
                 personIdentNumber = personIdent,
                 veilederToken = veilederToken,
             )
-            val newBehandlendeEnhet = if (enhetId?.value != geografiskEnhet?.enhetId) enhetId else null
+            val newBehandlendeEnhet = if (enhetId?.value != geografiskEnhet.enhetId) enhetId else null
             val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
             if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
                 repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, veilederToken.getNAVIdent()).also {
@@ -71,7 +71,7 @@ class EnhetService(
         callId: String,
         personIdentNumber: PersonIdentNumber,
         veilederToken: Token?
-    ): Enhet? {
+    ): Enhet {
         val cacheKey = "$CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
         val cachedEnhet: Enhet? = valkeyStore.getObject(key = cacheKey)
         return if (cachedEnhet != null) {
@@ -115,9 +115,9 @@ class EnhetService(
 
     suspend fun getMuligeOppfolgingsenheter(
         callId: String,
-        enhet: Enhet,
+        enhetId: EnhetId,
     ): List<Enhet> {
-        val overordnet = norgClient.getOverordnetEnhet(callId, enhet)
+        val overordnet = norgClient.getOverordnetEnhet(callId, enhetId)
         return if (overordnet != null) {
             norgClient.getUnderenheter(callId, overordnet.enhetNr).map {
                 Enhet(

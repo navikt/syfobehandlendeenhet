@@ -69,9 +69,10 @@ class BehandlendeEnhetSystemApiSpek : Spek({
 
                             behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
                             behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
-                            behandlendeEnhet.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
-                            behandlendeEnhet.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
-                            behandlendeEnhet.oppfolgingsenhet shouldBe null
+                            behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
+                            behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
+                            behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
+                            behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                         }
                     }
 

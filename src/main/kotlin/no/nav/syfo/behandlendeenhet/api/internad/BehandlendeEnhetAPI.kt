@@ -63,7 +63,7 @@ fun Route.registrerPersonApi(
             )
             val enhetId = call.parameters[ENHET_ID_PARAM]
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No enhetId supplied in request")
-            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, Enhet(enhetId))
+            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, EnhetId(enhetId))
 
             call.respond(tilordningsenheter)
         }
