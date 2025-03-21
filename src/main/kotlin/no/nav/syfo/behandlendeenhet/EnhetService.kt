@@ -60,7 +60,7 @@ class EnhetService(
                 personIdentNumber = personIdent,
                 veilederToken = veilederToken,
             )
-            val newBehandlendeEnhet = if (enhetId?.value != geografiskEnhet?.enhetId) enhetId else null
+            val newBehandlendeEnhet = if (enhetId?.value != geografiskEnhet.enhetId) enhetId else null
             val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
             if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
                 repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, veilederToken.getNAVIdent()).also {
@@ -82,7 +82,7 @@ class EnhetService(
         callId: String,
         personIdentNumber: PersonIdentNumber,
         veilederToken: Token?
-    ): Enhet? {
+    ): Enhet {
         val geografiskTilknytning = pdlClient.geografiskTilknytning(
             callId = callId,
             personIdentNumber = personIdentNumber,

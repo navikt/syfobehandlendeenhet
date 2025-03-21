@@ -37,15 +37,18 @@ class NorgClient(
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
-    ): Enhet? {
+    ): Enhet {
         val enheter = getArbeidsfordelingEnheter(
             callId = callId,
             diskresjonskode = diskresjonskode,
             geografiskTilknytning = geografiskTilknytning,
             isEgenAnsatt = isEgenAnsatt,
         )
+
         if (enheter.isEmpty()) {
-            return null
+            val errorMessage = "No arbeidsfordeling enhet was found in response from NORG2-arbeidsfordeling."
+            log.error("$errorMessage {}", callIdArgument(callId))
+            throw RuntimeException(errorMessage)
         }
         return enheter
             .filter { it.status == Enhetsstatus.AKTIV.formattedName }

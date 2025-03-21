@@ -89,9 +89,10 @@ class BehandlendeEnhetApiSpek : Spek({
 
                     behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
                     behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
-                    behandlendeEnhet.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
-                    behandlendeEnhet.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhet shouldBe null
+                    behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                 }
             }
 
@@ -124,10 +125,10 @@ class BehandlendeEnhetApiSpek : Spek({
 
                     behandlendeEnhet.enhetId shouldBeEqualTo norg2ResponseNavUtland.first().enhetNr
                     behandlendeEnhet.navn shouldBeEqualTo norg2ResponseNavUtland.first().navn
-                    behandlendeEnhet.geografiskEnhet?.enhetId shouldBeEqualTo "0101"
-                    behandlendeEnhet.geografiskEnhet?.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhet?.enhetId shouldBeEqualTo "0393"
-                    behandlendeEnhet.oppfolgingsenhet?.navn shouldBeEqualTo "Nav utland"
+                    behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0393"
+                    behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Nav utland"
                 }
             }
         }
