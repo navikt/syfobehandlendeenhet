@@ -5,7 +5,7 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import no.nav.syfo.behandlendeenhet.Enhet
 import no.nav.syfo.infrastructure.client.norg.domain.*
 import no.nav.syfo.infrastructure.client.pdl.GeografiskTilknytning
 import no.nav.syfo.util.*
@@ -37,20 +37,23 @@ class NorgClient(
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
-    ): BehandlendeEnhet? {
+    ): Enhet {
         val enheter = getArbeidsfordelingEnheter(
             callId = callId,
             diskresjonskode = diskresjonskode,
             geografiskTilknytning = geografiskTilknytning,
             isEgenAnsatt = isEgenAnsatt,
         )
+
         if (enheter.isEmpty()) {
-            return null
+            val errorMessage = "No arbeidsfordeling enhet was found in response from NORG2-arbeidsfordeling."
+            log.error("$errorMessage {}", callIdArgument(callId))
+            throw RuntimeException(errorMessage)
         }
         return enheter
             .filter { it.status == Enhetsstatus.AKTIV.formattedName }
             .map {
-                BehandlendeEnhet(
+                Enhet(
                     it.enhetNr,
                     it.navn
                 )
