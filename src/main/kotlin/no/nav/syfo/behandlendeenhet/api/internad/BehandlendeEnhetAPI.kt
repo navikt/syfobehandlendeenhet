@@ -14,9 +14,11 @@ import no.nav.syfo.util.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+const val ENHET_ID_PARAM = "enhetId"
 const val internadBehandlendeEnhetApiV2BasePath = "/api/internad/v2"
 const val internadBehandlendeEnhetApiV2PersonIdentPath = "/personident"
 const val internadBehandlendeEnhetApiV2PersonPath = "/person"
+const val internadBehandlendeEnhetApiV2TilordningsenheterPath = "/tilordningsenheter/{$ENHET_ID_PARAM}"
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.behandlendeenhet.api.internad")
 
@@ -47,6 +49,22 @@ fun Route.registrerPersonApi(
             )?.let { behandlendeEnhet ->
                 call.respond(behandlendeEnhet)
             } ?: call.respond(HttpStatusCode.NoContent)
+        }
+
+        get(internadBehandlendeEnhetApiV2TilordningsenheterPath) {
+            val callId = getCallId()
+            val token = getBearerHeader()
+                ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No Authorization header supplied")
+
+            veilederTilgangskontrollClient.throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
+                callId = callId,
+                token = token,
+            )
+            val enhetId = call.parameters[ENHET_ID_PARAM]
+                ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No enhetId supplied in request")
+            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, Enhet(enhetId))
+
+            call.respond(tilordningsenheter)
         }
 
         post(internadBehandlendeEnhetApiV2PersonPath) {

@@ -24,6 +24,7 @@ import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
 import no.nav.syfo.testhelper.generator.generateBehandlendeEnhetDTO
 import no.nav.syfo.testhelper.mock.ENHET_NR
+import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
 import no.nav.syfo.testhelper.mock.norg2Response
 import no.nav.syfo.testhelper.mock.norg2ResponseNavUtland
 import no.nav.syfo.util.*
@@ -68,6 +69,7 @@ class BehandlendeEnhetApiSpek : Spek({
 
     val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentPath"
     val personUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonPath"
+    val tilordningsenheterUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2TilordningsenheterPath".replace("{$ENHET_ID_PARAM}", "1234")
     val behandlendeEnhetDTO = generateBehandlendeEnhetDTO()
     val validToken = generateJWT(
         audience = externalMockEnvironment.environment.azureAppClientId,
@@ -340,6 +342,24 @@ class BehandlendeEnhetApiSpek : Spek({
                         setBody(behandlendeEnhetDTO.copy(personident = ARBEIDSTAKER_EGENANSATT.value))
                     }
                     response.status shouldBeEqualTo HttpStatusCode.BadRequest
+                }
+            }
+        }
+    }
+    describe("Get mulige oppfolgingsenheter") {
+        describe("Happy path") {
+            it("Get mulige oppfolgingsenheter") {
+                testApplication {
+                    val client = setupApiAndClient()
+                    val response = client.get(tilordningsenheterUrl) {
+                        bearerAuth(validToken)
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.OK
+                    val behandlendeEnhetList = response.body<List<BehandlendeEnhet>>()
+
+                    behandlendeEnhetList.size shouldBeEqualTo 2
+                    behandlendeEnhetList[0].enhetId shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhetList[1].enhetId shouldBeEqualTo ENHET_NR
                 }
             }
         }

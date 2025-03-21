@@ -43,6 +43,7 @@ fun Application.testApiModule(
 
     val norgClient = NorgClient(
         baseUrl = externalMockEnvironment.environment.norg2Url,
+        valkeyStore = valkeyStore,
         httpClient = externalMockEnvironment.mockHttpClient,
     )
 
