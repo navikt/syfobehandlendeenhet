@@ -74,7 +74,8 @@ class NorgClient(
             log.error("$errorMessage {}", callIdArgument(callId))
             throw RuntimeException(errorMessage)
         }
-        return enheter
+
+        val aktiveEnheter = enheter
             .filter { it.status == Enhetsstatus.AKTIV.formattedName }
             .map {
                 Enhet(
@@ -82,7 +83,14 @@ class NorgClient(
                     it.navn
                 )
             }
-            .first()
+
+        if (aktiveEnheter.isEmpty()) {
+            val errorMessage = "No aktive enhet was found in response from NORG2-arbeidsfordeling."
+            log.error("$errorMessage {}", callIdArgument(callId))
+            throw RuntimeException(errorMessage)
+        }
+
+        return aktiveEnheter.first()
     }
 
     private suspend fun getArbeidsfordelingEnheter(
