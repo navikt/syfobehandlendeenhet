@@ -124,10 +124,10 @@ class NorgClient(
         enhetId: EnhetId,
     ): NorgEnhet? {
         val cacheKey = "${CACHE_NORGENHET_OVERORDNET_KEY_PREFIX}${enhetId.value}"
-        val cachedEnhet: NorgEnhet? = valkeyStore.getObject(key = cacheKey)
-        return if (cachedEnhet != null) {
+        val cachedGeografiskEnhet: NorgEnhet? = valkeyStore.getObject(key = cacheKey)
+        return if (cachedGeografiskEnhet != null) {
             COUNT_CALL_NORG_OVERORDNET_ENHET_CACHE_HIT.increment()
-            cachedEnhet
+            cachedGeografiskEnhet
         } else {
             COUNT_CALL_NORG_OVERORDNET_ENHET_CACHE_MISS.increment()
             val url = getOverordnetEnhetForNAVKontorUrl(enhetId.value)
