@@ -9,7 +9,7 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import io.mockk.justRun
 import io.mockk.mockk
-import no.nav.syfo.BehandlendeEnhetResponseDTO
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.mock.norg2Response

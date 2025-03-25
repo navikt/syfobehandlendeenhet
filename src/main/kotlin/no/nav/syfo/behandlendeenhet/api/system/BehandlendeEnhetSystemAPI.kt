@@ -3,7 +3,7 @@ package no.nav.syfo.behandlendeenhet.api.system
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.syfo.BehandlendeEnhetResponseDTO
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.access.APIConsumerAccessService
 import no.nav.syfo.domain.PersonIdentNumber

@@ -1,4 +1,4 @@
-package no.nav.syfo
+package no.nav.syfo.behandlendeenhet.api
 
 import no.nav.syfo.behandlendeenhet.Enhet
 import no.nav.syfo.domain.BehandlendeEnhet

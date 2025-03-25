@@ -11,7 +11,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.syfo.BehandlendeEnhetResponseDTO
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.Enhet
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer

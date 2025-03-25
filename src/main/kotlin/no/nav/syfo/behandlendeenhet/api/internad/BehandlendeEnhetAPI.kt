@@ -4,7 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.syfo.BehandlendeEnhetResponseDTO
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.domain.toBehandlendeEnhetDTO
