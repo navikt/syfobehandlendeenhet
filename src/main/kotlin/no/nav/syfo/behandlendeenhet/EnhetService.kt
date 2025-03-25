@@ -119,7 +119,7 @@ class EnhetService(
     ): List<Enhet> {
         val overordnet = norgClient.getOverordnetEnhet(callId, enhetId)
         return if (overordnet != null) {
-            norgClient.getUnderenheter(callId, overordnet.enhetNr).map {
+            norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr)).map {
                 Enhet(
                     enhetId = it.enhetNr,
                     navn = it.navn,

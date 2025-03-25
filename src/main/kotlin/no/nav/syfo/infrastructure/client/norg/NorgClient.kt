@@ -123,7 +123,7 @@ class NorgClient(
         callId: String,
         enhetId: EnhetId,
     ): NorgEnhet? {
-        val cacheKey = "${CACHE_NORGENHET_OVERORDNET_KEY_PREFIX}$enhetId"
+        val cacheKey = "${CACHE_NORGENHET_OVERORDNET_KEY_PREFIX}${enhetId.value}"
         val cachedEnhet: NorgEnhet? = valkeyStore.getObject(key = cacheKey)
         return if (cachedEnhet != null) {
             COUNT_CALL_NORG_OVERORDNET_ENHET_CACHE_HIT.increment()
