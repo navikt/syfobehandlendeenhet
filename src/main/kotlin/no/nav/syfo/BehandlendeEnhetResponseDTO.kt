@@ -12,7 +12,7 @@ data class BehandlendeEnhetResponseDTO(
     val oppfolgingsenhet: Enhet,
 ) {
     companion object {
-        fun fromBehandlendeEnhet(behandlendeEnhet: BehandlendeEnhet): BehandlendeEnhetResponseDTO? {
+        fun fromBehandlendeEnhet(behandlendeEnhet: BehandlendeEnhet): BehandlendeEnhetResponseDTO {
             val oppfolgingsenhet = behandlendeEnhet.oppfolgingsenhet ?: behandlendeEnhet.geografiskEnhet
 
             return BehandlendeEnhetResponseDTO(
