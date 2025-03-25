@@ -123,7 +123,7 @@ class NorgClient(
         callId: String,
         enhetId: EnhetId,
     ): NorgEnhet? {
-        val cacheKey = "${CACHE_NORGENHET_OVERORDNET_KEY_PREFIX}${enhetId}"
+        val cacheKey = "${CACHE_NORGENHET_OVERORDNET_KEY_PREFIX}$enhetId"
         val cachedEnhet: NorgEnhet? = valkeyStore.getObject(key = cacheKey)
         return if (cachedEnhet != null) {
             COUNT_CALL_NORG_OVERORDNET_ENHET_CACHE_HIT.increment()
@@ -164,16 +164,16 @@ class NorgClient(
 
     suspend fun getUnderenheter(
         callId: String,
-        enhetNr: String,
+        enhetId: EnhetId,
     ): List<NorgEnhet> {
-        val cacheKey = "${CACHE_NORGENHET_UNDERORDNET_KEY_PREFIX}${enhetNr}"
+        val cacheKey = "${CACHE_NORGENHET_UNDERORDNET_KEY_PREFIX}${enhetId.value}"
         val cachedEnhet: List<NorgEnhet>? = valkeyStore.getListObject<NorgEnhet>(cacheKey)
         return if (cachedEnhet != null) {
             COUNT_CALL_NORG_UNDERORDNET_ENHET_CACHE_HIT.increment()
             cachedEnhet
         } else {
             COUNT_CALL_NORG_UNDERORDNET_ENHET_CACHE_MISS.increment()
-            val url = getOrganiseringForEnhetUrl(enhetNr)
+            val url = getOrganiseringForEnhetUrl(enhetId.value)
             val underenheter = try {
                 val response: List<RsOrganisering> = httpClient.get(url) {
                     header(NAV_CALL_ID_HEADER, callId)
@@ -181,8 +181,8 @@ class NorgClient(
                 }.body()
 
                 if (response.isEmpty()) {
-                    log.error("No underenheter returned from NORG2 for enhet $enhetNr, callId=$callId")
-                    throw RuntimeException("No underenheter returned from NORG2 for enhet $enhetNr, callId=$callId")
+                    log.error("No underenheter returned from NORG2 for enhet $enhetId, callId=$callId")
+                    throw RuntimeException("No underenheter returned from NORG2 for enhet $enhetId, callId=$callId")
                 }
                 response
                     .mapNotNull { it.organisertUnder?.nr }
@@ -193,7 +193,7 @@ class NorgClient(
                     emptyList()
                 } else {
                     val message =
-                        "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhetNr, callId=$callId"
+                        "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhetId, callId=$callId"
                     log.error(message)
                     throw e
                 }
