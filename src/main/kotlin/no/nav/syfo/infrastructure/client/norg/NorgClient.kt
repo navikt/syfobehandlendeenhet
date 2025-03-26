@@ -62,21 +62,12 @@ class NorgClient(
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
     ): Enhet {
-        val enheter = getArbeidsfordelingEnheter(
+        val aktiveEnheter = getArbeidsfordelingEnheter(
             callId = callId,
             diskresjonskode = diskresjonskode,
             geografiskTilknytning = geografiskTilknytning,
             isEgenAnsatt = isEgenAnsatt,
-        )
-
-        if (enheter.isEmpty()) {
-            val errorMessage = "No arbeidsfordeling enhet was found in response from NORG2-arbeidsfordeling."
-            log.error("$errorMessage {}", callIdArgument(callId))
-            throw RuntimeException(errorMessage)
-        }
-
-        val aktiveEnheter = enheter
-            .filter { it.status == Enhetsstatus.AKTIV.formattedName }
+        ).filter { it.status == Enhetsstatus.AKTIV.formattedName }
             .map {
                 Enhet(
                     it.enhetNr,
@@ -85,7 +76,7 @@ class NorgClient(
             }
 
         if (aktiveEnheter.isEmpty()) {
-            val errorMessage = "No aktive enhet was found in response from NORG2-arbeidsfordeling."
+            val errorMessage = "No arbeidsfordeling enhet was found in response from NORG2-arbeidsfordeling."
             log.error("$errorMessage {}", callIdArgument(callId))
             throw RuntimeException(errorMessage)
         }
