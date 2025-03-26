@@ -1,9 +1,9 @@
 package no.nav.syfo.behandlendeenhet.api.system
 
-import io.ktor.server.application.*
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.access.APIConsumerAccessService
 import no.nav.syfo.domain.PersonIdentNumber
@@ -37,9 +37,9 @@ fun Route.registrerSystemApi(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
                 veilederToken = null,
-            )?.let { behandlendeEnhet ->
-                call.respond(behandlendeEnhet)
-            } ?: call.respond(HttpStatusCode.NoContent)
+            )
+                .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) ?: HttpStatusCode.NoContent }
+                .run { call.respond(this) }
         }
     }
 }

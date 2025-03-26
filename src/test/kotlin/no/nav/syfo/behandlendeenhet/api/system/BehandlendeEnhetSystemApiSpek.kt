@@ -9,7 +9,7 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import io.mockk.justRun
 import io.mockk.mockk
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.mock.norg2Response
@@ -64,10 +64,14 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                                 header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
                             }
                             response.status shouldBeEqualTo HttpStatusCode.OK
-                            val behandlendeEnhet = response.body<BehandlendeEnhet>()
+                            val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
                             behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
                             behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
+                            behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
+                            behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
+                            behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
+                            behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                         }
                     }
 

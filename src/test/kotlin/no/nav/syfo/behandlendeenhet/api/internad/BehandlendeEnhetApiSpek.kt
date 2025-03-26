@@ -7,14 +7,18 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
-import io.mockk.*
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
+import io.mockk.clearMocks
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
+import no.nav.syfo.behandlendeenhet.Enhet
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
-import no.nav.syfo.testhelper.*
+import no.nav.syfo.testhelper.ExternalMockEnvironment
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_EGENANSATT
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
@@ -22,12 +26,16 @@ import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.testhelper.UserConstants.ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
+import no.nav.syfo.testhelper.dropData
+import no.nav.syfo.testhelper.generateJWT
 import no.nav.syfo.testhelper.generator.generateBehandlendeEnhetDTO
 import no.nav.syfo.testhelper.mock.ENHET_NR
 import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
 import no.nav.syfo.testhelper.mock.norg2Response
 import no.nav.syfo.testhelper.mock.norg2ResponseNavUtland
-import no.nav.syfo.util.*
+import no.nav.syfo.testhelper.testApiModule
+import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
+import no.nav.syfo.util.configure
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeLessThan
@@ -87,10 +95,14 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val behandlendeEnhet = response.body<BehandlendeEnhet>()
+                    val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
                     behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
                     behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
+                    behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                 }
             }
 
@@ -119,9 +131,14 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val behandlendeEnhet = response.body<BehandlendeEnhet>()
+                    val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
+
                     behandlendeEnhet.enhetId shouldBeEqualTo norg2ResponseNavUtland.first().enhetNr
                     behandlendeEnhet.navn shouldBeEqualTo norg2ResponseNavUtland.first().navn
+                    behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0393"
+                    behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Nav utland"
                 }
             }
         }
@@ -187,7 +204,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.body<BehandlendeEnhetDTO>() shouldBeEqualTo behandlendeEnhetDTO
 
                     val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo true
+                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo true
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo behandlendeEnhetDTO.personident
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
@@ -214,8 +231,8 @@ class BehandlendeEnhetApiSpek : Spek({
 
                     val oppfolgingsenhet =
                         repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo false
-                    oppfolgingsenhet?.enhet?.value shouldBeEqualTo ENHET_ID
+                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo false
+                    oppfolgingsenhet?.enhetId?.value shouldBeEqualTo ENHET_ID
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
@@ -252,7 +269,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
 
                     val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhet shouldBe null
+                    oppfolgingsenhet?.enhetId shouldBe null
                     oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
 
                     val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
@@ -272,7 +289,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhet?.isNavUtland() shouldBeEqualTo true
+                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo true
 
                     val updatePersonDTO = behandlendeEnhetDTO.copy(isNavUtland = false, oppfolgingsenhet = null)
                     val responsePost = client.post(personUrl) {
@@ -283,7 +300,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     responsePost.status shouldBeEqualTo HttpStatusCode.OK
 
                     val oppfolgingsenhetUpdate = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(updatePersonDTO.personident))
-                    oppfolgingsenhetUpdate?.enhet shouldBe null
+                    oppfolgingsenhetUpdate?.enhetId shouldBe null
 
                     val kafkaRecordSlot = mutableListOf<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
                     verify(exactly = 2) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
@@ -355,7 +372,7 @@ class BehandlendeEnhetApiSpek : Spek({
                         bearerAuth(validToken)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val behandlendeEnhetList = response.body<List<BehandlendeEnhet>>()
+                    val behandlendeEnhetList = response.body<List<Enhet>>()
 
                     behandlendeEnhetList.size shouldBeEqualTo 2
                     behandlendeEnhetList[0].enhetId shouldBeEqualTo UNDERORDNET_NR

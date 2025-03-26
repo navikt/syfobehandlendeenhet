@@ -2,7 +2,7 @@ package no.nav.syfo.infrastructure.database.repository
 
 import no.nav.syfo.behandlendeenhet.IEnhetRepository
 import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
-import no.nav.syfo.domain.Enhet
+import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
@@ -14,7 +14,7 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
 
     override fun createOppfolgingsenhet(
         personIdent: PersonIdentNumber,
-        enhet: Enhet?,
+        enhetId: EnhetId?,
         veilederident: String,
     ): Oppfolgingsenhet =
         database.connection.use { connection ->
@@ -22,7 +22,7 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
             connection.prepareStatement(createOppfolgingsenhet).use {
                 it.setObject(1, UUID.randomUUID())
                 it.setString(2, personIdent.value)
-                it.setString(3, enhet?.value)
+                it.setString(3, enhetId?.value)
                 it.setString(4, veilederident)
                 it.setObject(5, now)
                 it.executeQuery().toList { toPOppfolgingsenhet() }

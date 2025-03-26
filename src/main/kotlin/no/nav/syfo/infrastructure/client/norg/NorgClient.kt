@@ -5,9 +5,9 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.syfo.behandlendeenhet.BehandlendeEnhet
-import no.nav.syfo.domain.Enhet
 import no.nav.syfo.infrastructure.cache.ValkeyStore
+import no.nav.syfo.behandlendeenhet.Enhet
+import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.infrastructure.client.norg.domain.*
 import no.nav.syfo.infrastructure.client.pdl.GeografiskTilknytning
 import no.nav.syfo.util.*
@@ -61,21 +61,28 @@ class NorgClient(
         diskresjonskode: ArbeidsfordelingCriteriaDiskresjonskode?,
         geografiskTilknytning: GeografiskTilknytning,
         isEgenAnsatt: Boolean,
-    ): BehandlendeEnhet? =
-        getArbeidsfordelingEnheter(
+    ): Enhet {
+        val aktiveEnheter = getArbeidsfordelingEnheter(
             callId = callId,
             diskresjonskode = diskresjonskode,
             geografiskTilknytning = geografiskTilknytning,
             isEgenAnsatt = isEgenAnsatt,
-        )
-            .filter { it.status == Enhetsstatus.AKTIV.formattedName }
+        ).filter { it.status == Enhetsstatus.AKTIV.formattedName }
             .map {
-                BehandlendeEnhet(
+                Enhet(
                     it.enhetNr,
                     it.navn
                 )
             }
-            .firstOrNull()
+
+        if (aktiveEnheter.isEmpty()) {
+            val errorMessage = "No arbeidsfordeling enhet was found in response from NORG2-arbeidsfordeling."
+            log.error("$errorMessage {}", callIdArgument(callId))
+            throw RuntimeException(errorMessage)
+        }
+
+        return aktiveEnheter.first()
+    }
 
     private suspend fun getArbeidsfordelingEnheter(
         callId: String,
@@ -113,16 +120,16 @@ class NorgClient(
 
     suspend fun getOverordnetEnhet(
         callId: String,
-        enhet: Enhet,
+        enhetId: EnhetId,
     ): NorgEnhet? {
-        val cacheKey = "${CACHE_NORGENHET_OVERORDNET_KEY_PREFIX}${enhet.value}"
-        val cachedEnhet: NorgEnhet? = valkeyStore.getObject(key = cacheKey)
-        return if (cachedEnhet != null) {
+        val cacheKey = "${CACHE_NORGENHET_OVERORDNET_KEY_PREFIX}${enhetId.value}"
+        val cachedGeografiskEnhet: NorgEnhet? = valkeyStore.getObject(key = cacheKey)
+        return if (cachedGeografiskEnhet != null) {
             COUNT_CALL_NORG_OVERORDNET_ENHET_CACHE_HIT.increment()
-            cachedEnhet
+            cachedGeografiskEnhet
         } else {
             COUNT_CALL_NORG_OVERORDNET_ENHET_CACHE_MISS.increment()
-            val url = getOverordnetEnhetForNAVKontorUrl(enhet.value)
+            val url = getOverordnetEnhetForNAVKontorUrl(enhetId.value)
             val norgEnhet: NorgEnhet? = try {
                 val response: List<NorgEnhet> = httpClient.get(url) {
                     header(NAV_CALL_ID_HEADER, callId)
@@ -130,7 +137,7 @@ class NorgClient(
                 }.body()
 
                 if (response.isEmpty()) {
-                    log.warn("No overordnet enhet returned from NORG2 for enhet $enhet, callId=$callId")
+                    log.warn("No overordnet enhet returned from NORG2 for enhet $enhetId, callId=$callId")
                 }
                 response.firstOrNull()
             } catch (e: ResponseException) {
@@ -138,7 +145,7 @@ class NorgClient(
                     null
                 } else {
                     val message =
-                        "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhet, callId=$callId"
+                        "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhetId, callId=$callId"
                     log.error(message)
                     throw e
                 }
@@ -156,16 +163,16 @@ class NorgClient(
 
     suspend fun getUnderenheter(
         callId: String,
-        enhet: Enhet,
+        enhetId: EnhetId,
     ): List<NorgEnhet> {
-        val cacheKey = "${CACHE_NORGENHET_UNDERORDNET_KEY_PREFIX}${enhet.value}"
+        val cacheKey = "${CACHE_NORGENHET_UNDERORDNET_KEY_PREFIX}${enhetId.value}"
         val cachedEnhet: List<NorgEnhet>? = valkeyStore.getListObject<NorgEnhet>(cacheKey)
         return if (cachedEnhet != null) {
             COUNT_CALL_NORG_UNDERORDNET_ENHET_CACHE_HIT.increment()
             cachedEnhet
         } else {
             COUNT_CALL_NORG_UNDERORDNET_ENHET_CACHE_MISS.increment()
-            val url = getOrganiseringForEnhetUrl(enhet.value)
+            val url = getOrganiseringForEnhetUrl(enhetId.value)
             val underenheter = try {
                 val response: List<RsOrganisering> = httpClient.get(url) {
                     header(NAV_CALL_ID_HEADER, callId)
@@ -173,8 +180,8 @@ class NorgClient(
                 }.body()
 
                 if (response.isEmpty()) {
-                    log.error("No underenheter returned from NORG2 for enhet $enhet, callId=$callId")
-                    throw RuntimeException("No underenheter returned from NORG2 for enhet $enhet, callId=$callId")
+                    log.error("No underenheter returned from NORG2 for enhet $enhetId, callId=$callId")
+                    throw RuntimeException("No underenheter returned from NORG2 for enhet $enhetId, callId=$callId")
                 }
                 response
                     .mapNotNull { it.organisertUnder?.nr }
@@ -185,7 +192,7 @@ class NorgClient(
                     emptyList()
                 } else {
                     val message =
-                        "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhet, callId=$callId"
+                        "Call to NORG2 for overordnet enhet failed with status HTTP-${e.response.status} for enhet $enhetId, callId=$callId"
                     log.error(message)
                     throw e
                 }

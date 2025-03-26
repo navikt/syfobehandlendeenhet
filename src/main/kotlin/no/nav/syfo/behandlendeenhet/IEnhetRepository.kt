@@ -1,13 +1,13 @@
 package no.nav.syfo.behandlendeenhet
 
 import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
-import no.nav.syfo.domain.Enhet
+import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
 
 interface IEnhetRepository {
     fun createOppfolgingsenhet(
         personIdent: PersonIdentNumber,
-        enhet: Enhet?,
+        enhetId: EnhetId?,
         veilederident: String,
     ): Oppfolgingsenhet
 

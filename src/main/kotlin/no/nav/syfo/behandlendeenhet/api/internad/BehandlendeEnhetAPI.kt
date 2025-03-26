@@ -4,10 +4,11 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.behandlendeenhet.domain.toBehandlendeEnhetDTO
-import no.nav.syfo.domain.Enhet
+import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.util.*
@@ -46,9 +47,9 @@ fun Route.registrerPersonApi(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
                 veilederToken = token,
-            )?.let { behandlendeEnhet ->
-                call.respond(behandlendeEnhet)
-            } ?: call.respond(HttpStatusCode.NoContent)
+            )
+                .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) ?: HttpStatusCode.NoContent }
+                .run { call.respond(this) }
         }
 
         get(internadBehandlendeEnhetApiV2TilordningsenheterPath) {
@@ -62,7 +63,7 @@ fun Route.registrerPersonApi(
             )
             val enhetId = call.parameters[ENHET_ID_PARAM]
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No enhetId supplied in request")
-            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, Enhet(enhetId))
+            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, EnhetId(enhetId))
 
             call.respond(tilordningsenheter)
         }
@@ -82,8 +83,8 @@ fun Route.registrerPersonApi(
             val oppfolgingsenhet = enhetService.updateOppfolgingsenhet(
                 callId = callId,
                 personIdent = PersonIdentNumber(behandlendeEnhetDTO.personident),
-                enhet = behandlendeEnhetDTO.oppfolgingsenhet?.let { Enhet(it) }
-                    ?: if (behandlendeEnhetDTO.isNavUtland) Enhet(Enhet.ENHETNR_NAV_UTLAND) else null,
+                enhetId = behandlendeEnhetDTO.oppfolgingsenhet?.let { EnhetId(it) }
+                    ?: if (behandlendeEnhetDTO.isNavUtland) EnhetId(EnhetId.ENHETNR_NAV_UTLAND) else null,
                 veilederToken = token,
             )
 
