@@ -4,14 +4,19 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
+import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetRequestDTO
+import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetResponseDTO
 import no.nav.syfo.behandlendeenhet.domain.toBehandlendeEnhetDTO
 import no.nav.syfo.domain.EnhetId
-import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.domain.PersonIdentNumber
-import no.nav.syfo.util.*
+import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient
+import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
+import no.nav.syfo.util.getBearerHeader
+import no.nav.syfo.util.getCallId
+import no.nav.syfo.util.personIdentHeader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -94,6 +99,51 @@ fun Route.registrerPersonApi(
                 log.error("Could not set oppfolgingsenhet in database")
                 call.respond(HttpStatusCode.BadRequest)
             }
+        }
+
+        post("/personer") {
+            val callId = call.getCallId()
+            val token = call.getBearerHeader()
+                ?: throw IllegalArgumentException("Failed to check tilgang to brukere for veileder. No Authorization header supplied")
+
+            val tildelOppfolgingsenhetRequest = call.receive<TildelOppfolgingsenhetRequestDTO>()
+
+            val personsWithVeilederAccess: List<String> =
+                veilederTilgangskontrollClient.veilederPersonAccessListMedOBO(
+                    personidenter = tildelOppfolgingsenhetRequest.personidenter,
+                    token = token,
+                    callId = callId,
+                ) ?: emptyList()
+
+            val updatedOppfolgingsenheter = personsWithVeilederAccess.map { personIdent ->
+                try {
+                    val oppfolgingsenhet = enhetService.updateOppfolgingsenhet(
+                        callId = callId,
+                        personIdent = PersonIdentNumber(personIdent),
+                        enhetId = EnhetId(tildelOppfolgingsenhetRequest.oppfolgingsenhet),
+                        veilederToken = token,
+                    )
+                    if (oppfolgingsenhet != null) {
+                        Result.success(oppfolgingsenhet)
+                    } else {
+                        Result.failure(IllegalStateException("Could not update oppfolgingsenhet"))
+                    }
+                } catch (exception: Exception) {
+                    log.error("Failed to update oppfolgingsenhet, callId $callId", exception)
+                    Result.failure(exception)
+                }
+            }
+
+            val successfulOppfolgingsenheter = updatedOppfolgingsenheter
+                .filter { it.isSuccess }
+                .map {
+                    val oppfolgingsenhet = it.getOrThrow()
+                    TildelOppfolgingsenhetResponseDTO(
+                        personident = oppfolgingsenhet.personident.value,
+                        oppfolgingsenhet = oppfolgingsenhet.enhetId?.value,
+                    )
+                }
+            call.respond(successfulOppfolgingsenheter)
         }
     }
 }
