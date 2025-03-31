@@ -40,6 +40,14 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 }
         }.firstOrNull()?.toOppfolgingsenhet()
 
+    override fun getActiveOppfolgingsenheter(): List<PersonIdentNumber> =
+        database.connection.use { connection ->
+            connection.prepareStatement(queryActiveOppfolgingsenhet)
+                .use {
+                    it.executeQuery().toList { PersonIdentNumber(getString(1)) }
+                }
+        }
+
     private fun ResultSet.toPOppfolgingsenhet() =
         POppfolgingsenhet(
             id = getInt("id"),
@@ -97,6 +105,13 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 FROM OPPFOLGINGSENHET
                 WHERE personident = ?
                 ORDER BY created_at DESC
+            """
+
+        private const val queryActiveOppfolgingsenhet =
+            """
+                SELECT DISTINCT personident
+                FROM OPPFOLGINGSENHET o1
+                WHERE oppfolgingsenhet IS NOT NULL AND NOT EXISTS (SELECT 1 FROM OPPFOLGINGSENHET o2 WHERE o1.personident = o2.personident AND o1.created_at < o2.created_at)
             """
 
         private const val queryUpdatePersonident =

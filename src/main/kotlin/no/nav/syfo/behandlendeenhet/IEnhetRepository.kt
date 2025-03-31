@@ -13,6 +13,8 @@ interface IEnhetRepository {
 
     fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): Oppfolgingsenhet?
 
+    fun getActiveOppfolgingsenheter(): List<PersonIdentNumber>
+
     fun updatePersonident(nyPersonident: PersonIdentNumber, oldIdent: PersonIdentNumber): Int
 
     fun deletePerson(personIdent: PersonIdentNumber): Int
