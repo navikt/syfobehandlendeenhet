@@ -27,6 +27,7 @@ data class Environment(
         valkeyUsername = getEnvVar("VALKEY_USERNAME_CACHE"),
         valkeyPassword = getEnvVar("VALKEY_PASSWORD_CACHE"),
     ),
+    val electorPath: String = getEnvVar("ELECTOR_PATH"),
 
     val norg2Url: String = getEnvVar("NORG2_URL"),
 

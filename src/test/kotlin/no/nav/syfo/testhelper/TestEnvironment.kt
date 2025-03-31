@@ -50,6 +50,7 @@ fun testEnvironment(
         valkeyPassword = "valkeyPassword",
         ssl = false,
     ),
+    electorPath = "elector",
 )
 
 fun testAppState() = ApplicationState(

@@ -23,6 +23,7 @@ import no.nav.syfo.infrastructure.client.wellknown.getWellKnown
 import no.nav.syfo.identhendelse.IdenthendelseService
 import no.nav.syfo.identhendelse.kafka.IdenthendelseConsumerService
 import no.nav.syfo.identhendelse.kafka.launchKafkaTaskIdenthendelse
+import no.nav.syfo.infrastructure.cronjob.launchCronjobs
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
@@ -134,6 +135,11 @@ fun main() {
                     applicationState = applicationState,
                     applicationEnvironmentKafka = environment.kafka,
                     kafkaIdenthendelseConsumerService = kafkaIdenthendelseConsumerService,
+                )
+                launchCronjobs(
+                    applicationState = applicationState,
+                    environment = environment,
+                    database = applicationDatabase,
                 )
             }
         }

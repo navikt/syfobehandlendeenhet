@@ -28,6 +28,7 @@ spec:
     min: 2
     max: 4
     cpuThresholdPercentage: 70
+  leaderElection: true
   prometheus:
     enabled: true
     path: /internal/metrics
