@@ -41,5 +41,27 @@ fun Route.registrerSystemApi(
                 .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) ?: HttpStatusCode.NoContent }
                 .run { call.respond(this) }
         }
+        post(systemdBehandlendeEnhetApiV2PersonIdentPath) {
+            val callId = getCallId()
+            val token = getBearerHeader()
+                ?: throw IllegalArgumentException("Could not retrieve Person: No Authorization header supplied")
+
+            apiConsumerAccessService.validateConsumerApplicationAZP(
+                authorizedApplicationNameList = authorizedApplicationNameList,
+                token = token,
+            )
+
+            val personIdentNumber = personIdentHeader()?.let { personIdent ->
+                PersonIdentNumber(personIdent)
+            }
+                ?: throw IllegalArgumentException("Could not set BehandlendeEnhet: No $NAV_PERSONIDENT_HEADER supplied in request header")
+
+            enhetService.updateOppfolgingsenhet(
+                callId = callId,
+                personIdent = personIdentNumber,
+                enhetId = null,
+            )
+            call.respond(HttpStatusCode.OK)
+        }
     }
 }
