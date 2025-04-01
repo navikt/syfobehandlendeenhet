@@ -56,7 +56,7 @@ class EnhetService(
             )
             val newBehandlendeEnhet = if (enhetId?.value != geografiskEnhet.enhetId) enhetId else null
             val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
-            val navIdent = veilederToken?.getNAVIdent() ?: "Z999999"
+            val navIdent = veilederToken?.getNAVIdent() ?: SYSTEM_USER_IDENT
             if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
                 repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, navIdent).also {
                     behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
@@ -174,6 +174,7 @@ class EnhetService(
     companion object {
         private const val GEOGRAFISK_TILKNYTNING_UTVANDRET = "NOR"
         private const val ENHETSNAVN_MANGLER = "Enhetsnavn mangler"
+        const val SYSTEM_USER_IDENT = "Z999999"
         const val CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX = "geografiskenhet-personident-"
         const val CACHE_GEOGRAFISKENHET_PERSONIDENT_EXPIRE_SECONDS = 12 * 60 * 60L
     }

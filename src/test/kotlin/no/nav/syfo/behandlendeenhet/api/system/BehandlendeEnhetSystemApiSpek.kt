@@ -103,7 +103,7 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                             repository.createOppfolgingsenhet(
                                 personIdent = UserConstants.ARBEIDSTAKER_PERSONIDENT,
                                 enhetId = EnhetId("0102"),
-                                veilederident = "Z999999",
+                                veilederident = UserConstants.VEILEDER_IDENT,
                             )
                             val responsePre = client.get(url) {
                                 bearerAuth(validToken)
@@ -119,12 +119,12 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                             }
                             responsePost.status shouldBeEqualTo HttpStatusCode.OK
 
-                            val response = client.get(url) {
+                            val responseGet = client.get(url) {
                                 bearerAuth(validToken)
                                 header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
                             }
-                            response.status shouldBeEqualTo HttpStatusCode.OK
-                            val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
+                            responseGet.status shouldBeEqualTo HttpStatusCode.OK
+                            val behandlendeEnhet = responseGet.body<BehandlendeEnhetResponseDTO>()
                             behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
                         }
                     }
