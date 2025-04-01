@@ -44,7 +44,7 @@ fun Route.registrerSystemApi(
         post(systemdBehandlendeEnhetApiV2PersonIdentPath) {
             val callId = getCallId()
             val token = getBearerHeader()
-                ?: throw IllegalArgumentException("Could not retrieve Person: No Authorization header supplied")
+                ?: throw IllegalArgumentException("Could not set BehandlendeEnhet: No Authorization header supplied")
 
             apiConsumerAccessService.validateConsumerApplicationAZP(
                 authorizedApplicationNameList = authorizedApplicationNameList,
