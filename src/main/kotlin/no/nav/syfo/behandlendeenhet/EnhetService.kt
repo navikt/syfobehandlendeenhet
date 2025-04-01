@@ -46,7 +46,7 @@ class EnhetService(
         callId: String,
         personIdent: PersonIdentNumber,
         enhetId: EnhetId?,
-        veilederToken: Token,
+        veilederToken: Token? = null,
     ): Oppfolgingsenhet? =
         if (validateForOppfolgingsenhet(callId, personIdent, veilederToken)) {
             val geografiskEnhet = findGeografiskEnhet(
@@ -56,8 +56,9 @@ class EnhetService(
             )
             val newBehandlendeEnhet = if (enhetId?.value != geografiskEnhet.enhetId) enhetId else null
             val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
+            val navIdent = veilederToken?.getNAVIdent() ?: SYSTEM_USER_IDENT
             if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
-                repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, veilederToken.getNAVIdent()).also {
+                repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, navIdent).also {
                     behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
                 }
             } else {
@@ -133,7 +134,7 @@ class EnhetService(
     private suspend fun validateForOppfolgingsenhet(
         callId: String,
         personIdent: PersonIdentNumber,
-        veilederToken: Token,
+        veilederToken: Token?,
     ): Boolean {
         val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
             callId = callId,
@@ -173,6 +174,7 @@ class EnhetService(
     companion object {
         private const val GEOGRAFISK_TILKNYTNING_UTVANDRET = "NOR"
         private const val ENHETSNAVN_MANGLER = "Enhetsnavn mangler"
+        const val SYSTEM_USER_IDENT = "Z999999"
         const val CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX = "geografiskenhet-personident-"
         const val CACHE_GEOGRAFISKENHET_PERSONIDENT_EXPIRE_SECONDS = 12 * 60 * 60L
     }

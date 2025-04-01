@@ -11,6 +11,8 @@ import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
+import no.nav.syfo.domain.EnhetId
+import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.mock.norg2Response
 import no.nav.syfo.util.*
@@ -21,6 +23,7 @@ import org.spekframework.spek2.style.specification.describe
 class BehandlendeEnhetSystemApiSpek : Spek({
     describe(BehandlendeEnhetSystemApiSpek::class.java.simpleName) {
         val externalMockEnvironment = ExternalMockEnvironment.instance
+        val repository = EnhetRepository(externalMockEnvironment.database)
 
         val behandlendeEnhetProducer = mockk<BehandlendeEnhetProducer>()
         justRun { behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(any(), any()) }
@@ -42,7 +45,7 @@ class BehandlendeEnhetSystemApiSpek : Spek({
 
         val url = "$systemBehandlendeEnhetApiV2BasePath$systemdBehandlendeEnhetApiV2PersonIdentPath"
 
-        describe("Get BehandlendeEnhet for PersonIdent as System") {
+        describe("Get/Post BehandlendeEnhet for PersonIdent as System") {
             describe("Happy path") {
                 externalMockEnvironment.environment.systemAPIAuthorizedConsumerApplicationNameList.forEach { consumerApplicationName ->
 
@@ -72,6 +75,57 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                             behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
                             behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
                             behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
+                        }
+                    }
+                    it("Post BehandlendeEnhet for PersonIdent as $consumerApplicationName") {
+                        testApplication {
+                            val client = setupApiAndClient()
+                            val responsePost = client.post(url) {
+                                bearerAuth(validToken)
+                                header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
+                            }
+                            responsePost.status shouldBeEqualTo HttpStatusCode.OK
+
+                            val response = client.get(url) {
+                                bearerAuth(validToken)
+                                header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
+                            }
+                            response.status shouldBeEqualTo HttpStatusCode.OK
+                            val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
+                            behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
+                            behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
+                            behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
+                        }
+                    }
+                    it("Post BehandlendeEnhet for PersonIdent which has oppfolgingsenhet as $consumerApplicationName") {
+                        testApplication {
+                            val client = setupApiAndClient()
+                            repository.createOppfolgingsenhet(
+                                personIdent = UserConstants.ARBEIDSTAKER_PERSONIDENT,
+                                enhetId = EnhetId("0102"),
+                                veilederident = UserConstants.VEILEDER_IDENT,
+                            )
+                            val responsePre = client.get(url) {
+                                bearerAuth(validToken)
+                                header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
+                            }
+                            responsePre.status shouldBeEqualTo HttpStatusCode.OK
+                            val behandlendeEnhetPre = responsePre.body<BehandlendeEnhetResponseDTO>()
+                            behandlendeEnhetPre.oppfolgingsenhet.enhetId shouldBeEqualTo "0102"
+
+                            val responsePost = client.post(url) {
+                                bearerAuth(validToken)
+                                header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
+                            }
+                            responsePost.status shouldBeEqualTo HttpStatusCode.OK
+
+                            val responseGet = client.get(url) {
+                                bearerAuth(validToken)
+                                header(NAV_PERSONIDENT_HEADER, UserConstants.ARBEIDSTAKER_PERSONIDENT.value)
+                            }
+                            responseGet.status shouldBeEqualTo HttpStatusCode.OK
+                            val behandlendeEnhet = responseGet.body<BehandlendeEnhetResponseDTO>()
+                            behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
                         }
                     }
 
