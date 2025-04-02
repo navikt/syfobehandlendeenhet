@@ -37,23 +37,12 @@ spec:
     inbound:
       rules:
         - application: isdialogmote
-          namespace: teamsykefravr
-          cluster: prod-gcp
         - application: syfomodiaperson
-          namespace: teamsykefravr
-          cluster: prod-gcp
-        - application: syfomotebehov
-          namespace: team-esyfo
-          cluster: prod-fss
-        - application: syfomotebehov
-          namespace: team-esyfo
-          cluster: prod-gcp
+        - application: syfooversikt
         - application: syfooversiktsrv
-          namespace: teamsykefravr
-          cluster: prod-gcp
         - application: istilgangskontroll
-          namespace: teamsykefravr
-          cluster: prod-gcp
+        - application: syfomotebehov
+          namespace: team-esyfo
         - application: meroppfolging-backend
           namespace: team-esyfo
     outbound:
