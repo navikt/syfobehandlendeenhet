@@ -5,10 +5,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.syfo.behandlendeenhet.EnhetService
-import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
-import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
-import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetRequestDTO
-import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetResponseDTO
+import no.nav.syfo.behandlendeenhet.api.*
 import no.nav.syfo.behandlendeenhet.domain.toBehandlendeEnhetDTO
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
@@ -101,7 +98,7 @@ fun Route.registrerPersonApi(
             }
         }
 
-        post("/personer") {
+        post("/oppfolgingsenhet-tildelinger") {
             val callId = call.getCallId()
             val token = call.getBearerHeader()
                 ?: throw IllegalArgumentException("Failed to check tilgang to brukere for veileder. No Authorization header supplied")
@@ -115,6 +112,8 @@ fun Route.registrerPersonApi(
                     callId = callId,
                 ) ?: emptyList()
 
+            val personidenterNoAccess = tildelOppfolgingsenhetRequest.personidenter.subtract(personsWithVeilederAccess.toSet())
+            val errorneousPersonidenter = mutableListOf<String>()
             val updatedOppfolgingsenheter = personsWithVeilederAccess.map { personIdent ->
                 try {
                     val oppfolgingsenhet = enhetService.updateOppfolgingsenhet(
@@ -129,21 +128,46 @@ fun Route.registrerPersonApi(
                         Result.failure(IllegalStateException("Could not update oppfolgingsenhet"))
                     }
                 } catch (exception: Exception) {
-                    log.error("Failed to update oppfolgingsenhet, callId $callId", exception)
+                    log.error(
+                        "Failed to update oppfolgingsenhet ${tildelOppfolgingsenhetRequest.oppfolgingsenhet}, callId $callId",
+                        exception
+                    )
+                    errorneousPersonidenter.add(personIdent)
                     Result.failure(exception)
                 }
             }
 
-            val successfulOppfolgingsenheter = updatedOppfolgingsenheter
+            val successfulTildelinger = updatedOppfolgingsenheter
                 .filter { it.isSuccess }
                 .map {
                     val oppfolgingsenhet = it.getOrThrow()
-                    TildelOppfolgingsenhetResponseDTO(
+                    TildelOppfolgingsenhetDTO(
                         personident = oppfolgingsenhet.personident.value,
                         oppfolgingsenhet = oppfolgingsenhet.enhetId?.value,
                     )
                 }
-            call.respond(successfulOppfolgingsenheter)
+            val unsuccessfulTildelinger = errorneousPersonidenter
+                .map { personident ->
+                    ErrorDTO(
+                        personident = personident,
+                        errorMessage = "Failed to update oppfolgingsenhet",
+                    )
+                }.plus(
+                    personidenterNoAccess.map { personident ->
+                        ErrorDTO(
+                            personident = personident,
+                            errorMessage = "Veileder does not have access to this person",
+                            errorCode = HttpStatusCode.Forbidden.value,
+                        )
+                    }
+                )
+
+            val tildelOppfolgingsenhetResponseDTO = TildelOppfolgingsenhetResponseDTO(
+                tildelinger = successfulTildelinger,
+                errors = unsuccessfulTildelinger,
+            )
+
+            call.respond(tildelOppfolgingsenhetResponseDTO)
         }
     }
 }

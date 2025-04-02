@@ -45,6 +45,7 @@ import no.nav.syfo.util.configure
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeLessThan
+import org.amshove.kluent.shouldNotBe
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.spekframework.spek2.Spek
@@ -83,7 +84,7 @@ class BehandlendeEnhetApiSpek : Spek({
 
     val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentPath"
     val personUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonPath"
-    val personerUrl = "$internadBehandlendeEnhetApiV2BasePath/personer"
+    val oppfolgingsenhetTildelingerUrl = "$internadBehandlendeEnhetApiV2BasePath/oppfolgingsenhet-tildelinger"
     val tilordningsenheterUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2TilordningsenheterPath".replace("{$ENHET_ID_PARAM}", "1234")
     val behandlendeEnhetDTO = generateBehandlendeEnhetDTO()
     val validToken = generateJWT(
@@ -401,17 +402,18 @@ class BehandlendeEnhetApiSpek : Spek({
 
             testApplication {
                 val client = setupApiAndClient()
-                val response = client.post(personerUrl) {
+                val response = client.post(oppfolgingsenhetTildelingerUrl) {
                     bearerAuth(validToken)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(requestDTO)
                 }
                 response.status shouldBeEqualTo HttpStatusCode.OK
 
-                val responseDTO = response.body<List<TildelOppfolgingsenhetResponseDTO>>()
+                val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
 
-                responseDTO.size shouldBeEqualTo 2
-                responseDTO.all { it.oppfolgingsenhet == ENHET_ID } shouldBeEqualTo true
+                responseDTO.tildelinger.size shouldBeEqualTo 2
+                responseDTO.errors.size shouldBeEqualTo 0
+                responseDTO.tildelinger.all { it.oppfolgingsenhet == ENHET_ID } shouldBeEqualTo true
 
                 verify(exactly = 2) { kafkaProducerMock.send(any()) }
             }
@@ -428,17 +430,21 @@ class BehandlendeEnhetApiSpek : Spek({
 
             testApplication {
                 val client = setupApiAndClient()
-                val response = client.post(personerUrl) {
+                val response = client.post(oppfolgingsenhetTildelingerUrl) {
                     bearerAuth(validToken)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(requestDTO)
                 }
                 response.status shouldBeEqualTo HttpStatusCode.OK
 
-                val responseDTO = response.body<List<TildelOppfolgingsenhetResponseDTO>>()
+                val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
 
-                responseDTO.size shouldBeEqualTo 1
-                responseDTO.first().oppfolgingsenhet shouldBeEqualTo ENHET_ID
+                responseDTO.tildelinger.size shouldBeEqualTo 1
+                responseDTO.tildelinger.first().oppfolgingsenhet shouldBeEqualTo ENHET_ID
+                responseDTO.tildelinger.first().personident shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
+                responseDTO.errors.size shouldBeEqualTo 1
+                responseDTO.errors.first().personident shouldBeEqualTo ARBEIDSTAKER_ADRESSEBESKYTTET.value
+                responseDTO.errors.first().errorCode shouldBeEqualTo 403
 
                 verify(exactly = 1) { kafkaProducerMock.send(any()) }
             }
@@ -452,16 +458,18 @@ class BehandlendeEnhetApiSpek : Spek({
 
             testApplication {
                 val client = setupApiAndClient()
-                val response = client.post(personerUrl) {
+                val response = client.post(oppfolgingsenhetTildelingerUrl) {
                     bearerAuth(validToken)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(requestDTO)
                 }
                 response.status shouldBeEqualTo HttpStatusCode.OK
 
-                val responseDTO = response.body<List<TildelOppfolgingsenhetResponseDTO>>()
+                val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
 
-                responseDTO.size shouldBeEqualTo 0
+                responseDTO.tildelinger.size shouldBeEqualTo 0
+                responseDTO.errors.size shouldBeEqualTo 1
+                responseDTO.errors.first().personident shouldBeEqualTo ARBEIDSTAKER_ADRESSEBESKYTTET.value
 
                 verify(exactly = 0) { kafkaProducerMock.send(any()) }
             }
@@ -483,17 +491,18 @@ class BehandlendeEnhetApiSpek : Spek({
 
             testApplication {
                 val client = setupApiAndClient()
-                val response = client.post(personerUrl) {
+                val response = client.post(oppfolgingsenhetTildelingerUrl) {
                     bearerAuth(validToken)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(requestDTO)
                 }
                 response.status shouldBeEqualTo HttpStatusCode.OK
 
-                val responseDTO = response.body<List<TildelOppfolgingsenhetResponseDTO>>()
+                val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
 
-                responseDTO.size shouldBeEqualTo 2
-                responseDTO.all { it.oppfolgingsenhet == ENHET_ID } shouldBeEqualTo true
+                responseDTO.tildelinger.size shouldBeEqualTo 2
+                responseDTO.errors.size shouldBeEqualTo 0
+                responseDTO.tildelinger.all { it.oppfolgingsenhet == ENHET_ID } shouldBeEqualTo true
 
                 verify(exactly = 2) { kafkaProducerMock.send(any()) }
             }
@@ -515,18 +524,19 @@ class BehandlendeEnhetApiSpek : Spek({
 
             testApplication {
                 val client = setupApiAndClient()
-                val response = client.post(personerUrl) {
+                val response = client.post(oppfolgingsenhetTildelingerUrl) {
                     bearerAuth(validToken)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(requestDTO)
                 }
                 response.status shouldBeEqualTo HttpStatusCode.OK
 
-                val responseDTO = response.body<List<TildelOppfolgingsenhetResponseDTO>>()
+                val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
 
-                responseDTO.size shouldBeEqualTo 2
-                val firstPerson = responseDTO.first { it.personident == ARBEIDSTAKER_PERSONIDENT.value }
-                val otherPerson = responseDTO.first { it.personident == ARBEIDSTAKER_PERSONIDENT_3.value }
+                responseDTO.tildelinger.size shouldBeEqualTo 2
+                responseDTO.errors.size shouldBeEqualTo 0
+                val firstPerson = responseDTO.tildelinger.first { it.personident == ARBEIDSTAKER_PERSONIDENT.value }
+                val otherPerson = responseDTO.tildelinger.first { it.personident == ARBEIDSTAKER_PERSONIDENT_3.value }
                 firstPerson.oppfolgingsenhet shouldBeEqualTo ENHET_ID
                 otherPerson.oppfolgingsenhet shouldBeEqualTo null
 
@@ -546,14 +556,14 @@ class BehandlendeEnhetApiSpek : Spek({
 
             testApplication {
                 val client = setupApiAndClient()
-                val response = client.post(personerUrl) {
+                val response = client.post(oppfolgingsenhetTildelingerUrl) {
                     bearerAuth(validToken)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(requestDTO)
                 }
                 response.status shouldBeEqualTo HttpStatusCode.OK
 
-                val responseDTO = response.body<List<TildelOppfolgingsenhetResponseDTO>>()
+                val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
 
                 val oppfolgingsenhetPerson1 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT)
                 val oppfolgingsenhetPerson2 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT_2)
@@ -562,10 +572,50 @@ class BehandlendeEnhetApiSpek : Spek({
                 oppfolgingsenhetPerson2?.enhetId?.value shouldBeEqualTo ENHET_ID
                 oppfolgingsenhetPerson3 shouldBeEqualTo null
 
-                responseDTO.size shouldBeEqualTo 2
-                responseDTO.all { it.oppfolgingsenhet == ENHET_ID } shouldBeEqualTo true
+                responseDTO.tildelinger.size shouldBeEqualTo 2
+                responseDTO.tildelinger.all { it.oppfolgingsenhet == ENHET_ID } shouldBeEqualTo true
+                responseDTO.errors.size shouldBeEqualTo 1
+                responseDTO.errors.first().personident shouldBeEqualTo ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value
 
                 verify(exactly = 2) { kafkaProducerMock.send(any()) }
+            }
+        }
+
+        it("Updates oppfolgingsenheter even though one of them fails, and one without access") {
+            val requestDTO = generateTildelOppfolgingsenhetRequestDTO(
+                personidenter = listOf(
+                    ARBEIDSTAKER_PERSONIDENT.value,
+                    ARBEIDSTAKER_ADRESSEBESKYTTET.value,
+                    ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value, // Vil feile på kall til PDL
+                ),
+                oppfolgingsenhet = ENHET_ID,
+            )
+
+            testApplication {
+                val client = setupApiAndClient()
+                val response = client.post(oppfolgingsenhetTildelingerUrl) {
+                    bearerAuth(validToken)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(requestDTO)
+                }
+                response.status shouldBeEqualTo HttpStatusCode.OK
+
+                val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
+
+                val oppfolgingsenhetPerson1 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT)
+                val oppfolgingsenhetPerson2 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_ADRESSEBESKYTTET)
+                val oppfolgingsenhetPerson3 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND)
+                oppfolgingsenhetPerson1?.enhetId?.value shouldBeEqualTo ENHET_ID
+                oppfolgingsenhetPerson2 shouldBeEqualTo null
+                oppfolgingsenhetPerson3 shouldBeEqualTo null
+
+                responseDTO.tildelinger.size shouldBeEqualTo 1
+                responseDTO.tildelinger.first().oppfolgingsenhet shouldBeEqualTo ENHET_ID
+                responseDTO.errors.size shouldBeEqualTo 2
+                responseDTO.errors.find { it.personident == ARBEIDSTAKER_ADRESSEBESKYTTET.value } shouldNotBe null
+                responseDTO.errors.find { it.personident == ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value } shouldNotBe null
+
+                verify(exactly = 1) { kafkaProducerMock.send(any()) }
             }
         }
     }
