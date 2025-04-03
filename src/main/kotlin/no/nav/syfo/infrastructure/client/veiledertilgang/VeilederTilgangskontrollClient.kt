@@ -12,6 +12,7 @@ import no.nav.syfo.application.api.ForbiddenAccessVeilederException
 import no.nav.syfo.application.api.authentication.Token
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.client.httpClientDefault
+import no.nav.syfo.util.NAV_CALL_ID_HEADER
 import no.nav.syfo.util.bearerHeader
 import no.nav.syfo.util.callIdArgument
 import org.slf4j.LoggerFactory
@@ -24,6 +25,7 @@ class VeilederTilgangskontrollClient(
 ) {
 
     private val tilgangskontrollSYFOUrl: String = "$baseUrl$ACCESS_TO_SYFO_PATH"
+    private val tilgangskontrollBrukereUrl: String = "$baseUrl$ACCESS_TO_BRUKERE_PATH"
 
     suspend fun throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
         callId: String,
@@ -35,6 +37,46 @@ class VeilederTilgangskontrollClient(
         )
         if (!hasAccess) {
             throw ForbiddenAccessVeilederException()
+        }
+    }
+
+    suspend fun veilederPersonAccessListMedOBO(
+        personidenter: List<String>,
+        token: Token,
+        callId: String,
+    ): List<String>? {
+        val oboToken = azureAdClient.getOnBehalfOfToken(
+            scopeClientId = clientId,
+            token = token,
+        )?.accessToken
+            ?: throw RuntimeException("Failed to request access to list of persons: Failed to get OBO token")
+
+        try {
+            val response: HttpResponse = httpClient.post(tilgangskontrollBrukereUrl) {
+                header(HttpHeaders.Authorization, bearerHeader(oboToken))
+                header(NAV_CALL_ID_HEADER, callId)
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(personidenter)
+            }
+
+            COUNT_CALL_TILGANGSKONTROLL_BRUKERE_SUCCESS.increment()
+
+            return response.body<List<String>>()
+        } catch (e: ClientRequestException) {
+            return if (e.response.status == HttpStatusCode.Forbidden) {
+                COUNT_CALL_TILGANGSKONTROLL_BRUKERE_FORBIDDEN.increment()
+                log.warn("Forbidden to request access to list of persons from istilgangskontroll")
+                null
+            } else {
+                COUNT_CALL_TILGANGSKONTROLL_BRUKERE_FAIL.increment()
+                log.error("Error while requesting access to list of persons from istilgangskontroll: ${e.message}", e)
+                null
+            }
+        } catch (e: ServerResponseException) {
+            COUNT_CALL_TILGANGSKONTROLL_BRUKERE_FAIL.increment()
+            log.error("Error while requesting access to list of persons from istilgangskontroll: ${e.message}", e)
+            return null
         }
     }
 
@@ -79,6 +121,7 @@ class VeilederTilgangskontrollClient(
 
     companion object {
         const val ACCESS_TO_SYFO_PATH = "/api/tilgang/navident/syfo"
+        const val ACCESS_TO_BRUKERE_PATH = "/api/tilgang/navident/brukere"
 
         private val log = LoggerFactory.getLogger(VeilederTilgangskontrollClient::class.java)
     }

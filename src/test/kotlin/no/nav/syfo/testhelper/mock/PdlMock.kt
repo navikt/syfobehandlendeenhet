@@ -2,13 +2,21 @@ package no.nav.syfo.testhelper.mock
 
 import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
-import io.ktor.http.*
 import no.nav.syfo.infrastructure.client.pdl.PdlClient.Companion.GT_HEADER
 import no.nav.syfo.infrastructure.client.pdl.domain.*
 import no.nav.syfo.testhelper.UserConstants
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 
 const val geografiskTilknytningKommune = "0330"
+const val geografiskTilknytningAnnenKommune = "0440"
+
+fun generateAnnenGeografiskTilknytningKommune() =
+    PdlGeografiskTilknytning(
+        gtType = PdlGeografiskTilknytningType.KOMMUNE.name,
+        gtBydel = null,
+        gtKommune = geografiskTilknytningAnnenKommune,
+        gtLand = null,
+    )
 
 fun generatePdlHentGeografiskTilknytning(
     hentGeografiskTilknytning: PdlGeografiskTilknytning? = PdlGeografiskTilknytning(
@@ -92,14 +100,21 @@ suspend fun MockRequestHandleScope.pdlMockResponse(request: HttpRequestData): Ht
     return if (request.headers[GT_HEADER] == GT_HEADER) {
         val pdlRequest = request.receiveBody<PdlGeografiskTilknytningRequest>()
         when (pdlRequest.variables.ident) {
-            UserConstants.ARBEIDSTAKER_PERSONIDENT.value -> {
-                respond(generatePdlGeografiskTilknytningResponse())
-            }
             UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value -> {
                 respond(generatePdlGeografiskTilknytningNotFoundResponse())
             }
+            UserConstants.ARBEIDSTAKER_PERSONIDENT_3.value -> {
+                respond(
+                    PdlGeografiskTilknytningResponse(
+                        data = PdlHentGeografiskTilknytning(
+                            hentGeografiskTilknytning = generateAnnenGeografiskTilknytningKommune()
+                        ),
+                        errors = emptyList(),
+                    )
+                )
+            }
             else -> {
-                respond(HttpStatusCode.InternalServerError)
+                respond(generatePdlGeografiskTilknytningResponse())
             }
         }
     } else {
