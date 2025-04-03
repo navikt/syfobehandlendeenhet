@@ -8,6 +8,7 @@ import io.ktor.server.netty.*
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.application.api.apiModule
+import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.infrastructure.database.applicationDatabase
 import no.nav.syfo.infrastructure.database.databaseModule
@@ -109,17 +110,21 @@ fun main() {
         module = {
             databaseModule(environment = environment)
             val repository = EnhetRepository(database = applicationDatabase)
+            val enhetService = EnhetService(
+                norgClient = norgClient,
+                pdlClient = pdlClient,
+                valkeyStore = valkeyStore,
+                skjermedePersonerPipClient = skjermedePersonerPipClient,
+                repository = repository,
+                behandlendeEnhetProducer = behandlendeEnhetProducer,
+            )
+
             apiModule(
                 applicationState = applicationState,
                 environment = environment,
                 wellKnownInternalAzureAD = wellKnownInternalAzureAD,
-                repository = repository,
-                behandlendeEnhetProducer = behandlendeEnhetProducer,
-                pdlClient = pdlClient,
-                valkeyStore = valkeyStore,
-                norgClient = norgClient,
-                skjermedePersonerPipClient = skjermedePersonerPipClient,
                 veilederTilgangskontrollClient = veilederTilgangskontrollClient,
+                enhetService = enhetService,
             )
             monitor.subscribe(ApplicationStarted) {
                 applicationState.ready = true
@@ -139,7 +144,8 @@ fun main() {
                 launchCronjobs(
                     applicationState = applicationState,
                     environment = environment,
-                    database = applicationDatabase,
+                    enhetService = enhetService,
+                    repository = repository,
                 )
             }
         }

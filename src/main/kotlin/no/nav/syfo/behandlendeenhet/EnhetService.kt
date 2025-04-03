@@ -30,7 +30,7 @@ class EnhetService(
     suspend fun arbeidstakersBehandlendeEnhet(
         callId: String,
         personIdentNumber: PersonIdentNumber,
-        veilederToken: Token?,
+        veilederToken: Token? = null,
     ): BehandlendeEnhet {
         val oppfolgingsenhet = getOppfolgingsenhet(personIdentNumber)?.enhetId?.let { enhet ->
             Enhet(
@@ -48,7 +48,7 @@ class EnhetService(
         enhetId: EnhetId?,
         veilederToken: Token? = null,
     ): Oppfolgingsenhet? =
-        if (validateForOppfolgingsenhet(callId, personIdent, veilederToken)) {
+        if (enhetId == null || validateForOppfolgingsenhet(callId, personIdent, veilederToken)) {
             val geografiskEnhet = findGeografiskEnhet(
                 callId = callId,
                 personIdentNumber = personIdent,
@@ -131,10 +131,10 @@ class EnhetService(
         }
     }
 
-    private suspend fun validateForOppfolgingsenhet(
+    suspend fun validateForOppfolgingsenhet(
         callId: String,
         personIdent: PersonIdentNumber,
-        veilederToken: Token?,
+        veilederToken: Token? = null,
     ): Boolean {
         val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
             callId = callId,

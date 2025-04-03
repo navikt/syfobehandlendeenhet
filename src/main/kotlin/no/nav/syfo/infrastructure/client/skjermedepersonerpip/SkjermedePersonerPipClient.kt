@@ -25,7 +25,7 @@ class SkjermedePersonerPipClient(
     suspend fun isSkjermet(
         callId: String,
         personIdentNumber: PersonIdentNumber,
-        veilederToken: Token?,
+        veilederToken: Token? = null,
     ): Boolean {
         val token = if (veilederToken == null) {
             azureAdClient.getSystemToken(

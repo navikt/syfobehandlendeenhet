@@ -3,13 +3,15 @@ package no.nav.syfo.infrastructure.cronjob
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Environment
 import no.nav.syfo.application.launchBackgroundTask
+import no.nav.syfo.behandlendeenhet.EnhetService
+import no.nav.syfo.behandlendeenhet.IEnhetRepository
 import no.nav.syfo.infrastructure.clients.leaderelection.LeaderPodClient
-import no.nav.syfo.infrastructure.database.DatabaseInterface
 
 fun launchCronjobs(
     applicationState: ApplicationState,
     environment: Environment,
-    database: DatabaseInterface,
+    enhetService: EnhetService,
+    repository: IEnhetRepository,
 ) {
     val leaderPodClient = LeaderPodClient(
         electorPath = environment.electorPath
@@ -20,7 +22,12 @@ fun launchCronjobs(
     )
     val cronjobs = mutableListOf<Cronjob>()
 
-    cronjobs.add(RemoveOppfolgingsenhetCronjob(database))
+    cronjobs.add(
+        RemoveOppfolgingsenhetCronjob(
+            enhetService = enhetService,
+            repository = repository,
+        )
+    )
 
     cronjobs.forEach {
         launchBackgroundTask(
