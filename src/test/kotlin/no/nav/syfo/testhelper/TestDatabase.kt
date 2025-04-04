@@ -4,6 +4,8 @@ import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import org.flywaydb.core.Flyway
 import java.sql.Connection
+import java.time.OffsetDateTime
+import java.util.UUID
 
 class TestDatabase : DatabaseInterface {
     private val pg: EmbeddedPostgres
@@ -48,6 +50,17 @@ fun DatabaseInterface.dropData() {
     this.connection.use { connection ->
         queryList.forEach { query ->
             connection.prepareStatement(query).execute()
+        }
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.setSkjermingCheckedAt(uuid: UUID, datetime: OffsetDateTime) {
+    this.connection.use { connection ->
+        connection.prepareStatement("update oppfolgingsenhet set skjerming_checked_at = ? where uuid=?").use {
+            it.setObject(1, datetime)
+            it.setString(2, uuid.toString())
+            it.executeUpdate()
         }
         connection.commit()
     }

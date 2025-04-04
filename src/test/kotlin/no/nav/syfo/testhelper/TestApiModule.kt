@@ -2,6 +2,7 @@ package no.nav.syfo.testhelper
 
 import io.ktor.server.application.*
 import no.nav.syfo.application.api.apiModule
+import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
@@ -62,16 +63,19 @@ fun Application.testApiModule(
         httpClient = externalMockEnvironment.mockHttpClient,
     )
     val repository = EnhetRepository(externalMockEnvironment.database)
+    val enhetService = EnhetService(
+        norgClient = norgClient,
+        pdlClient = pdlClient,
+        valkeyStore = valkeyStore,
+        skjermedePersonerPipClient = skjermedePersonerPipClient,
+        repository = repository,
+        behandlendeEnhetProducer = behandlendeEnhetProducer,
+    )
     this.apiModule(
         applicationState = externalMockEnvironment.applicationState,
         environment = externalMockEnvironment.environment,
         wellKnownInternalAzureAD = externalMockEnvironment.wellKnownInternalAzureAD,
-        repository = repository,
-        behandlendeEnhetProducer = behandlendeEnhetProducer,
-        pdlClient = pdlClient,
-        valkeyStore = valkeyStore,
-        norgClient = norgClient,
-        skjermedePersonerPipClient = skjermedePersonerPipClient,
+        enhetService = enhetService,
         veilederTilgangskontrollClient = veilederTilgangskontrollClient,
     )
 }

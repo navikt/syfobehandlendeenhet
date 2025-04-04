@@ -25,6 +25,7 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 it.setString(3, enhetId?.value)
                 it.setString(4, veilederident)
                 it.setObject(5, now)
+                it.setObject(6, now)
                 it.executeQuery().toList { toPOppfolgingsenhet() }
             }.also {
                 connection.commit()
@@ -39,6 +40,25 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                     it.executeQuery().toList { toPOppfolgingsenhet() }
                 }
         }.firstOrNull()?.toOppfolgingsenhet()
+
+    override fun getActiveOppfolgingsenheter(): List<Pair<UUID, PersonIdentNumber>> =
+        database.connection.use { connection ->
+            connection.prepareStatement(queryActiveOppfolgingsenhet)
+                .use {
+                    it.executeQuery().toList { Pair(UUID.fromString(getString(1)), PersonIdentNumber(getString(2))) }
+                }
+        }
+
+    override fun updateSkjermingCheckedAt(
+        oppfolgingsenhetUUID: UUID,
+    ) = database.connection.use { connection ->
+        connection.prepareStatement(queryUpdateSkjermingCheckedAt).use {
+            it.setString(1, oppfolgingsenhetUUID.toString())
+            it.executeUpdate()
+        }.also {
+            connection.commit()
+        }
+    }
 
     private fun ResultSet.toPOppfolgingsenhet() =
         POppfolgingsenhet(
@@ -86,8 +106,9 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 personident,
                 oppfolgingsenhet,
                 veilederident,
-                created_at
-                ) VALUES (DEFAULT, ?, ?, ?, ?, ?)
+                created_at,
+                skjerming_checked_at
+                ) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?)
                 RETURNING *
             """
 
@@ -97,6 +118,23 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 FROM OPPFOLGINGSENHET
                 WHERE personident = ?
                 ORDER BY created_at DESC
+            """
+
+        private const val queryActiveOppfolgingsenhet =
+            """
+                SELECT uuid, personident
+                FROM OPPFOLGINGSENHET o1
+                WHERE oppfolgingsenhet IS NOT NULL AND 
+                NOT EXISTS (SELECT 1 FROM OPPFOLGINGSENHET o2 WHERE o1.personident = o2.personident AND o1.created_at < o2.created_at) AND
+                skjerming_checked_at < NOW() - INTERVAL '1 DAY'
+                LIMIT 100
+            """
+
+        private const val queryUpdateSkjermingCheckedAt =
+            """
+                UPDATE OPPFOLGINGSENHET
+                SET skjerming_checked_at = now()
+                WHERE uuid = ?
             """
 
         private const val queryUpdatePersonident =
