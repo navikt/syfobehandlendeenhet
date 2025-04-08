@@ -127,7 +127,7 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 WHERE oppfolgingsenhet IS NOT NULL AND 
                 NOT EXISTS (SELECT 1 FROM OPPFOLGINGSENHET o2 WHERE o1.personident = o2.personident AND o1.created_at < o2.created_at) AND
                 skjerming_checked_at < NOW() - INTERVAL '1 DAY'
-                LIMIT 100
+                LIMIT 500
             """
 
         private const val queryUpdateSkjermingCheckedAt =

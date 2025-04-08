@@ -118,17 +118,19 @@ class EnhetService(
         callId: String,
         enhetId: EnhetId,
     ): List<Enhet> {
+        val mulige = mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND))
         val overordnet = norgClient.getOverordnetEnhet(callId, enhetId)
-        return if (overordnet != null) {
-            norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr)).map {
-                Enhet(
-                    enhetId = it.enhetNr,
-                    navn = it.navn,
-                )
-            }
-        } else {
-            emptyList()
+        if (overordnet != null) {
+            mulige.addAll(
+                norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr)).map {
+                    Enhet(
+                        enhetId = it.enhetNr,
+                        navn = it.navn,
+                    )
+                }
+            )
         }
+        return mulige
     }
 
     suspend fun validateForOppfolgingsenhet(

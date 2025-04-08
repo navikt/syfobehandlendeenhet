@@ -382,9 +382,10 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val behandlendeEnhetList = response.body<List<Enhet>>()
 
-                    behandlendeEnhetList.size shouldBeEqualTo 2
-                    behandlendeEnhetList[0].enhetId shouldBeEqualTo UNDERORDNET_NR
-                    behandlendeEnhetList[1].enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR
+                    behandlendeEnhetList.size shouldBeEqualTo 3
+                    behandlendeEnhetList[0].enhetId shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
+                    behandlendeEnhetList[1].enhetId shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhetList[2].enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR
                 }
             }
         }
