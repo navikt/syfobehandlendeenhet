@@ -85,7 +85,7 @@ class BehandlendeEnhetApiSpek : Spek({
     val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentPath"
     val personUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonPath"
     val oppfolgingsenhetTildelingerUrl = "$internadBehandlendeEnhetApiV2BasePath/oppfolgingsenhet-tildelinger"
-    val tilordningsenheterUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2TilordningsenheterPath".replace("{$ENHET_ID_PARAM}", "1234")
+    val tilordningsenheterUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2TilordningsenheterPath".replace("{$ENHET_ID_PARAM}", GEOGRAFISK_ENHET_NR)
     val behandlendeEnhetDTO = generateBehandlendeEnhetDTO()
     val validToken = generateJWT(
         audience = externalMockEnvironment.environment.azureAppClientId,
@@ -382,10 +382,9 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val behandlendeEnhetList = response.body<List<Enhet>>()
 
-                    behandlendeEnhetList.size shouldBeEqualTo 3
+                    behandlendeEnhetList.size shouldBeEqualTo 2
                     behandlendeEnhetList[0].enhetId shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
                     behandlendeEnhetList[1].enhetId shouldBeEqualTo UNDERORDNET_NR
-                    behandlendeEnhetList[2].enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR
                 }
             }
         }

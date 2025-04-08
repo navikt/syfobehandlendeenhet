@@ -15,6 +15,7 @@ import no.nav.syfo.infrastructure.client.pdl.domain.toArbeidsfordelingCriteriaDi
 import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.domain.BehandlendeEnhet
+import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 
@@ -116,16 +117,14 @@ class EnhetService(
 
     suspend fun getMuligeOppfolgingsenheter(
         callId: String,
-        enhetId: EnhetId,
+        currentEnhetId: EnhetId,
     ): List<Enhet> {
         val mulige = mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND))
-        val overordnet = norgClient.getOverordnetEnhet(callId, enhetId)
+        val overordnet = norgClient.getOverordnetEnhet(callId, currentEnhetId)
         if (overordnet != null) {
             mulige.addAll(
                 norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr))
-                    .filter {
-                        it.enhetNr != enhetId.value
-                    }
+                    .excludeCurrentEnhet(currentEnhetId)
                     .map {
                         Enhet(
                             enhetId = it.enhetNr,
@@ -136,6 +135,10 @@ class EnhetService(
         }
         return mulige
     }
+
+    private fun List<NorgEnhet>.excludeCurrentEnhet(
+        currentEnhetId: EnhetId,
+    ) = this.filter { it.enhetNr != currentEnhetId.value }
 
     suspend fun validateForOppfolgingsenhet(
         callId: String,
