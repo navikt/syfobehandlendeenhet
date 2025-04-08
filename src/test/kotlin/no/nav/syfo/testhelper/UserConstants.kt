@@ -7,6 +7,7 @@ object UserConstants {
     val ARBEIDSTAKER_PERSONIDENT_2 = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "8"))
     val ARBEIDSTAKER_PERSONIDENT_3 = PersonIdentNumber("12345678913")
     val ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "1"))
+    val ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND_2 = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "3"))
     val ARBEIDSTAKER_ADRESSEBESKYTTET = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "6"))
     val ARBEIDSTAKER_EGENANSATT = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "7"))
 

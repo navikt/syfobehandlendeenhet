@@ -24,6 +24,7 @@ import no.nav.syfo.testhelper.ExternalMockEnvironment
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_EGENANSATT
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
+import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND_2
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT_2
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT_3
@@ -463,7 +464,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(requestDTO)
                 }
-                response.status shouldBeEqualTo HttpStatusCode.OK
+                response.status shouldBeEqualTo HttpStatusCode.Forbidden
 
                 val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
 
@@ -567,7 +568,8 @@ class BehandlendeEnhetApiSpek : Spek({
 
                 val oppfolgingsenhetPerson1 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT)
                 val oppfolgingsenhetPerson2 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT_2)
-                val oppfolgingsenhetPerson3 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND)
+                val oppfolgingsenhetPerson3 =
+                    repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND)
                 oppfolgingsenhetPerson1?.enhetId?.value shouldBeEqualTo ENHET_ID
                 oppfolgingsenhetPerson2?.enhetId?.value shouldBeEqualTo ENHET_ID
                 oppfolgingsenhetPerson3 shouldBeEqualTo null
@@ -578,6 +580,32 @@ class BehandlendeEnhetApiSpek : Spek({
                 responseDTO.errors.first().personident shouldBeEqualTo ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value
 
                 verify(exactly = 2) { kafkaProducerMock.send(any()) }
+            }
+        }
+        it("Returns error if all of them fails") {
+            val requestDTO = generateTildelOppfolgingsenhetRequestDTO(
+                personidenter = listOf(
+                    ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value, // Vil feile på kall til PDL
+                    ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND_2.value, // Vil feile på kall til PDL
+                ),
+                oppfolgingsenhet = ENHET_ID,
+            )
+
+            testApplication {
+                val client = setupApiAndClient()
+                val response = client.post(oppfolgingsenhetTildelingerUrl) {
+                    bearerAuth(validToken)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(requestDTO)
+                }
+                response.status shouldBeEqualTo HttpStatusCode.InternalServerError
+
+                val responseDTO = response.body<TildelOppfolgingsenhetResponseDTO>()
+
+                responseDTO.tildelinger.size shouldBeEqualTo 0
+                responseDTO.errors.size shouldBeEqualTo 2
+
+                verify(exactly = 0) { kafkaProducerMock.send(any()) }
             }
         }
 
