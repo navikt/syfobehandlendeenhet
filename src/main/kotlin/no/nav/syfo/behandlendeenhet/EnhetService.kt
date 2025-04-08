@@ -124,7 +124,7 @@ class EnhetService(
             mulige.addAll(
                 norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr))
                     .filter {
-                       it.enhetNr != enhetId.value
+                        it.enhetNr != enhetId.value
                     }
                     .map {
                         Enhet(
