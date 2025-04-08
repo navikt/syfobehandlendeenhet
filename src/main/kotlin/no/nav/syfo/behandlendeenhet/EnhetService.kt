@@ -122,12 +122,16 @@ class EnhetService(
         val overordnet = norgClient.getOverordnetEnhet(callId, enhetId)
         if (overordnet != null) {
             mulige.addAll(
-                norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr)).map {
-                    Enhet(
-                        enhetId = it.enhetNr,
-                        navn = it.navn,
-                    )
-                }
+                norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr))
+                    .filter {
+                       it.enhetNr != enhetId.value
+                    }
+                    .map {
+                        Enhet(
+                            enhetId = it.enhetNr,
+                            navn = it.navn,
+                        )
+                    }
             )
         }
         return mulige
