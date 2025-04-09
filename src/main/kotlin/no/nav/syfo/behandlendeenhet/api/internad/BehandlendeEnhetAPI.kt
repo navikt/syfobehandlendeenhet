@@ -167,7 +167,16 @@ fun Route.registrerPersonApi(
                 errors = unsuccessfulTildelinger,
             )
 
-            call.respond(tildelOppfolgingsenhetResponseDTO)
+            call.respond(
+                status = if (successfulTildelinger.isNotEmpty()) {
+                    HttpStatusCode.OK
+                } else if (personidenterNoAccess.isNotEmpty()) {
+                    HttpStatusCode.Forbidden
+                } else {
+                    HttpStatusCode.InternalServerError
+                },
+                message = tildelOppfolgingsenhetResponseDTO,
+            )
         }
     }
 }

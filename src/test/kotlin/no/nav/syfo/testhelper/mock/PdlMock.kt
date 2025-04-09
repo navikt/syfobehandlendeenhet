@@ -100,7 +100,8 @@ suspend fun MockRequestHandleScope.pdlMockResponse(request: HttpRequestData): Ht
     return if (request.headers[GT_HEADER] == GT_HEADER) {
         val pdlRequest = request.receiveBody<PdlGeografiskTilknytningRequest>()
         when (pdlRequest.variables.ident) {
-            UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value -> {
+            UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value,
+            UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND_2.value -> {
                 respond(generatePdlGeografiskTilknytningNotFoundResponse())
             }
             UserConstants.ARBEIDSTAKER_PERSONIDENT_3.value -> {
