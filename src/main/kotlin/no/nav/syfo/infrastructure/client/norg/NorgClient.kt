@@ -185,6 +185,7 @@ class NorgClient(
                 }
                 response
                     .mapNotNull { it.organisertUnder?.nr }
+                    .distinct()
                     .mapNotNull { getNorgEnhet(it) }
                     .filter { it.type == ENHET_TYPE_LOKAL && it.status == Enhetsstatus.AKTIV.formattedName }
             } catch (e: ResponseException) {
