@@ -64,6 +64,13 @@ suspend fun MockRequestHandleScope.getNorg2Response(request: HttpRequestData): H
                 RsOrganisering(
                     orgType = "ENHET",
                     organiserer = RsSimpleEnhet(OVERORDNET_NR, "Overordnet"),
+                    organisertUnder = RsSimpleEnhet(UNDERORDNET_NR, "Underordnet"),
+                    gyldigFra = null,
+                    gyldigTil = null,
+                ),
+                RsOrganisering(
+                    orgType = "ENHET",
+                    organiserer = RsSimpleEnhet(OVERORDNET_NR, "Overordnet"),
                     organisertUnder = RsSimpleEnhet(GEOGRAFISK_ENHET_NR, ENHET_NAVN),
                     gyldigFra = null,
                     gyldigTil = null,
