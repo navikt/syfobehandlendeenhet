@@ -18,6 +18,7 @@ import no.nav.syfo.domain.BehandlendeEnhet
 import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
+import org.slf4j.LoggerFactory
 
 class EnhetService(
     private val norgClient: NorgClient,
@@ -66,6 +67,7 @@ class EnhetService(
                 null
             }
         } else {
+            log.warn("Attempt to update oppfolgingsenhet for person with skjerming or adressebeskyttelse")
             null
         }
 
@@ -186,5 +188,6 @@ class EnhetService(
         const val SYSTEM_USER_IDENT = "Z999999"
         const val CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX = "geografiskenhet-personident-"
         const val CACHE_GEOGRAFISKENHET_PERSONIDENT_EXPIRE_SECONDS = 12 * 60 * 60L
+        private val log = LoggerFactory.getLogger(EnhetService::class.java)
     }
 }
