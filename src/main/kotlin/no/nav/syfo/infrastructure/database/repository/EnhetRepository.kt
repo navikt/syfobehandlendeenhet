@@ -32,22 +32,14 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
             }
         }.first().toOppfolgingsenhet()
 
-    fun getUsageForVeileder(veilederident: String): List<Pair<EnhetId, Int>> {
-        return database.connection.use { connection ->
-            connection.prepareStatement(
-                """
-                SELECT oppfolgingsenhet, COUNT(*) AS count
-                FROM OPPFOLGINGSENHET
-                WHERE veilederident = ? AND oppfolgingsenhet IS NOT NULL
-                GROUP BY oppfolgingsenhet
-                ORDER BY count DESC
-            """.trimIndent(),
-            ).use {
-                it.setString(1, veilederident)
-                it.executeQuery().toList { Pair(EnhetId(getString(1)), getInt(2)) }
-            }
+    override fun getUsageForVeileder(veilederident: String): List<Pair<EnhetId, Int>> =
+        database.connection.use { connection ->
+            connection.prepareStatement(queryOppfolgingsenhetUsage)
+                .use {
+                    it.setString(1, veilederident)
+                    it.executeQuery().toList { Pair(EnhetId(getString(1)), getInt(2)) }
+                }
         }
-    }
 
     override fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): Oppfolgingsenhet? =
         database.connection.use { connection ->
@@ -135,6 +127,15 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 FROM OPPFOLGINGSENHET
                 WHERE personident = ?
                 ORDER BY created_at DESC
+            """
+
+        private const val queryOppfolgingsenhetUsage =
+            """
+                SELECT oppfolgingsenhet, COUNT(*) AS count
+                FROM OPPFOLGINGSENHET
+                WHERE veilederident = ? AND oppfolgingsenhet IS NOT NULL
+                GROUP BY oppfolgingsenhet
+                ORDER BY count DESC
             """
 
         private const val queryActiveOppfolgingsenhet =
