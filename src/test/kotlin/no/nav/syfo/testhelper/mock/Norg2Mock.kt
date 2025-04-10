@@ -7,9 +7,11 @@ import no.nav.syfo.infrastructure.client.norg.domain.*
 import no.nav.syfo.testhelper.UserConstants.ENHET_ID
 
 const val GEOGRAFISK_ENHET_NR = "0101"
+const val GEOGRAFISK_ENHET_NR_2 = "0102"
 const val OVERORDNET_NR = "0200"
-const val UNDERORDNET_NR = "0102"
+const val UNDERORDNET_NR = "0103"
 const val ENHET_NAVN = "Enhet"
+const val ENHET_NAVN_2 = "Enhet2"
 
 fun generateNorgEnhet(): NorgEnhet {
     return NorgEnhet(
@@ -72,6 +74,13 @@ suspend fun MockRequestHandleScope.getNorg2Response(request: HttpRequestData): H
                     orgType = "ENHET",
                     organiserer = RsSimpleEnhet(OVERORDNET_NR, "Overordnet"),
                     organisertUnder = RsSimpleEnhet(GEOGRAFISK_ENHET_NR, ENHET_NAVN),
+                    gyldigFra = null,
+                    gyldigTil = null,
+                ),
+                RsOrganisering(
+                    orgType = "ENHET",
+                    organiserer = RsSimpleEnhet(OVERORDNET_NR, "Overordnet"),
+                    organisertUnder = RsSimpleEnhet(GEOGRAFISK_ENHET_NR_2, ENHET_NAVN_2),
                     gyldigFra = null,
                     gyldigTil = null,
                 ),

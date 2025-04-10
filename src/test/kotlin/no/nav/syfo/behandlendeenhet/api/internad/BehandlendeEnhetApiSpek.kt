@@ -20,7 +20,7 @@ import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
-import no.nav.syfo.testhelper.ExternalMockEnvironment
+import no.nav.syfo.testhelper.*
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_EGENANSATT
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
@@ -32,15 +32,9 @@ import no.nav.syfo.testhelper.UserConstants.ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.OTHER_ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
-import no.nav.syfo.testhelper.dropData
-import no.nav.syfo.testhelper.generateJWT
 import no.nav.syfo.testhelper.generator.generateBehandlendeEnhetDTO
 import no.nav.syfo.testhelper.generator.generateTildelOppfolgingsenhetRequestDTO
-import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR
-import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
-import no.nav.syfo.testhelper.mock.norg2Response
-import no.nav.syfo.testhelper.mock.norg2ResponseNavUtland
-import no.nav.syfo.testhelper.testApiModule
+import no.nav.syfo.testhelper.mock.*
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.util.configure
 import org.amshove.kluent.shouldBe
@@ -377,15 +371,29 @@ class BehandlendeEnhetApiSpek : Spek({
             it("Get mulige oppfolgingsenheter") {
                 testApplication {
                     val client = setupApiAndClient()
+                    client.post(personUrl) {
+                        bearerAuth(validToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(
+                            BehandlendeEnhetDTO(
+                                personident = UserConstants.ARBEIDSTAKER_PERSONIDENT.value,
+                                isNavUtland = false,
+                                oppfolgingsenhet = UNDERORDNET_NR,
+                            )
+                        )
+                    }
+
                     val response = client.get(tilordningsenheterUrl) {
                         bearerAuth(validToken)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val behandlendeEnhetList = response.body<List<Enhet>>()
 
-                    behandlendeEnhetList.size shouldBeEqualTo 2
+                    behandlendeEnhetList.size shouldBeEqualTo 3
                     behandlendeEnhetList[0].enhetId shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
+                    // UNDERORDNET_NR (0103) kommer foran GEOGRAFISK_ENHET_NR_2 (0102) fordi veileder har brukt 0103 en gang
                     behandlendeEnhetList[1].enhetId shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhetList[2].enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR_2
                 }
             }
         }
