@@ -145,7 +145,7 @@ class EnhetService(
 
     private fun List<Enhet>.sortAccordingToUsage(veilederident: String): List<Enhet> {
         val result = mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND))
-        repository.getUsageForVeileder(veilederident).forEach { pair ->
+        repository.getEnhetUsageForVeileder(veilederident).forEach { pair ->
             if (pair.first.value != ENHETNR_NAV_UTLAND) {
                 val enhet = this.find { it.enhetId == pair.first.value }
                 if (enhet != null) {
