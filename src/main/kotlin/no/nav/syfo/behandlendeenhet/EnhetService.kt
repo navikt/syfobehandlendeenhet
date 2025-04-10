@@ -122,7 +122,7 @@ class EnhetService(
         currentEnhetId: EnhetId,
         veilederident: String,
     ): List<Enhet> {
-        val mulige = mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND))
+        val mulige = mutableListOf<Enhet>()
         val overordnet = norgClient.getOverordnetEnhet(callId, currentEnhetId)
         if (overordnet != null) {
             mulige.addAll(
@@ -136,21 +136,19 @@ class EnhetService(
                     }
             )
         }
-        return mulige.sortAccordingToUsage(veilederident)
+        return mulige.addNavUtlandAndSortAccordingToUsage(veilederident)
     }
 
     private fun List<NorgEnhet>.excludeCurrentEnhet(
         currentEnhetId: EnhetId,
     ) = this.filter { it.enhetNr != currentEnhetId.value }
 
-    private fun List<Enhet>.sortAccordingToUsage(veilederident: String): List<Enhet> {
+    private fun List<Enhet>.addNavUtlandAndSortAccordingToUsage(veilederident: String): List<Enhet> {
         val result = mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND))
         repository.getEnhetUsageForVeileder(veilederident).forEach { pair ->
-            if (pair.first.value != ENHETNR_NAV_UTLAND) {
-                val enhet = this.find { it.enhetId == pair.first.value }
-                if (enhet != null) {
-                    result.add(enhet)
-                }
+            val enhet = this.find { it.enhetId == pair.first.value }
+            if (enhet != null) {
+                result.add(enhet)
             }
         }
         result.addAll(this)
