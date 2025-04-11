@@ -120,8 +120,9 @@ class EnhetService(
     suspend fun getMuligeOppfolgingsenheter(
         callId: String,
         currentEnhetId: EnhetId,
+        veilederident: String,
     ): List<Enhet> {
-        val mulige = mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND))
+        val mulige = mutableListOf<Enhet>()
         val overordnet = norgClient.getOverordnetEnhet(callId, currentEnhetId)
         if (overordnet != null) {
             mulige.addAll(
@@ -135,12 +136,22 @@ class EnhetService(
                     }
             )
         }
-        return mulige
+        return addNavUtlandAndSortAccordingToUsage(mulige, veilederident)
     }
 
     private fun List<NorgEnhet>.excludeCurrentEnhet(
         currentEnhetId: EnhetId,
     ) = this.filter { it.enhetNr != currentEnhetId.value }
+
+    private fun addNavUtlandAndSortAccordingToUsage(enhetList: List<Enhet>, veilederident: String) =
+        mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND)).apply {
+            addAll(
+                repository.getEnhetUsageForVeileder(veilederident).mapNotNull { enhetId ->
+                    enhetList.find { it.enhetId == enhetId.value }
+                }
+            )
+            addAll(enhetList)
+        }.distinct()
 
     suspend fun validateForOppfolgingsenhet(
         callId: String,

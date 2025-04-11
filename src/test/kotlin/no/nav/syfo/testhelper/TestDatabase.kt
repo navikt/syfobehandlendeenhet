@@ -65,3 +65,14 @@ fun DatabaseInterface.setSkjermingCheckedAt(uuid: UUID, datetime: OffsetDateTime
         connection.commit()
     }
 }
+
+fun DatabaseInterface.addOppfolgingsenhet(uuid: UUID, datetime: OffsetDateTime) {
+    this.connection.use { connection ->
+        connection.prepareStatement("update oppfolgingsenhet set skjerming_checked_at = ? where uuid=?").use {
+            it.setObject(1, datetime)
+            it.setString(2, uuid.toString())
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}

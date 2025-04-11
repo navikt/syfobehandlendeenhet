@@ -32,6 +32,15 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
             }
         }.first().toOppfolgingsenhet()
 
+    override fun getEnhetUsageForVeileder(veilederident: String): List<EnhetId> =
+        database.connection.use { connection ->
+            connection.prepareStatement(queryOppfolgingsenhetUsage)
+                .use {
+                    it.setString(1, veilederident)
+                    it.executeQuery().toList { EnhetId(getString(1)) }
+                }
+        }
+
     override fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): Oppfolgingsenhet? =
         database.connection.use { connection ->
             connection.prepareStatement(queryOppfolgingsenhetByPersonident)
@@ -118,6 +127,15 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 FROM OPPFOLGINGSENHET
                 WHERE personident = ?
                 ORDER BY created_at DESC
+            """
+
+        private const val queryOppfolgingsenhetUsage =
+            """
+                SELECT oppfolgingsenhet, COUNT(*) AS count
+                FROM OPPFOLGINGSENHET
+                WHERE veilederident = ? AND oppfolgingsenhet IS NOT NULL
+                GROUP BY oppfolgingsenhet
+                ORDER BY count DESC
             """
 
         private const val queryActiveOppfolgingsenhet =

@@ -14,6 +14,8 @@ interface IEnhetRepository {
 
     fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): Oppfolgingsenhet?
 
+    fun getEnhetUsageForVeileder(veilederident: String): List<EnhetId>
+
     fun getActiveOppfolgingsenheter(): List<Pair<UUID, PersonIdentNumber>>
 
     fun updateSkjermingCheckedAt(oppfolgingsenhetUUID: UUID): Int

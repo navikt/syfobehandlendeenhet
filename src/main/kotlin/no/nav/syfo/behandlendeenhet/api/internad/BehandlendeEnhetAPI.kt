@@ -4,6 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.syfo.application.api.authentication.getNAVIdent
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.*
 import no.nav.syfo.behandlendeenhet.domain.toBehandlendeEnhetDTO
@@ -65,7 +66,9 @@ fun Route.registrerPersonApi(
             )
             val enhetId = call.parameters[ENHET_ID_PARAM]
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No enhetId supplied in request")
-            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, EnhetId(enhetId))
+            val veilederident = token.getNAVIdent()
+
+            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, EnhetId(enhetId), veilederident)
 
             call.respond(tilordningsenheter)
         }
