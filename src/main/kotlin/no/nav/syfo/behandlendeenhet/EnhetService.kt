@@ -136,21 +136,21 @@ class EnhetService(
                     }
             )
         }
-        return mulige.addNavUtlandAndSortAccordingToUsage(veilederident)
+        return addNavUtlandAndSortAccordingToUsage(mulige, veilederident)
     }
 
     private fun List<NorgEnhet>.excludeCurrentEnhet(
         currentEnhetId: EnhetId,
     ) = this.filter { it.enhetNr != currentEnhetId.value }
 
-    private fun List<Enhet>.addNavUtlandAndSortAccordingToUsage(veilederident: String) =
+    private fun addNavUtlandAndSortAccordingToUsage(enhetList: List<Enhet>, veilederident: String) =
         mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND)).apply {
             addAll(
                 repository.getEnhetUsageForVeileder(veilederident).mapNotNull { enhetId ->
-                    this.find { it.enhetId == enhetId.value }
+                    enhetList.find { it.enhetId == enhetId.value }
                 }
             )
-            addAll(this@addNavUtlandAndSortAccordingToUsage)
+            addAll(enhetList)
         }.distinct()
 
     suspend fun validateForOppfolgingsenhet(
