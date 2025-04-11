@@ -32,12 +32,12 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
             }
         }.first().toOppfolgingsenhet()
 
-    override fun getEnhetUsageForVeileder(veilederident: String): List<Pair<EnhetId, Int>> =
+    override fun getEnhetUsageForVeileder(veilederident: String): List<EnhetId> =
         database.connection.use { connection ->
             connection.prepareStatement(queryOppfolgingsenhetUsage)
                 .use {
                     it.setString(1, veilederident)
-                    it.executeQuery().toList { Pair(EnhetId(getString(1)), getInt(2)) }
+                    it.executeQuery().toList { EnhetId(getString(1)) }
                 }
         }
 

@@ -370,19 +370,12 @@ class BehandlendeEnhetApiSpek : Spek({
         describe("Happy path") {
             it("Get mulige oppfolgingsenheter") {
                 testApplication {
+                    repository.createOppfolgingsenhet(
+                        personIdent = UserConstants.ARBEIDSTAKER_PERSONIDENT,
+                        enhetId = EnhetId(UNDERORDNET_NR),
+                        veilederident = UserConstants.VEILEDER_IDENT,
+                    )
                     val client = setupApiAndClient()
-                    client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(
-                            BehandlendeEnhetDTO(
-                                personident = UserConstants.ARBEIDSTAKER_PERSONIDENT.value,
-                                isNavUtland = false,
-                                oppfolgingsenhet = UNDERORDNET_NR,
-                            )
-                        )
-                    }
-
                     val response = client.get(tilordningsenheterUrl) {
                         bearerAuth(validToken)
                     }

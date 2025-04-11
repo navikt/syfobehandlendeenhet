@@ -143,17 +143,15 @@ class EnhetService(
         currentEnhetId: EnhetId,
     ) = this.filter { it.enhetNr != currentEnhetId.value }
 
-    private fun List<Enhet>.addNavUtlandAndSortAccordingToUsage(veilederident: String): List<Enhet> {
-        val result = mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND))
-        repository.getEnhetUsageForVeileder(veilederident).forEach { pair ->
-            val enhet = this.find { it.enhetId == pair.first.value }
-            if (enhet != null) {
-                result.add(enhet)
-            }
-        }
-        result.addAll(this)
-        return result.distinct()
-    }
+    private fun List<Enhet>.addNavUtlandAndSortAccordingToUsage(veilederident: String) =
+        mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND)).apply {
+            addAll(
+                repository.getEnhetUsageForVeileder(veilederident).mapNotNull { enhetId ->
+                    this.find { it.enhetId == enhetId.value }
+                }
+            )
+            addAll(this@addNavUtlandAndSortAccordingToUsage)
+        }.distinct()
 
     suspend fun validateForOppfolgingsenhet(
         callId: String,
