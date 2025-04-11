@@ -19,6 +19,7 @@ import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 
 class EnhetService(
     private val norgClient: NorgClient,
@@ -64,6 +65,7 @@ class EnhetService(
                     behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
                 }
             } else {
+                log.warn("Attempt to update oppfolgingsenhet for person with enhetId=$enhetId, geografiskEnhet=$geografiskEnhet, currentOppfolgingsenhet=$currentOppfolgingsenhet failed, returning null")
                 null
             }
         } else {
@@ -199,6 +201,6 @@ class EnhetService(
         const val SYSTEM_USER_IDENT = "Z999999"
         const val CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX = "geografiskenhet-personident-"
         const val CACHE_GEOGRAFISKENHET_PERSONIDENT_EXPIRE_SECONDS = 12 * 60 * 60L
-        private val log = LoggerFactory.getLogger(EnhetService::class.java)
+        private val log: Logger = LoggerFactory.getLogger(EnhetService::class.java)
     }
 }
