@@ -51,6 +51,7 @@ spec:
         - host: "pdl-api.prod-fss-pub.nais.io"
       rules:
         - application: istilgangskontroll
+        - application: syfooversiktsrv
         - application: skjermede-personer-pip
           namespace: nom
         - application: norg2
@@ -88,6 +89,10 @@ spec:
       value: "prod-gcp.nom.skjermede-personer-pip"
     - name: SKJERMEDEPERSONERPIP_URL
       value: "http://skjermede-personer-pip.nom"
+    - name: SYFOOVERSIKTSRV_CLIENT_ID
+      value: "prod-gcp.teamsykefravr.syfooversiktsrv"
+    - name: SYFOOVERSIKTSRV_URL
+      value: "http://syfooversiktsrv"
     - name: ISTILGANGSKONTROLL_CLIENT_ID
       value: "prod-gcp.teamsykefravr.istilgangskontroll"
     - name: ISTILGANGSKONTROLL_URL

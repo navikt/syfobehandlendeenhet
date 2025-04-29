@@ -2,7 +2,6 @@ package no.nav.syfo.util
 
 import net.logstash.logback.argument.StructuredArgument
 import net.logstash.logback.argument.StructuredArguments
-import java.util.*
 
 const val NAV_PERSONIDENT_HEADER = "nav-personident"
 const val NAV_PERSONIDENTER_HEADER = "Nav-Personidenter"
