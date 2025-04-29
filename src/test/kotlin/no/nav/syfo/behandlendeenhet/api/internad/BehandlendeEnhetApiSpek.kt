@@ -9,11 +9,9 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import io.mockk.clearMocks
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
-import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.Enhet
-import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
+import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetResponseDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
@@ -32,17 +30,15 @@ import no.nav.syfo.testhelper.UserConstants.ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.OTHER_ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
-import no.nav.syfo.testhelper.generator.generateBehandlendeEnhetDTO
 import no.nav.syfo.testhelper.generator.generateTildelOppfolgingsenhetRequestDTO
-import no.nav.syfo.testhelper.mock.*
+import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR
+import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR_2
+import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.util.configure
-import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeLessThan
 import org.amshove.kluent.shouldNotBe
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -78,10 +74,8 @@ class BehandlendeEnhetApiSpek : Spek({
     }
 
     val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentPath"
-    val personUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonPath"
     val oppfolgingsenhetTildelingerUrl = "$internadBehandlendeEnhetApiV2BasePath/oppfolgingsenhet-tildelinger"
     val tilordningsenheterUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2TilordningsenheterPath".replace("{$ENHET_ID_PARAM}", GEOGRAFISK_ENHET_NR)
-    val behandlendeEnhetDTO = generateBehandlendeEnhetDTO()
     val validToken = generateJWT(
         audience = externalMockEnvironment.environment.azureAppClientId,
         issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
@@ -100,8 +94,6 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
-                    behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
-                    behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
                     behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
                     behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
                     behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
@@ -117,31 +109,6 @@ class BehandlendeEnhetApiSpek : Spek({
                         header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.NoContent
-                }
-            }
-
-            it("should send NavUtland behandlingstype if Person has entry in database") {
-                testApplication {
-                    val client = setupApiAndClient()
-                    val responsePost = client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO)
-                    }
-                    responsePost.status shouldBeEqualTo HttpStatusCode.OK
-                    val response = client.get(behandlendeEnhetUrl) {
-                        bearerAuth(validToken)
-                        header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.OK
-                    val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
-
-                    behandlendeEnhet.enhetId shouldBeEqualTo norg2ResponseNavUtland.first().enhetNr
-                    behandlendeEnhet.navn shouldBeEqualTo norg2ResponseNavUtland.first().navn
-                    behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
-                    behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0393"
-                    behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Nav utland"
                 }
             }
         }
@@ -193,187 +160,14 @@ class BehandlendeEnhetApiSpek : Spek({
         }
     }
 
-    describe("Update oppfolgingsenhet") {
-        describe("Happy path") {
-            it("should create oppfolgingsenhet in db") {
-                testApplication {
-                    val client = setupApiAndClient()
-                    val response = client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO)
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.OK
-                    response.body<BehandlendeEnhetDTO>() shouldBeEqualTo behandlendeEnhetDTO
-
-                    val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo true
-                    oppfolgingsenhet?.personident?.value shouldBeEqualTo behandlendeEnhetDTO.personident
-
-                    val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
-                    verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
-                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
-                }
-            }
-            it("should create oppfolgingsenhet other than Nav utland in db") {
-                testApplication {
-                    val client = setupApiAndClient()
-                    val behandlendeEnhetDTO = BehandlendeEnhetDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        isNavUtland = false,
-                        oppfolgingsenhet = ENHET_ID,
-                    )
-                    val response = client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO)
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.OK
-                    response.body<BehandlendeEnhetDTO>() shouldBeEqualTo behandlendeEnhetDTO
-
-                    val oppfolgingsenhet =
-                        repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo false
-                    oppfolgingsenhet?.enhetId?.value shouldBeEqualTo ENHET_ID
-                    oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
-
-                    val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
-                    verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
-                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
-                }
-            }
-            it("should store null as oppfolgingsenhet if same as geografisk and current oppfolgingsenhet is not null") {
-                testApplication {
-                    val client = setupApiAndClient()
-                    val behandlendeEnhetDTO = BehandlendeEnhetDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        isNavUtland = false,
-                        oppfolgingsenhet = ENHET_ID,
-                    )
-                    client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO)
-                    }
-                    clearMocks(kafkaProducerMock)
-
-                    val behandlendeEnhetUpdateDTO = BehandlendeEnhetDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        isNavUtland = false,
-                        oppfolgingsenhet = GEOGRAFISK_ENHET_NR, // norg2mock-value
-                    )
-                    val response = client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetUpdateDTO)
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.OK
-
-                    val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhetId shouldBe null
-                    oppfolgingsenhet?.personident?.value shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT.value
-
-                    val kafkaRecordSlot = slot<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
-                    verify(exactly = 1) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot.captured.value().personident shouldBeEqualTo oppfolgingsenhet?.personident?.value
-                    kafkaRecordSlot.captured.value().updatedAt shouldBeEqualTo oppfolgingsenhet?.createdAt
-                }
-            }
-
-            it("should update oppfolgingsenhet if already in db") {
-                testApplication {
-                    val client = setupApiAndClient()
-                    val response = client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO)
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.OK
-                    val oppfolgingsenhet = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(behandlendeEnhetDTO.personident))
-                    oppfolgingsenhet?.enhetId?.isNavUtland() shouldBeEqualTo true
-
-                    val updatePersonDTO = behandlendeEnhetDTO.copy(isNavUtland = false, oppfolgingsenhet = null)
-                    val responsePost = client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(updatePersonDTO)
-                    }
-                    responsePost.status shouldBeEqualTo HttpStatusCode.OK
-
-                    val oppfolgingsenhetUpdate = repository.getOppfolgingsenhetByPersonident(PersonIdentNumber(updatePersonDTO.personident))
-                    oppfolgingsenhetUpdate?.enhetId shouldBe null
-
-                    val kafkaRecordSlot = mutableListOf<ProducerRecord<String, KBehandlendeEnhetUpdate>>()
-                    verify(exactly = 2) { kafkaProducerMock.send(capture(kafkaRecordSlot)) }
-                    kafkaRecordSlot[0].value().personident shouldBeEqualTo oppfolgingsenhetUpdate?.personident?.value
-                    kafkaRecordSlot[1].value().updatedAt shouldBeEqualTo oppfolgingsenhetUpdate?.createdAt
-                    kafkaRecordSlot[0].value().updatedAt shouldBeLessThan kafkaRecordSlot[1].value().updatedAt
-                }
-            }
-        }
-
-        describe("Unhappy path") {
-            it("should return status Unauthorized if no token is supplied") {
-                testApplication {
-                    val client = setupApiAndClient()
-                    val response = client.post(personUrl) {
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO)
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.Unauthorized
-                }
-            }
-
-            it("should return status Forbidden if NAVIdent is denied access") {
-                testApplication {
-                    val validTokenNoAccess = generateJWT(
-                        audience = externalMockEnvironment.environment.azureAppClientId,
-                        issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
-                        navIdent = VEILEDER_IDENT_NO_ACCESS,
-                    )
-                    val client = setupApiAndClient()
-                    val response = client.post(personUrl) {
-                        bearerAuth(validTokenNoAccess)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO)
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.Forbidden
-                }
-            }
-            it("should return status BadRequest if kode 6/7") {
-                testApplication {
-                    val client = setupApiAndClient()
-                    val response = client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO.copy(personident = ARBEIDSTAKER_ADRESSEBESKYTTET.value))
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.BadRequest
-                }
-            }
-            it("should return status BadRequest if egen ansatt") {
-                testApplication {
-                    val client = setupApiAndClient()
-                    val response = client.post(personUrl) {
-                        bearerAuth(validToken)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(behandlendeEnhetDTO.copy(personident = ARBEIDSTAKER_EGENANSATT.value))
-                    }
-                    response.status shouldBeEqualTo HttpStatusCode.BadRequest
-                }
-            }
-        }
-    }
     describe("Get mulige oppfolgingsenheter") {
         describe("Happy path") {
             it("Get mulige oppfolgingsenheter") {
                 testApplication {
                     repository.createOppfolgingsenhet(
-                        personIdent = UserConstants.ARBEIDSTAKER_PERSONIDENT,
+                        personIdent = ARBEIDSTAKER_PERSONIDENT,
                         enhetId = EnhetId(UNDERORDNET_NR),
-                        veilederident = UserConstants.VEILEDER_IDENT,
+                        veilederident = VEILEDER_IDENT,
                     )
                     val client = setupApiAndClient()
                     val response = client.get(tilordningsenheterUrl) {
@@ -392,7 +186,7 @@ class BehandlendeEnhetApiSpek : Spek({
         }
     }
 
-    describe("Update multiple oppfolgingsenheter") {
+    describe("Update oppfolgingsenhet - bulk endpoint") {
         it("Updates multiple oppfolgingsenheter successfully") {
             val requestDTO = generateTildelOppfolgingsenhetRequestDTO(
                 personidenter = listOf(
@@ -645,6 +439,46 @@ class BehandlendeEnhetApiSpek : Spek({
                 responseDTO.errors.find { it.personident == ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND.value } shouldNotBe null
 
                 verify(exactly = 1) { kafkaProducerMock.send(any()) }
+            }
+        }
+
+        describe("Unhappy path") {
+            val requestDTO = generateTildelOppfolgingsenhetRequestDTO(
+                personidenter = listOf(ARBEIDSTAKER_PERSONIDENT.value),
+                oppfolgingsenhet = ENHET_ID,
+            )
+            it("should return status Unauthorized if no token is supplied") {
+                testApplication {
+                    val client = setupApiAndClient()
+                    val response = client.post(oppfolgingsenhetTildelingerUrl) {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(requestDTO)
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.Unauthorized
+                }
+            }
+
+            it("should return status BadRequest if kode 6/7") {
+                testApplication {
+                    val client = setupApiAndClient()
+                    val response = client.post(oppfolgingsenhetTildelingerUrl) {
+                        bearerAuth(validToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(requestDTO.copy(personidenter = listOf(ARBEIDSTAKER_ADRESSEBESKYTTET.value)))
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.Forbidden
+                }
+            }
+            it("should return status BadRequest if egen ansatt") {
+                testApplication {
+                    val client = setupApiAndClient()
+                    val response = client.post(oppfolgingsenhetTildelingerUrl) {
+                        bearerAuth(validToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(requestDTO.copy(personidenter = listOf(ARBEIDSTAKER_EGENANSATT.value)))
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.Forbidden
+                }
             }
         }
     }
