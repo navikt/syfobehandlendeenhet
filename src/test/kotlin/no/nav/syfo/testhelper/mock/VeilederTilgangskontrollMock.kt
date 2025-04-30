@@ -9,7 +9,6 @@ import no.nav.syfo.infrastructure.client.veiledertilgang.TilgangDTO
 import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient.Companion.ACCESS_TO_BRUKERE_PATH
 import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient.Companion.ACCESS_TO_SYFO_PATH
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
-import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_EGENANSATT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
 
 val tilgangFalse = TilgangDTO(
@@ -36,7 +35,7 @@ suspend fun MockRequestHandleScope.tilgangskontrollResponse(request: HttpRequest
         }
         requestUrl.endsWith(ACCESS_TO_BRUKERE_PATH) -> {
             val personidenter = request.receiveBody<List<String>>()
-            val personerWhereTilgangOk = personidenter.filter { !(it == ARBEIDSTAKER_ADRESSEBESKYTTET.value || it == ARBEIDSTAKER_EGENANSATT.value) }
+            val personerWhereTilgangOk = personidenter.filter { it != ARBEIDSTAKER_ADRESSEBESKYTTET.value }
             respond(personerWhereTilgangOk)
         }
         else -> error("Unhandled path $requestUrl")

@@ -7,6 +7,7 @@ import io.ktor.server.routing.*
 import no.nav.syfo.application.api.authentication.getNAVIdent
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.api.*
+import no.nav.syfo.behandlendeenhet.domain.toBehandlendeEnhetDTO
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory
 const val ENHET_ID_PARAM = "enhetId"
 const val internadBehandlendeEnhetApiV2BasePath = "/api/internad/v2"
 const val internadBehandlendeEnhetApiV2PersonIdentPath = "/personident"
+const val internadBehandlendeEnhetApiV2PersonPath = "/person"
 const val internadBehandlendeEnhetApiV2TilordningsenheterPath = "/tilordningsenheter/{$ENHET_ID_PARAM}"
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.behandlendeenhet.api.internad")
@@ -49,7 +51,7 @@ fun Route.registrerPersonApi(
                 personIdentNumber = personIdentNumber,
                 veilederToken = token,
             )
-                .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) }
+                .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) ?: HttpStatusCode.NoContent }
                 .run { call.respond(this) }
         }
 
@@ -69,6 +71,34 @@ fun Route.registrerPersonApi(
             val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, EnhetId(enhetId), veilederident)
 
             call.respond(tilordningsenheter)
+        }
+
+        post(internadBehandlendeEnhetApiV2PersonPath) {
+            val callId = getCallId()
+            val token = getBearerHeader()
+                ?: throw IllegalArgumentException("Could not retrieve Person: No Authorization header supplied")
+
+            veilederTilgangskontrollClient.throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
+                callId = callId,
+                token = token,
+            )
+
+            val behandlendeEnhetDTO = call.receive<BehandlendeEnhetDTO>()
+
+            val oppfolgingsenhet = enhetService.updateOppfolgingsenhet(
+                callId = callId,
+                personIdent = PersonIdentNumber(behandlendeEnhetDTO.personident),
+                enhetId = behandlendeEnhetDTO.oppfolgingsenhet?.let { EnhetId(it) }
+                    ?: if (behandlendeEnhetDTO.isNavUtland) EnhetId(EnhetId.ENHETNR_NAV_UTLAND) else null,
+                veilederToken = token,
+            )
+
+            if (oppfolgingsenhet != null) {
+                call.respond(oppfolgingsenhet.toBehandlendeEnhetDTO())
+            } else {
+                log.error("Could not set oppfolgingsenhet in database")
+                call.respond(HttpStatusCode.BadRequest)
+            }
         }
 
         post("/oppfolgingsenhet-tildelinger") {
