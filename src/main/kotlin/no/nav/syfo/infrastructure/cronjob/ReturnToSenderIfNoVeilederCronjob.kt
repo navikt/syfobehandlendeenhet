@@ -12,7 +12,7 @@ class ReturnToSenderIfNoVeilederCronjob(
     val repository: IEnhetRepository,
     val syfooversiktsrvClient: SyfooversiktsrvClient,
 ) : Cronjob {
-    override val initialDelayMinutes: Long = 2
+    override val initialDelayMinutes: Long = 4
     override val intervalDelayMinutes: Long = 60 * 24
 
     override suspend fun run(): List<Result<Any>> {
