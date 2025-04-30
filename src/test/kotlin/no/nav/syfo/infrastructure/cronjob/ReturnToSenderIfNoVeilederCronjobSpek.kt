@@ -146,6 +146,7 @@ class ReturnToSenderIfNoVeilederCronjobSpek : Spek({
 
                     returnToSenderIfNoVeilederCronjob.run()
 
+                    database.getVeilederCheckedOk(oppfolgingsenhet.uuid) shouldBe null
                     val storedEnhet = enhetService.arbeidstakersBehandlendeEnhet(
                         callId = callId,
                         personIdentNumber = UserConstants.ARBEIDSTAKER_PERSONIDENT_2,
@@ -169,6 +170,7 @@ class ReturnToSenderIfNoVeilederCronjobSpek : Spek({
 
                     returnToSenderIfNoVeilederCronjob.run()
 
+                    database.getVeilederCheckedOk(oppfolgingsenhet.uuid) shouldBe null
                     val storedEnhet = enhetService.arbeidstakersBehandlendeEnhet(
                         callId = callId,
                         personIdentNumber = UserConstants.ARBEIDSTAKER_PERSONIDENT_2,
