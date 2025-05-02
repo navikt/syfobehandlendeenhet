@@ -38,7 +38,7 @@ fun Route.registrerSystemApi(
                 personIdentNumber = personIdentNumber,
                 veilederToken = null,
             )
-                .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) ?: HttpStatusCode.NoContent }
+                .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) }
                 .run { call.respond(this) }
         }
         post(systemdBehandlendeEnhetApiV2PersonIdentPath) {

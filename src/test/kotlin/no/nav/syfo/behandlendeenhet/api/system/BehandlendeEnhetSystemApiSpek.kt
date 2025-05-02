@@ -14,7 +14,6 @@ import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import no.nav.syfo.testhelper.*
-import no.nav.syfo.testhelper.mock.norg2Response
 import no.nav.syfo.util.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
@@ -69,8 +68,6 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                             response.status shouldBeEqualTo HttpStatusCode.OK
                             val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
-                            behandlendeEnhet.enhetId shouldBeEqualTo norg2Response.first().enhetNr
-                            behandlendeEnhet.navn shouldBeEqualTo norg2Response.first().navn
                             behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
                             behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
                             behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"

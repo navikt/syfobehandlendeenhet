@@ -1,6 +1,5 @@
 package no.nav.syfo.behandlendeenhet.domain
 
-import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetDTO
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
 import java.time.OffsetDateTime
@@ -12,10 +11,4 @@ data class Oppfolgingsenhet(
     val enhetId: EnhetId?,
     val veilederident: String,
     val createdAt: OffsetDateTime,
-)
-
-fun Oppfolgingsenhet.toBehandlendeEnhetDTO() = BehandlendeEnhetDTO(
-    personident = this.personident.value,
-    isNavUtland = this.enhetId?.isNavUtland() ?: false,
-    oppfolgingsenhet = this.enhetId?.value,
 )
