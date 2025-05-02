@@ -2,6 +2,7 @@ package no.nav.syfo.testhelper
 
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import no.nav.syfo.infrastructure.database.DatabaseInterface
+import no.nav.syfo.infrastructure.database.toList
 import org.flywaydb.core.Flyway
 import java.sql.Connection
 import java.time.OffsetDateTime
@@ -69,6 +70,27 @@ fun DatabaseInterface.setSkjermingCheckedAt(uuid: UUID, datetime: OffsetDateTime
 fun DatabaseInterface.addOppfolgingsenhet(uuid: UUID, datetime: OffsetDateTime) {
     this.connection.use { connection ->
         connection.prepareStatement("update oppfolgingsenhet set skjerming_checked_at = ? where uuid=?").use {
+            it.setObject(1, datetime)
+            it.setString(2, uuid.toString())
+            it.executeUpdate()
+        }
+        connection.commit()
+    }
+}
+
+fun DatabaseInterface.getVeilederCheckedOk(uuid: UUID) =
+    this.connection.use { connection ->
+        connection.prepareStatement("select veileder_checked_ok_at from oppfolgingsenhet where uuid=?").use {
+            it.setString(1, uuid.toString())
+            it.executeQuery().toList {
+                getObject(1, OffsetDateTime::class.java)
+            }.firstOrNull()
+        }
+    }
+
+fun DatabaseInterface.setCreatedAt(uuid: UUID, datetime: OffsetDateTime) {
+    this.connection.use { connection ->
+        connection.prepareStatement("update oppfolgingsenhet set created_at = ? where uuid=?").use {
             it.setObject(1, datetime)
             it.setString(2, uuid.toString())
             it.executeUpdate()

@@ -15,6 +15,7 @@ fun testEnvironment(
     pdlUrl: String = "pdl",
     skjermedePersonerPipUrl: String = "skjermedepersonerpip",
     istilgangskontrollUrl: String = "tilgangskontroll",
+    syfooversiktsrvUrl: String = "syfooversiktsrv",
 ) = Environment(
     azureAppClientId = "syfoperson-client-id",
     azureAppClientSecret = "syfoperson-secret",
@@ -38,6 +39,8 @@ fun testEnvironment(
     skjermedePersonerPipUrl = skjermedePersonerPipUrl,
     istilgangskontrollClientId = "dev-gcp.teamsykefravr.istilgangskontroll",
     istilgangskontrollUrl = istilgangskontrollUrl,
+    syfooversiktsrvClientId = "dev-gcp.teamsykefravr.syfooversiktsrv",
+    syfooversiktsrvUrl = syfooversiktsrvUrl,
     syfobehandlendeenhetDbHost = "localhost",
     syfobehandlendeenhetDbPort = "5432",
     syfobehandlendeenhetDbName = "syfobehandlendeenhet_dev",

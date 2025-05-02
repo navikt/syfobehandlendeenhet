@@ -24,6 +24,7 @@ import no.nav.syfo.infrastructure.client.wellknown.getWellKnown
 import no.nav.syfo.identhendelse.IdenthendelseService
 import no.nav.syfo.identhendelse.kafka.IdenthendelseConsumerService
 import no.nav.syfo.identhendelse.kafka.launchKafkaTaskIdenthendelse
+import no.nav.syfo.infrastructure.client.syfooversiktsrv.SyfooversiktsrvClient
 import no.nav.syfo.infrastructure.cronjob.launchCronjobs
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -91,6 +92,12 @@ fun main() {
         baseUrl = environment.istilgangskontrollUrl,
     )
 
+    val syfooversiktsrvClient = SyfooversiktsrvClient(
+        azureAdClient = azureAdClient,
+        clientId = environment.syfooversiktsrvClientId,
+        baseUrl = environment.syfooversiktsrvUrl,
+    )
+
     val applicationEnvironment = applicationEnvironment {
         log = LoggerFactory.getLogger("ktor.application")
         config = HoconApplicationConfig(ConfigFactory.load())
@@ -146,6 +153,7 @@ fun main() {
                     environment = environment,
                     enhetService = enhetService,
                     repository = repository,
+                    syfooversiktsrvClient = syfooversiktsrvClient,
                 )
             }
         }

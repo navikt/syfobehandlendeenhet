@@ -5,6 +5,7 @@ import no.nav.syfo.application.Environment
 import no.nav.syfo.application.launchBackgroundTask
 import no.nav.syfo.behandlendeenhet.EnhetService
 import no.nav.syfo.behandlendeenhet.IEnhetRepository
+import no.nav.syfo.infrastructure.client.syfooversiktsrv.SyfooversiktsrvClient
 import no.nav.syfo.infrastructure.clients.leaderelection.LeaderPodClient
 
 fun launchCronjobs(
@@ -12,6 +13,7 @@ fun launchCronjobs(
     environment: Environment,
     enhetService: EnhetService,
     repository: IEnhetRepository,
+    syfooversiktsrvClient: SyfooversiktsrvClient,
 ) {
     val leaderPodClient = LeaderPodClient(
         electorPath = environment.electorPath
@@ -26,6 +28,13 @@ fun launchCronjobs(
         RemoveOppfolgingsenhetCronjob(
             enhetService = enhetService,
             repository = repository,
+        )
+    )
+    cronjobs.add(
+        ReturnToSenderIfNoVeilederCronjob(
+            enhetService = enhetService,
+            repository = repository,
+            syfooversiktsrvClient = syfooversiktsrvClient,
         )
     )
 

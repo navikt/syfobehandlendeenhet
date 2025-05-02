@@ -40,6 +40,9 @@ data class Environment(
     val istilgangskontrollClientId: String = getEnvVar("ISTILGANGSKONTROLL_CLIENT_ID"),
     val istilgangskontrollUrl: String = getEnvVar("ISTILGANGSKONTROLL_URL"),
 
+    val syfooversiktsrvClientId: String = getEnvVar("SYFOOVERSIKTSRV_CLIENT_ID"),
+    val syfooversiktsrvUrl: String = getEnvVar("SYFOOVERSIKTSRV_URL"),
+
     val syfobehandlendeenhetDbHost: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_HOST"),
     val syfobehandlendeenhetDbPort: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_PORT"),
     val syfobehandlendeenhetDbName: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_DATABASE"),
