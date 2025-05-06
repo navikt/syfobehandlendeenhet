@@ -65,7 +65,6 @@ class EnhetService(
                     behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
                 }
             } else {
-                log.warn("Attempt to update oppfolgingsenhet for person with enhetId=$enhetId, geografiskEnhet=$geografiskEnhet, currentOppfolgingsenhet=$currentOppfolgingsenhet failed, returning null")
                 null
             }
         } else {
