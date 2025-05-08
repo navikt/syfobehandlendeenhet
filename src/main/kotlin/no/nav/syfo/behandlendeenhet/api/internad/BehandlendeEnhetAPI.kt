@@ -116,7 +116,7 @@ fun Route.registrerPersonApi(
                     val oppfolgingsenhet = it.getOrThrow()
                     TildelOppfolgingsenhetDTO(
                         personident = oppfolgingsenhet.personident.value,
-                        oppfolgingsenhet = oppfolgingsenhet.enhetId?.value,
+                        oppfolgingsenhet = oppfolgingsenhet.enhet?.enhetId?.value,
                     )
                 }
             val unsuccessfulTildelinger = errorneousPersonidenter
