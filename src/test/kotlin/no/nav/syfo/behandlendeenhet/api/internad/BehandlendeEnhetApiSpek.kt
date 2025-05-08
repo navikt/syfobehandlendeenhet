@@ -10,7 +10,7 @@ import io.ktor.server.testing.*
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.behandlendeenhet.Enhet
+import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetResponseDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
@@ -36,6 +36,7 @@ import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR_2
 import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.util.configure
+import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBe
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -94,10 +95,38 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
-                    behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet.enhetId.value shouldBeEqualTo "0101"
                     behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
+                    behandlendeEnhet.oppfolgingsenhet.enhetId.value shouldBeEqualTo "0101"
                     behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhetDTO?.enhet shouldBe null
+                    behandlendeEnhet.oppfolgingsenhetDTO?.createdAt shouldBe null
+                    behandlendeEnhet.oppfolgingsenhetDTO?.veilederident shouldBe null
+                }
+            }
+            it("Get BehandlendeEnhet when oppfolgingsenhet has been set") {
+                testApplication {
+                    repository.createOppfolgingsenhet(
+                        personIdent = ARBEIDSTAKER_PERSONIDENT,
+                        enhetId = EnhetId(UNDERORDNET_NR),
+                        veilederident = VEILEDER_IDENT,
+                    )
+                    val client = setupApiAndClient()
+                    val response = client.get(behandlendeEnhetUrl) {
+                        bearerAuth(validToken)
+                        header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
+                    }
+                    response.status shouldBeEqualTo HttpStatusCode.OK
+                    val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
+
+                    behandlendeEnhet.geografiskEnhet.enhetId.value shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhet.enhetId.value shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.enhetId?.value shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.navn shouldBeEqualTo "Enhet"
+                    behandlendeEnhet.oppfolgingsenhetDTO?.createdAt shouldNotBe null
+                    behandlendeEnhet.oppfolgingsenhetDTO?.veilederident shouldBeEqualTo VEILEDER_IDENT
                 }
             }
 
@@ -177,10 +206,10 @@ class BehandlendeEnhetApiSpek : Spek({
                     val behandlendeEnhetList = response.body<List<Enhet>>()
 
                     behandlendeEnhetList.size shouldBeEqualTo 3
-                    behandlendeEnhetList[0].enhetId shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
+                    behandlendeEnhetList[0].enhetId.value shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
                     // UNDERORDNET_NR (0103) kommer foran GEOGRAFISK_ENHET_NR_2 (0102) fordi veileder har brukt 0103 en gang
-                    behandlendeEnhetList[1].enhetId shouldBeEqualTo UNDERORDNET_NR
-                    behandlendeEnhetList[2].enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR_2
+                    behandlendeEnhetList[1].enhetId.value shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhetList[2].enhetId.value shouldBeEqualTo GEOGRAFISK_ENHET_NR_2
                 }
             }
         }
@@ -365,8 +394,8 @@ class BehandlendeEnhetApiSpek : Spek({
                 val oppfolgingsenhetPerson2 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT_2)
                 val oppfolgingsenhetPerson3 =
                     repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND)
-                oppfolgingsenhetPerson1?.enhetId?.value shouldBeEqualTo ENHET_ID
-                oppfolgingsenhetPerson2?.enhetId?.value shouldBeEqualTo ENHET_ID
+                oppfolgingsenhetPerson1?.oppfolgingsenhet shouldBeEqualTo ENHET_ID
+                oppfolgingsenhetPerson2?.oppfolgingsenhet shouldBeEqualTo ENHET_ID
                 oppfolgingsenhetPerson3 shouldBeEqualTo null
 
                 responseDTO.tildelinger.size shouldBeEqualTo 2
@@ -428,7 +457,7 @@ class BehandlendeEnhetApiSpek : Spek({
                 val oppfolgingsenhetPerson1 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT)
                 val oppfolgingsenhetPerson2 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_ADRESSEBESKYTTET)
                 val oppfolgingsenhetPerson3 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND)
-                oppfolgingsenhetPerson1?.enhetId?.value shouldBeEqualTo ENHET_ID
+                oppfolgingsenhetPerson1?.oppfolgingsenhet shouldBeEqualTo ENHET_ID
                 oppfolgingsenhetPerson2 shouldBeEqualTo null
                 oppfolgingsenhetPerson3 shouldBeEqualTo null
 

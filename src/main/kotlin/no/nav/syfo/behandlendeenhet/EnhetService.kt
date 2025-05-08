@@ -14,10 +14,12 @@ import no.nav.syfo.infrastructure.client.pdl.domain.gradering
 import no.nav.syfo.infrastructure.client.pdl.domain.toArbeidsfordelingCriteriaDiskresjonskode
 import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
 import no.nav.syfo.domain.PersonIdentNumber
-import no.nav.syfo.domain.BehandlendeEnhet
+import no.nav.syfo.behandlendeenhet.domain.BehandlendeEnhet
+import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
+import no.nav.syfo.infrastructure.database.repository.toOppfolgingsenhet
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
 
@@ -35,14 +37,12 @@ class EnhetService(
         personIdentNumber: PersonIdentNumber,
         veilederToken: Token? = null,
     ): BehandlendeEnhet {
-        val oppfolgingsenhet = getOppfolgingsenhet(personIdentNumber)?.enhetId?.let { enhet ->
-            Enhet(
-                enhetId = enhet.value,
-                navn = getEnhetsnavn(enhet),
-            )
-        }
+        val oppfolgingsenhet = getOppfolgingsenhet(personIdentNumber)
         val geografiskEnhet = findGeografiskEnhet(callId, personIdentNumber, veilederToken)
-        return BehandlendeEnhet(geografiskEnhet, oppfolgingsenhet)
+        return BehandlendeEnhet(
+            geografiskEnhet = geografiskEnhet,
+            oppfolgingsenhet = oppfolgingsenhet,
+        )
     }
 
     suspend fun updateOppfolgingsenhet(
@@ -57,11 +57,14 @@ class EnhetService(
                 personIdentNumber = personIdent,
                 veilederToken = veilederToken,
             )
-            val newBehandlendeEnhet = if (enhetId?.value != geografiskEnhet.enhetId) enhetId else null
+            val newBehandlendeEnhet = if (enhetId != geografiskEnhet.enhetId) enhetId else null
             val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
             val navIdent = veilederToken?.getNAVIdent() ?: SYSTEM_USER_IDENT
             if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
-                repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, navIdent).also {
+                val pOppfolgingsenhet = repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, navIdent)
+                pOppfolgingsenhet.toOppfolgingsenhet(
+                    enhetNavn = newBehandlendeEnhet?.let { getEnhetsnavn(it) },
+                ).also {
                     behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
                 }
             } else {
@@ -131,7 +134,7 @@ class EnhetService(
                     .excludeCurrentEnhet(currentEnhetId)
                     .map {
                         Enhet(
-                            enhetId = it.enhetNr,
+                            enhetId = EnhetId(it.enhetNr),
                             navn = it.navn,
                         )
                     }
@@ -145,10 +148,10 @@ class EnhetService(
     ) = this.filter { it.enhetNr != currentEnhetId.value }
 
     private fun addNavUtlandAndSortAccordingToUsage(enhetList: List<Enhet>, veilederident: String) =
-        mutableListOf(Enhet(ENHETNR_NAV_UTLAND, ENHETNAVN_NAV_UTLAND)).apply {
+        mutableListOf(Enhet(EnhetId(ENHETNR_NAV_UTLAND), ENHETNAVN_NAV_UTLAND)).apply {
             addAll(
                 repository.getEnhetUsageForVeileder(veilederident).mapNotNull { enhetId ->
-                    enhetList.find { it.enhetId == enhetId.value }
+                    enhetList.find { it.enhetId == enhetId }
                 }
             )
             addAll(enhetList)
@@ -172,8 +175,14 @@ class EnhetService(
         return !isEgenAnsatt && (graderingList == null || graderingList.none { it.isKode6() || it.isKode7() })
     }
 
-    private fun getOppfolgingsenhet(personIdent: PersonIdentNumber): Oppfolgingsenhet? {
-        return repository.getOppfolgingsenhetByPersonident(personIdent)
+    private suspend fun getOppfolgingsenhet(personIdent: PersonIdentNumber): Oppfolgingsenhet? {
+        return repository.getOppfolgingsenhetByPersonident(personIdent)?.let {
+            it.toOppfolgingsenhet(
+                enhetNavn = it.oppfolgingsenhet?.let {
+                    getEnhetsnavn(EnhetId(it))
+                }
+            )
+        }
     }
 
     private suspend fun getEnhetsnavn(oppfolgingsenhet: EnhetId) =
@@ -184,12 +193,12 @@ class EnhetService(
         }
 
     private fun isEnhetUtvandret(enhet: Enhet?): Boolean {
-        return enhet?.enhetId == GEOGRAFISK_TILKNYTNING_UTVANDRET
+        return enhet?.enhetId?.value == GEOGRAFISK_TILKNYTNING_UTVANDRET
     }
 
     private fun getEnhetNAVUtland(): Enhet {
         return Enhet(
-            enhetId = ENHETNR_NAV_UTLAND,
+            enhetId = EnhetId(ENHETNR_NAV_UTLAND),
             navn = ENHETNAVN_NAV_UTLAND,
         )
     }
