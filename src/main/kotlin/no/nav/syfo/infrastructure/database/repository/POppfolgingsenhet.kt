@@ -16,13 +16,13 @@ data class POppfolgingsenhet(
     val createdAt: OffsetDateTime,
 )
 
-fun POppfolgingsenhet.toOppfolgingsenhet(enhetNavn: String?) = Oppfolgingsenhet(
+fun POppfolgingsenhet.toOppfolgingsenhet(enhetNavn: String) = Oppfolgingsenhet(
     uuid = this.uuid,
     personident = PersonIdentNumber(this.personident),
     enhet = this.oppfolgingsenhet?.let {
         Enhet(
             enhetId = EnhetId(it),
-            navn = enhetNavn!!,
+            navn = enhetNavn,
         )
     },
     veilederident = veilederident,

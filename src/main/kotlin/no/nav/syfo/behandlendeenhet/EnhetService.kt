@@ -63,7 +63,7 @@ class EnhetService(
             if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
                 val pOppfolgingsenhet = repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, navIdent)
                 pOppfolgingsenhet.toOppfolgingsenhet(
-                    enhetNavn = newBehandlendeEnhet?.let { getEnhetsnavn(it) },
+                    enhetNavn = getEnhetsnavn(newBehandlendeEnhet),
                 ).also {
                     behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
                 }
@@ -178,19 +178,19 @@ class EnhetService(
     private suspend fun getOppfolgingsenhet(personIdent: PersonIdentNumber): Oppfolgingsenhet? {
         return repository.getOppfolgingsenhetByPersonident(personIdent)?.let {
             it.toOppfolgingsenhet(
-                enhetNavn = it.oppfolgingsenhet?.let {
-                    getEnhetsnavn(EnhetId(it))
-                }
+                enhetNavn = getEnhetsnavn(it.oppfolgingsenhet?.let { EnhetId(it) })
             )
         }
     }
 
-    private suspend fun getEnhetsnavn(oppfolgingsenhet: EnhetId) =
-        if (oppfolgingsenhet.isNavUtland()) {
-            ENHETNAVN_NAV_UTLAND
-        } else {
-            norgClient.getEnhetsnavn(oppfolgingsenhet.value) ?: ENHETSNAVN_MANGLER
-        }
+    private suspend fun getEnhetsnavn(oppfolgingsenhet: EnhetId?) =
+        oppfolgingsenhet?.let {
+            if (it.isNavUtland()) {
+                ENHETNAVN_NAV_UTLAND
+            } else {
+                norgClient.getEnhetsnavn(it.value)
+            }
+        } ?: ENHETSNAVN_MANGLER
 
     private fun isEnhetUtvandret(enhet: Enhet?): Boolean {
         return enhet?.enhetId?.value == GEOGRAFISK_TILKNYTNING_UTVANDRET
