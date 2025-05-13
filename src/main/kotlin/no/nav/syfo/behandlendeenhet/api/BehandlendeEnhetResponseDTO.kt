@@ -10,8 +10,8 @@ data class BehandlendeEnhetResponseDTO(
     @Deprecated("Erstattet av geografisk enhet og oppfolgingsenhet")
     val navn: String,
 
-    val geografiskEnhet: Enhet,
-    val oppfolgingsenhet: Enhet, // TODO: remove when not used anymore
+    val geografiskEnhet: EnhetDTO,
+    val oppfolgingsenhet: EnhetDTO, // TODO: remove when not used anymore
     val oppfolgingsenhetDTO: OppfolgingsenhetDTO?,
 ) {
     companion object {
@@ -20,11 +20,11 @@ data class BehandlendeEnhetResponseDTO(
             return BehandlendeEnhetResponseDTO(
                 enhetId = oppfolgingsenhet.enhetId.value,
                 navn = oppfolgingsenhet.navn,
-                geografiskEnhet = behandlendeEnhet.geografiskEnhet,
-                oppfolgingsenhet = oppfolgingsenhet,
+                geografiskEnhet = behandlendeEnhet.geografiskEnhet.toEnhetDTO(),
+                oppfolgingsenhet = oppfolgingsenhet.toEnhetDTO(),
                 oppfolgingsenhetDTO = behandlendeEnhet.oppfolgingsenhet?.enhet?.let {
                     OppfolgingsenhetDTO(
-                        enhet = behandlendeEnhet.oppfolgingsenhet.enhet,
+                        enhet = behandlendeEnhet.oppfolgingsenhet.enhet.toEnhetDTO(),
                         createdAt = behandlendeEnhet.oppfolgingsenhet.createdAt,
                         veilederident = behandlendeEnhet.oppfolgingsenhet.veilederident,
                     )
@@ -35,7 +35,19 @@ data class BehandlendeEnhetResponseDTO(
 }
 
 data class OppfolgingsenhetDTO(
-    val enhet: Enhet,
+    val enhet: EnhetDTO,
     val createdAt: OffsetDateTime,
     val veilederident: String,
 )
+
+data class EnhetDTO(
+    val enhetId: String,
+    val navn: String,
+)
+
+fun Enhet.toEnhetDTO(): EnhetDTO {
+    return EnhetDTO(
+        enhetId = this.enhetId.value,
+        navn = this.navn,
+    )
+}

@@ -95,9 +95,9 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
-                    behandlendeEnhet.geografiskEnhet.enhetId.value shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
                     behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhet.enhetId.value shouldBeEqualTo "0101"
+                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
                     behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                     behandlendeEnhet.oppfolgingsenhetDTO?.enhet shouldBe null
                     behandlendeEnhet.oppfolgingsenhetDTO?.createdAt shouldBe null
@@ -119,11 +119,11 @@ class BehandlendeEnhetApiSpek : Spek({
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
-                    behandlendeEnhet.geografiskEnhet.enhetId.value shouldBeEqualTo "0101"
+                    behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
                     behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhet.enhetId.value shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo UNDERORDNET_NR
                     behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.enhetId?.value shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.enhetId shouldBeEqualTo UNDERORDNET_NR
                     behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.navn shouldBeEqualTo "Enhet"
                     behandlendeEnhet.oppfolgingsenhetDTO?.createdAt shouldNotBe null
                     behandlendeEnhet.oppfolgingsenhetDTO?.veilederident shouldBeEqualTo VEILEDER_IDENT
