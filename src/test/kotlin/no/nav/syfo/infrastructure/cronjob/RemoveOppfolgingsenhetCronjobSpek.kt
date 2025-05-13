@@ -72,7 +72,7 @@ class RemoveOppfolgingsenhetCronjobSpek : Spek({
                         callId = callId,
                         personIdentNumber = UserConstants.ARBEIDSTAKER_PERSONIDENT,
                     )
-                    storedEnhet.oppfolgingsenhet?.enhet?.enhetId?.value shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
+                    storedEnhet.oppfolgingsenhet?.enhetId shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
                 }
             }
             it("Cronjob nuller oppfolgingsenhet på person med skjerming") {
@@ -95,7 +95,7 @@ class RemoveOppfolgingsenhetCronjobSpek : Spek({
                         callId = callId,
                         personIdentNumber = UserConstants.ARBEIDSTAKER_PERSONIDENT,
                     )
-                    storedEnhet.oppfolgingsenhet?.enhet?.enhetId?.value shouldNotBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
+                    storedEnhet.oppfolgingsenhet?.enhetId shouldNotBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
                 }
             }
         }

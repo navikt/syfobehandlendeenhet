@@ -74,7 +74,7 @@ object IdenthendelseServiceSpek : Spek({
                 }
 
                 val updated = repository.getOppfolgingsenhetByPersonident(newIdent)
-                updated?.personident shouldBeEqualTo newIdent.value
+                updated?.personident?.value shouldBeEqualTo newIdent.value
 
                 val old = repository.getOppfolgingsenhetByPersonident(oldIdent)
                 old shouldBeEqualTo null
@@ -102,7 +102,7 @@ object IdenthendelseServiceSpek : Spek({
                 }
 
                 val updated = repository.getOppfolgingsenhetByPersonident(newIdent)
-                updated?.personident shouldBeEqualTo newIdent.value
+                updated?.personident?.value shouldBeEqualTo newIdent.value
 
                 val old = repository.getOppfolgingsenhetByPersonident(oldIdent)
                 old shouldBeEqualTo null

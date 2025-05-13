@@ -22,9 +22,7 @@ class IdenthendelseService(
             if (activeIdent != null) {
                 val inactiveIdenter = identhendelse.getInactivePersonidenter()
                 val oldPersonIdentList = inactiveIdenter.mapNotNull { personident ->
-                    repository.getOppfolgingsenhetByPersonident(personident)?.personident?.let {
-                        PersonIdentNumber(it)
-                    }
+                    repository.getOppfolgingsenhetByPersonident(personident)?.personident
                 }
 
                 if (oldPersonIdentList.isNotEmpty()) {

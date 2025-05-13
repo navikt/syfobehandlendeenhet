@@ -1,6 +1,7 @@
 package no.nav.syfo.infrastructure.database.repository
 
 import no.nav.syfo.behandlendeenhet.IEnhetRepository
+import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.EnhetId.Companion.ENHETNR_NAV_UTLAND
 import no.nav.syfo.domain.PersonIdentNumber
@@ -16,7 +17,7 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
         personIdent: PersonIdentNumber,
         enhetId: EnhetId?,
         veilederident: String,
-    ): POppfolgingsenhet =
+    ): Oppfolgingsenhet =
         database.connection.use { connection ->
             val now = OffsetDateTime.now()
             connection.prepareStatement(createOppfolgingsenhet).use {
@@ -30,7 +31,7 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
             }.also {
                 connection.commit()
             }
-        }.first()
+        }.first().toOppfolgingsenhet()
 
     override fun getEnhetUsageForVeileder(veilederident: String): List<EnhetId> =
         database.connection.use { connection ->
@@ -41,14 +42,14 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 }
         }
 
-    override fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): POppfolgingsenhet? =
+    override fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): Oppfolgingsenhet? =
         database.connection.use { connection ->
             connection.prepareStatement(queryOppfolgingsenhetByPersonident)
                 .use {
                     it.setString(1, personIdent.value)
                     it.executeQuery().toList { toPOppfolgingsenhet() }
                 }
-        }.firstOrNull()
+        }.firstOrNull()?.toOppfolgingsenhet()
 
     override fun getActiveOppfolgingsenheter(): List<Pair<UUID, PersonIdentNumber>> =
         database.connection.use { connection ->

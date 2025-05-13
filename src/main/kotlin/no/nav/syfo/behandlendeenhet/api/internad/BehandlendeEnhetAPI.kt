@@ -68,7 +68,7 @@ fun Route.registrerPersonApi(
 
             val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, EnhetId(enhetId), veilederident)
 
-            call.respond(tilordningsenheter.map { it.toEnhetDTO() })
+            call.respond(tilordningsenheter)
         }
 
         post("/oppfolgingsenhet-tildelinger") {
@@ -116,7 +116,7 @@ fun Route.registrerPersonApi(
                     val oppfolgingsenhet = it.getOrThrow()
                     TildelOppfolgingsenhetDTO(
                         personident = oppfolgingsenhet.personident.value,
-                        oppfolgingsenhet = oppfolgingsenhet.enhet?.enhetId?.value,
+                        oppfolgingsenhet = oppfolgingsenhet.enhetId?.value,
                     )
                 }
             val unsuccessfulTildelinger = errorneousPersonidenter

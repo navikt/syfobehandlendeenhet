@@ -1,6 +1,5 @@
 package no.nav.syfo.infrastructure.database.repository
 
-import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
@@ -16,15 +15,10 @@ data class POppfolgingsenhet(
     val createdAt: OffsetDateTime,
 )
 
-fun POppfolgingsenhet.toOppfolgingsenhet(enhetNavn: String) = Oppfolgingsenhet(
+fun POppfolgingsenhet.toOppfolgingsenhet() = Oppfolgingsenhet(
     uuid = this.uuid,
     personident = PersonIdentNumber(this.personident),
-    enhet = this.oppfolgingsenhet?.let {
-        Enhet(
-            enhetId = EnhetId(it),
-            navn = enhetNavn,
-        )
-    },
+    enhetId = this.oppfolgingsenhet?.let { EnhetId(it) },
     veilederident = veilederident,
     createdAt = this.createdAt,
 )

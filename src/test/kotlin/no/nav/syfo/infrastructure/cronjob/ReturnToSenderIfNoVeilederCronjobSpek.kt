@@ -106,7 +106,7 @@ class ReturnToSenderIfNoVeilederCronjobSpek : Spek({
                         callId = callId,
                         personIdentNumber = UserConstants.ARBEIDSTAKER_PERSONIDENT,
                     )
-                    storedEnhet.oppfolgingsenhet?.enhet?.enhetId?.value shouldBeEqualTo ENHET_ID
+                    storedEnhet.oppfolgingsenhet?.enhetId shouldBeEqualTo ENHET_ID
                     database.getVeilederCheckedOk(oppfolgingsenhet.uuid) shouldNotBe null
                 }
             }
@@ -126,7 +126,7 @@ class ReturnToSenderIfNoVeilederCronjobSpek : Spek({
                         callId = callId,
                         personIdentNumber = UserConstants.ARBEIDSTAKER_PERSONIDENT_2,
                     )
-                    storedEnhet.oppfolgingsenhet?.enhet?.enhetId?.value shouldBeEqualTo ENHET_ID
+                    storedEnhet.oppfolgingsenhet?.enhetId shouldBeEqualTo ENHET_ID
                     database.getVeilederCheckedOk(oppfolgingsenhet.uuid) shouldBe null
                 }
             }
@@ -151,7 +151,7 @@ class ReturnToSenderIfNoVeilederCronjobSpek : Spek({
                         callId = callId,
                         personIdentNumber = UserConstants.ARBEIDSTAKER_PERSONIDENT_2,
                     )
-                    storedEnhet.oppfolgingsenhet?.enhet?.enhetId?.value shouldBe null
+                    storedEnhet.oppfolgingsenhet?.enhetId shouldBe null
                 }
             }
             it("Cronjob nuller ikke ut oppfolgningsenhet for arbeidstaker som ikke har fått veileder etter 7 dager hvis Nav Utland") {
@@ -175,7 +175,7 @@ class ReturnToSenderIfNoVeilederCronjobSpek : Spek({
                         callId = callId,
                         personIdentNumber = UserConstants.ARBEIDSTAKER_PERSONIDENT_2,
                     )
-                    storedEnhet.oppfolgingsenhet?.enhet?.enhetId?.value shouldBeEqualTo ENHETNR_NAV_UTLAND
+                    storedEnhet.oppfolgingsenhet?.enhetId shouldBeEqualTo ENHETNR_NAV_UTLAND
                 }
             }
         }
