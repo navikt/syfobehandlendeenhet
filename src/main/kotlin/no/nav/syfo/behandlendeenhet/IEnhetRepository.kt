@@ -1,8 +1,8 @@
 package no.nav.syfo.behandlendeenhet
 
+import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
-import no.nav.syfo.infrastructure.database.repository.POppfolgingsenhet
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -11,9 +11,9 @@ interface IEnhetRepository {
         personIdent: PersonIdentNumber,
         enhetId: EnhetId?,
         veilederident: String,
-    ): POppfolgingsenhet
+    ): Oppfolgingsenhet
 
-    fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): POppfolgingsenhet?
+    fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): Oppfolgingsenhet?
 
     fun getEnhetUsageForVeileder(veilederident: String): List<EnhetId>
 
