@@ -10,7 +10,6 @@ import io.ktor.server.testing.*
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
 import no.nav.syfo.behandlendeenhet.api.EnhetDTO
 import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetResponseDTO
