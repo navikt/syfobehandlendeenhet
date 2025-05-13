@@ -12,6 +12,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
+import no.nav.syfo.behandlendeenhet.api.EnhetDTO
 import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetResponseDTO
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
@@ -203,13 +204,13 @@ class BehandlendeEnhetApiSpek : Spek({
                         bearerAuth(validToken)
                     }
                     response.status shouldBeEqualTo HttpStatusCode.OK
-                    val behandlendeEnhetList = response.body<List<Enhet>>()
+                    val behandlendeEnhetList = response.body<List<EnhetDTO>>()
 
                     behandlendeEnhetList.size shouldBeEqualTo 3
-                    behandlendeEnhetList[0].enhetId.value shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
+                    behandlendeEnhetList[0].enhetId shouldBeEqualTo EnhetId.ENHETNR_NAV_UTLAND
                     // UNDERORDNET_NR (0103) kommer foran GEOGRAFISK_ENHET_NR_2 (0102) fordi veileder har brukt 0103 en gang
-                    behandlendeEnhetList[1].enhetId.value shouldBeEqualTo UNDERORDNET_NR
-                    behandlendeEnhetList[2].enhetId.value shouldBeEqualTo GEOGRAFISK_ENHET_NR_2
+                    behandlendeEnhetList[1].enhetId shouldBeEqualTo UNDERORDNET_NR
+                    behandlendeEnhetList[2].enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR_2
                 }
             }
         }
