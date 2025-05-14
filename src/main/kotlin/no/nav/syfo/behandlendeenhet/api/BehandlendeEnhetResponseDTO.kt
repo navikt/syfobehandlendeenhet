@@ -2,6 +2,7 @@ package no.nav.syfo.behandlendeenhet.api
 
 import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.behandlendeenhet.domain.BehandlendeEnhet
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 data class BehandlendeEnhetResponseDTO(
@@ -25,7 +26,7 @@ data class BehandlendeEnhetResponseDTO(
                 oppfolgingsenhetDTO = behandlendeEnhet.oppfolgingsenhet?.enhet?.let {
                     OppfolgingsenhetDTO(
                         enhet = behandlendeEnhet.oppfolgingsenhet.enhet.toEnhetDTO(),
-                        createdAt = behandlendeEnhet.oppfolgingsenhet.createdAt,
+                        createdAt = behandlendeEnhet.oppfolgingsenhet.createdAt.toLocalDateTime(),
                         veilederident = behandlendeEnhet.oppfolgingsenhet.veilederident,
                     )
                 }
@@ -36,7 +37,7 @@ data class BehandlendeEnhetResponseDTO(
 
 data class OppfolgingsenhetDTO(
     val enhet: EnhetDTO,
-    val createdAt: OffsetDateTime,
+    val createdAt: LocalDateTime,
     val veilederident: String,
 )
 

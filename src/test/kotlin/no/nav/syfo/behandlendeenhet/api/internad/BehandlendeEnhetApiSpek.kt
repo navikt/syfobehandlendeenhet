@@ -42,6 +42,7 @@ import org.amshove.kluent.shouldNotBe
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
 
 class BehandlendeEnhetApiSpek : Spek({
     val externalMockEnvironment = ExternalMockEnvironment.instance
@@ -125,7 +126,7 @@ class BehandlendeEnhetApiSpek : Spek({
                     behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                     behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.enhetId shouldBeEqualTo UNDERORDNET_NR
                     behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhetDTO?.createdAt shouldNotBe null
+                    behandlendeEnhet.oppfolgingsenhetDTO?.createdAt?.toLocalDate() shouldBeEqualTo LocalDate.now()
                     behandlendeEnhet.oppfolgingsenhetDTO?.veilederident shouldBeEqualTo VEILEDER_IDENT
                 }
             }
