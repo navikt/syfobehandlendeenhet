@@ -3,7 +3,6 @@ package no.nav.syfo.behandlendeenhet.api
 import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.behandlendeenhet.domain.BehandlendeEnhet
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 
 data class BehandlendeEnhetResponseDTO(
     @Deprecated("Erstattet av geografisk enhet og oppfolgingsenhet")
