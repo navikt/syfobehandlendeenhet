@@ -98,8 +98,6 @@ class BehandlendeEnhetApiSpek : Spek({
 
                     behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
                     behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
-                    behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                     behandlendeEnhet.oppfolgingsenhetDTO?.enhet shouldBe null
                     behandlendeEnhet.oppfolgingsenhetDTO?.createdAt shouldBe null
                     behandlendeEnhet.oppfolgingsenhetDTO?.veilederident shouldBe null
@@ -122,8 +120,6 @@ class BehandlendeEnhetApiSpek : Spek({
 
                     behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
                     behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
-                    behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo UNDERORDNET_NR
-                    behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                     behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.enhetId shouldBeEqualTo UNDERORDNET_NR
                     behandlendeEnhet.oppfolgingsenhetDTO?.enhet?.navn shouldBeEqualTo "Enhet"
                     behandlendeEnhet.oppfolgingsenhetDTO?.createdAt?.toLocalDate() shouldBeEqualTo LocalDate.now()

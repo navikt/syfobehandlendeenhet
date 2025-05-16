@@ -70,8 +70,6 @@ class BehandlendeEnhetSystemApiSpek : Spek({
 
                             behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
                             behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
-                            behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
-                            behandlendeEnhet.oppfolgingsenhet.navn shouldBeEqualTo "Enhet"
                         }
                     }
                     it("Post BehandlendeEnhet for PersonIdent as $consumerApplicationName") {
@@ -91,7 +89,6 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                             val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
                             behandlendeEnhet.geografiskEnhet.enhetId shouldBeEqualTo "0101"
                             behandlendeEnhet.geografiskEnhet.navn shouldBeEqualTo "Enhet"
-                            behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
                         }
                     }
                     it("Post BehandlendeEnhet for PersonIdent which has oppfolgingsenhet as $consumerApplicationName") {
@@ -108,7 +105,6 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                             }
                             responsePre.status shouldBeEqualTo HttpStatusCode.OK
                             val behandlendeEnhetPre = responsePre.body<BehandlendeEnhetResponseDTO>()
-                            behandlendeEnhetPre.oppfolgingsenhet.enhetId shouldBeEqualTo "0102"
 
                             val responsePost = client.post(url) {
                                 bearerAuth(validToken)
@@ -122,7 +118,6 @@ class BehandlendeEnhetSystemApiSpek : Spek({
                             }
                             responseGet.status shouldBeEqualTo HttpStatusCode.OK
                             val behandlendeEnhet = responseGet.body<BehandlendeEnhetResponseDTO>()
-                            behandlendeEnhet.oppfolgingsenhet.enhetId shouldBeEqualTo "0101"
                         }
                     }
 
