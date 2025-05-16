@@ -44,8 +44,6 @@ spec:
         - application: istilgangskontroll
         - application: syfomotebehov
           namespace: team-esyfo
-        - application: meroppfolging-backend
-          namespace: team-esyfo
     outbound:
       external:
         - host: "pdl-api.dev-fss-pub.nais.io"
