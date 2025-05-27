@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory
 const val ENHET_ID_PARAM = "enhetId"
 const val internadBehandlendeEnhetApiV2BasePath = "/api/internad/v2"
 const val internadBehandlendeEnhetApiV2PersonIdentPath = "/personident"
+const val internadBehandlendeEnhetApiV2PersonIdentHistorikkPath = "/personident/historikk"
 const val internadBehandlendeEnhetApiV2TilordningsenheterPath = "/tilordningsenheter/{$ENHET_ID_PARAM}"
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.behandlendeenhet.api.internad")
@@ -51,6 +52,28 @@ fun Route.registrerPersonApi(
             )
                 .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) }
                 .run { call.respond(this) }
+        }
+
+        get(internadBehandlendeEnhetApiV2PersonIdentHistorikkPath) {
+            val callId = getCallId()
+            val token = getBearerHeader()
+                ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No Authorization header supplied")
+
+            val personIdentNumber = personIdentHeader()?.let { personIdent ->
+                PersonIdentNumber(personIdent)
+            }
+                ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No $NAV_PERSONIDENT_HEADER supplied in request header")
+
+            veilederTilgangskontrollClient.throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
+                callId = callId,
+                token = token,
+            )
+
+            enhetService.arbeidstakersBehandlendeEnhetHistorikk(
+                personIdentNumber = personIdentNumber,
+            )
+                .map { TildelOppfolgingsenhetHistorikkDTO.fromOppfolgingsenhet(it) }
+                .run { call.respond(TildelHistorikkResponseDTO(this)) }
         }
 
         get(internadBehandlendeEnhetApiV2TilordningsenheterPath) {
