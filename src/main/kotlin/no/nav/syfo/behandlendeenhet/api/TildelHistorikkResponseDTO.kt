@@ -11,11 +11,11 @@ data class TildelHistorikkResponseDTO(
 
 enum class TildelOppfolgingsenhetHistorikkType {
     TILDELT_ANNEN_ENHET_AV_VEILEDER,
-    TILDELT_TILBAKE_TIL_ENHET_AV_VEILEDER,
-    TILDELT_TILBAKE_TIL_ENHET_AV_SYSTEM,
+    TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_VEILEDER,
+    TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_SYSTEM,
 }
 
-abstract class TildelOppfolgingsenhetHistorikkDTO {
+sealed class TildelOppfolgingsenhetHistorikkDTO {
     abstract val createdAt: LocalDateTime
     abstract val veilederident: String
     abstract val tildelOppfolgingsenhetHistorikkType: TildelOppfolgingsenhetHistorikkType
@@ -56,11 +56,11 @@ data class Tildelt(
 data class TildeltTilbake(
     override val createdAt: LocalDateTime,
     override val veilederident: String,
-    override val tildelOppfolgingsenhetHistorikkType: TildelOppfolgingsenhetHistorikkType = TILDELT_TILBAKE_TIL_ENHET_AV_VEILEDER,
+    override val tildelOppfolgingsenhetHistorikkType: TildelOppfolgingsenhetHistorikkType = TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_VEILEDER,
 ) : TildelOppfolgingsenhetHistorikkDTO()
 
 data class TildeltTilbakeAvSystem(
     override val createdAt: LocalDateTime,
     override val veilederident: String,
-    override val tildelOppfolgingsenhetHistorikkType: TildelOppfolgingsenhetHistorikkType = TILDELT_TILBAKE_TIL_ENHET_AV_SYSTEM,
+    override val tildelOppfolgingsenhetHistorikkType: TildelOppfolgingsenhetHistorikkType = TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_SYSTEM,
 ) : TildelOppfolgingsenhetHistorikkDTO()
