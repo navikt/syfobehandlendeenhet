@@ -1,5 +1,6 @@
 package no.nav.syfo.behandlendeenhet.api
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.syfo.behandlendeenhet.EnhetService.Companion.SYSTEM_USER_IDENT
 import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetHistorikkType.*
 import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
@@ -15,6 +16,7 @@ enum class TildelOppfolgingsenhetHistorikkType {
     TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_SYSTEM,
 }
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 sealed class TildelOppfolgingsenhetHistorikkDTO {
     abstract val createdAt: LocalDateTime
     abstract val veilederident: String
