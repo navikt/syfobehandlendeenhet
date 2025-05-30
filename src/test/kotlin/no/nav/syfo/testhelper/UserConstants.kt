@@ -11,7 +11,7 @@ object UserConstants {
     val ARBEIDSTAKER_ADRESSEBESKYTTET = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "6"))
     val ARBEIDSTAKER_EGENANSATT = PersonIdentNumber(ARBEIDSTAKER_PERSONIDENT.value.replace("2", "7"))
 
-    const val VEILEDER_IDENT = "Z999999"
+    const val VEILEDER_IDENT = "Z990000"
     val VEILEDER_IDENT_NO_ACCESS = VEILEDER_IDENT.replace("9", "1")
 
     const val ENHET_ID = "0314"

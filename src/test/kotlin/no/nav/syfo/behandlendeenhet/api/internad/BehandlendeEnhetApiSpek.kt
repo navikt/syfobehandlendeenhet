@@ -1,5 +1,7 @@
 package no.nav.syfo.behandlendeenhet.api.internad
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -10,15 +12,14 @@ import io.ktor.server.testing.*
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
-import no.nav.syfo.behandlendeenhet.api.EnhetDTO
-import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetResponseDTO
+import no.nav.syfo.behandlendeenhet.EnhetService.Companion.SYSTEM_USER_IDENT
+import no.nav.syfo.behandlendeenhet.api.*
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
-import no.nav.syfo.testhelper.*
+import no.nav.syfo.testhelper.ExternalMockEnvironment
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_EGENANSATT
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND
@@ -30,15 +31,17 @@ import no.nav.syfo.testhelper.UserConstants.ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.OTHER_ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
+import no.nav.syfo.testhelper.dropData
+import no.nav.syfo.testhelper.generateJWT
 import no.nav.syfo.testhelper.generator.generateTildelOppfolgingsenhetRequestDTO
+import no.nav.syfo.testhelper.mock.ENHET_NAVN
 import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR
 import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR_2
 import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
+import no.nav.syfo.testhelper.testApiModule
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.util.configure
-import org.amshove.kluent.shouldBe
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBe
+import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -75,9 +78,14 @@ class BehandlendeEnhetApiSpek : Spek({
         database.dropData()
     }
 
-    val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentPath"
+    val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath/personident"
+    val tildelthistorikkUrl = "$internadBehandlendeEnhetApiV2BasePath/historikk"
     val oppfolgingsenhetTildelingerUrl = "$internadBehandlendeEnhetApiV2BasePath/oppfolgingsenhet-tildelinger"
-    val tilordningsenheterUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2TilordningsenheterPath".replace("{$ENHET_ID_PARAM}", GEOGRAFISK_ENHET_NR)
+    val tilordningsenheterUrl =
+        "$internadBehandlendeEnhetApiV2BasePath/tilordningsenheter/{$ENHET_ID_PARAM}".replace(
+            "{$ENHET_ID_PARAM}",
+            GEOGRAFISK_ENHET_NR
+        )
     val validToken = generateJWT(
         audience = externalMockEnvironment.environment.azureAppClientId,
         issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
@@ -93,6 +101,7 @@ class BehandlendeEnhetApiSpek : Spek({
                         bearerAuth(validToken)
                         header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                     }
+
                     response.status shouldBeEqualTo HttpStatusCode.OK
                     val behandlendeEnhet = response.body<BehandlendeEnhetResponseDTO>()
 
@@ -208,6 +217,147 @@ class BehandlendeEnhetApiSpek : Spek({
                     behandlendeEnhetList[1].enhetId shouldBeEqualTo UNDERORDNET_NR
                     behandlendeEnhetList[2].enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR_2
                 }
+            }
+        }
+    }
+
+    describe("Get tildelthistorikk for PersonIdent") {
+        val objectMapper = ObjectMapper()
+        objectMapper.registerModule(JavaTimeModule())
+
+        it("Tildelt til annen enhet av veileder") {
+            testApplication {
+                repository.createOppfolgingsenhet(
+                    personIdent = ARBEIDSTAKER_PERSONIDENT,
+                    enhetId = EnhetId(GEOGRAFISK_ENHET_NR),
+                    veilederident = VEILEDER_IDENT,
+                )
+
+                val client = setupApiAndClient()
+                val response = client.get(tildelthistorikkUrl) {
+                    bearerAuth(validToken)
+                    header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
+                }
+
+                response.status shouldBeEqualTo HttpStatusCode.OK
+                val historikk = response.body<TildeltHistorikkResponseDTO>()
+
+                val jsonStr = response.body<String>()
+                val expectedType = """
+                    "type":"TILDELT_ANNEN_ENHET_AV_VEILEDER"
+                """.trimIndent()
+                jsonStr shouldContain expectedType
+
+                val tildelteOppfolgingsenheter = historikk.tildelteOppfolgingsenheter
+                tildelteOppfolgingsenheter.size shouldBeEqualTo 1
+
+                val tildelt = tildelteOppfolgingsenheter[0] as Tildelt
+                tildelt.veilederident shouldBeEqualTo VEILEDER_IDENT
+                tildelt.enhet.enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR
+                tildelt.enhet.navn shouldBeEqualTo ENHET_NAVN
+            }
+        }
+
+        it("Tildelt tilbake av veileder") {
+            testApplication {
+                repository.createOppfolgingsenhet(
+                    personIdent = ARBEIDSTAKER_PERSONIDENT,
+                    enhetId = null,
+                    veilederident = VEILEDER_IDENT,
+                )
+
+                val client = setupApiAndClient()
+                val response = client.get(tildelthistorikkUrl) {
+                    bearerAuth(validToken)
+                    header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
+                }
+
+                response.status shouldBeEqualTo HttpStatusCode.OK
+                val historikk = response.body<TildeltHistorikkResponseDTO>()
+
+                val jsonStr = response.body<String>()
+                val expectedType = """
+                    "type":"TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_VEILEDER"
+                """.trimIndent()
+                jsonStr shouldContain expectedType
+
+                val tildelteOppfolgingsenheter = historikk.tildelteOppfolgingsenheter
+                tildelteOppfolgingsenheter.size shouldBeEqualTo 1
+
+                val tildeltTilbake = tildelteOppfolgingsenheter[0] as TildeltTilbake
+                tildeltTilbake.veilederident shouldBeEqualTo VEILEDER_IDENT
+            }
+        }
+
+        it("Tildelt tilbake av systemet") {
+            testApplication {
+                repository.createOppfolgingsenhet(
+                    personIdent = ARBEIDSTAKER_PERSONIDENT,
+                    enhetId = null,
+                    veilederident = SYSTEM_USER_IDENT,
+                )
+
+                val client = setupApiAndClient()
+                val response = client.get(tildelthistorikkUrl) {
+                    bearerAuth(validToken)
+                    header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
+                }
+
+                response.status shouldBeEqualTo HttpStatusCode.OK
+                val historikk = response.body<TildeltHistorikkResponseDTO>()
+
+                val jsonStr = response.body<String>()
+                val expectedType = """
+                    "type":"TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_SYSTEM"
+                """.trimIndent()
+                jsonStr shouldContain expectedType
+
+                val tildelteOppfolgingsenheter = historikk.tildelteOppfolgingsenheter
+                tildelteOppfolgingsenheter.size shouldBeEqualTo 1
+
+                val tildeltTilbakeSystem = tildelteOppfolgingsenheter[0] as TildeltTilbakeAvSystem
+                tildeltTilbakeSystem.veilederident shouldBeEqualTo SYSTEM_USER_IDENT
+            }
+        }
+
+        it("Historikk leveres sortert synkende på createdAt") {
+            testApplication {
+                repository.createOppfolgingsenhet(
+                    personIdent = ARBEIDSTAKER_PERSONIDENT,
+                    enhetId = EnhetId(GEOGRAFISK_ENHET_NR),
+                    veilederident = VEILEDER_IDENT,
+                )
+
+                repository.createOppfolgingsenhet(
+                    personIdent = ARBEIDSTAKER_PERSONIDENT,
+                    enhetId = null,
+                    veilederident = VEILEDER_IDENT,
+                )
+
+                repository.createOppfolgingsenhet(
+                    personIdent = ARBEIDSTAKER_PERSONIDENT,
+                    enhetId = null,
+                    veilederident = SYSTEM_USER_IDENT,
+                )
+
+                val client = setupApiAndClient()
+                val response = client.get(tildelthistorikkUrl) {
+                    bearerAuth(validToken)
+                    header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
+                }
+
+                response.status shouldBeEqualTo HttpStatusCode.OK
+                val historikk = response.body<TildeltHistorikkResponseDTO>()
+
+                val tildelteOppfolgingsenheter = historikk.tildelteOppfolgingsenheter
+                tildelteOppfolgingsenheter.size shouldBeEqualTo 3
+
+                val tildeltTilbakeSystem = tildelteOppfolgingsenheter[0] as TildeltTilbakeAvSystem
+                val tildeltTilbake = tildelteOppfolgingsenheter[1] as TildeltTilbake
+                val tildelt = tildelteOppfolgingsenheter[2] as Tildelt
+
+                tildeltTilbake.createdAt shouldBeBefore tildeltTilbakeSystem.createdAt
+                tildelt.createdAt shouldBeBefore tildeltTilbake.createdAt
             }
         }
     }
@@ -453,7 +603,8 @@ class BehandlendeEnhetApiSpek : Spek({
 
                 val oppfolgingsenhetPerson1 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT)
                 val oppfolgingsenhetPerson2 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_ADRESSEBESKYTTET)
-                val oppfolgingsenhetPerson3 = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND)
+                val oppfolgingsenhetPerson3 =
+                    repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_GEOGRAFISK_TILKNYTNING_NOT_FOUND)
                 oppfolgingsenhetPerson1?.oppfolgingsenhet shouldBeEqualTo ENHET_ID
                 oppfolgingsenhetPerson2 shouldBeEqualTo null
                 oppfolgingsenhetPerson3 shouldBeEqualTo null

@@ -45,6 +45,14 @@ class EnhetService(
         )
     }
 
+    suspend fun arbeidstakersBehandlendeEnhetHistorikk(personIdentNumber: PersonIdentNumber): List<Oppfolgingsenhet> {
+        return repository.getOppfolgingsenhetHistorikkByPersonident(personIdentNumber).map {
+            it.toOppfolgingsenhet(
+                enhetNavn = getEnhetsnavn(it.oppfolgingsenhet?.let { EnhetId(it) })
+            )
+        }
+    }
+
     suspend fun updateOppfolgingsenhet(
         callId: String,
         personIdent: PersonIdentNumber,
