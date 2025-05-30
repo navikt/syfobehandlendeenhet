@@ -69,8 +69,8 @@ fun Route.registrerPersonApi(
             enhetService.arbeidstakersBehandlendeEnhetHistorikk(
                 personIdentNumber = personIdentNumber,
             )
-                .map { TildelOppfolgingsenhetHistorikkDTO.fromOppfolgingsenhet(it) }
-                .run { call.respond(TildelHistorikkResponseDTO(this)) }
+                .map { TildeltOppfolgingsenhetHistorikkDTO.fromOppfolgingsenhet(it) }
+                .run { call.respond(TildeltHistorikkResponseDTO(this)) }
         }
 
         get("/tilordningsenheter/{$ENHET_ID_PARAM}") {
