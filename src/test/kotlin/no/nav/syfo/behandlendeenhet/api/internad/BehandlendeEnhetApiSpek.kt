@@ -47,7 +47,6 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 
-
 class BehandlendeEnhetApiSpek : Spek({
     val externalMockEnvironment = ExternalMockEnvironment.instance
     val database = externalMockEnvironment.database
