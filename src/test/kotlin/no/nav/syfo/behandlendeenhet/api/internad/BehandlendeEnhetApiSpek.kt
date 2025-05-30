@@ -1,5 +1,7 @@
 package no.nav.syfo.behandlendeenhet.api.internad
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -12,7 +14,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.syfo.behandlendeenhet.EnhetService.Companion.SYSTEM_USER_IDENT
 import no.nav.syfo.behandlendeenhet.api.*
-import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetHistorikkType.*
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.EnhetId
@@ -40,14 +41,12 @@ import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
 import no.nav.syfo.testhelper.testApiModule
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.util.configure
-import org.amshove.kluent.shouldBe
-import org.amshove.kluent.shouldBeBefore
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBe
+import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
+
 
 class BehandlendeEnhetApiSpek : Spek({
     val externalMockEnvironment = ExternalMockEnvironment.instance
@@ -80,12 +79,11 @@ class BehandlendeEnhetApiSpek : Spek({
         database.dropData()
     }
 
-    val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentPath"
-    val tildelhistorikkUrl =
-        "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2PersonIdentHistorikkPath"
+    val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath/personident"
+    val tildelhistorikkUrl = "$internadBehandlendeEnhetApiV2BasePath/historikk"
     val oppfolgingsenhetTildelingerUrl = "$internadBehandlendeEnhetApiV2BasePath/oppfolgingsenhet-tildelinger"
     val tilordningsenheterUrl =
-        "$internadBehandlendeEnhetApiV2BasePath$internadBehandlendeEnhetApiV2TilordningsenheterPath".replace(
+        "$internadBehandlendeEnhetApiV2BasePath/tilordningsenheter/{$ENHET_ID_PARAM}".replace(
             "{$ENHET_ID_PARAM}",
             GEOGRAFISK_ENHET_NR
         )
@@ -225,6 +223,9 @@ class BehandlendeEnhetApiSpek : Spek({
     }
 
     describe("Get tildelingshistorikk for PersonIdent") {
+        val objectMapper = ObjectMapper()
+        objectMapper.registerModule(JavaTimeModule())
+
         it("Tildel til annen enhet av veileder") {
             testApplication {
                 repository.createOppfolgingsenhet(
@@ -242,12 +243,17 @@ class BehandlendeEnhetApiSpek : Spek({
                 response.status shouldBeEqualTo HttpStatusCode.OK
                 val historikk = response.body<TildelHistorikkResponseDTO>()
 
+                val jsonStr = response.body<String>()
+                val expectedType = """
+                    "type":"TILDELT_ANNEN_ENHET_AV_VEILEDER"
+                """.trimIndent()
+                jsonStr shouldContain expectedType
+
                 val oppfolgingsenheter = historikk.oppfolgingsenheter
                 oppfolgingsenheter.size shouldBeEqualTo 1
 
                 val tildelt = oppfolgingsenheter[0] as Tildelt
                 tildelt.veilederident shouldBeEqualTo VEILEDER_IDENT
-                tildelt.tildelOppfolgingsenhetHistorikkType shouldBeEqualTo TILDELT_ANNEN_ENHET_AV_VEILEDER
                 tildelt.enhet.enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR
                 tildelt.enhet.navn shouldBeEqualTo ENHET_NAVN
             }
@@ -270,12 +276,17 @@ class BehandlendeEnhetApiSpek : Spek({
                 response.status shouldBeEqualTo HttpStatusCode.OK
                 val historikk = response.body<TildelHistorikkResponseDTO>()
 
+                val jsonStr = response.body<String>()
+                val expectedType = """
+                    "type":"TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_VEILEDER"
+                """.trimIndent()
+                jsonStr shouldContain expectedType
+
                 val oppfolgingsenheter = historikk.oppfolgingsenheter
                 oppfolgingsenheter.size shouldBeEqualTo 1
 
                 val tildeltTilbake = oppfolgingsenheter[0] as TildeltTilbake
                 tildeltTilbake.veilederident shouldBeEqualTo VEILEDER_IDENT
-                tildeltTilbake.tildelOppfolgingsenhetHistorikkType shouldBeEqualTo TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_VEILEDER
             }
         }
 
@@ -296,12 +307,17 @@ class BehandlendeEnhetApiSpek : Spek({
                 response.status shouldBeEqualTo HttpStatusCode.OK
                 val historikk = response.body<TildelHistorikkResponseDTO>()
 
+                val jsonStr = response.body<String>()
+                val expectedType = """
+                    "type":"TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_SYSTEM"
+                """.trimIndent()
+                jsonStr shouldContain expectedType
+
                 val oppfolgingsenheter = historikk.oppfolgingsenheter
                 oppfolgingsenheter.size shouldBeEqualTo 1
 
                 val tildeltTilbakeSystem = oppfolgingsenheter[0] as TildeltTilbakeAvSystem
                 tildeltTilbakeSystem.veilederident shouldBeEqualTo SYSTEM_USER_IDENT
-                tildeltTilbakeSystem.tildelOppfolgingsenhetHistorikkType shouldBeEqualTo TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_SYSTEM
             }
         }
 
