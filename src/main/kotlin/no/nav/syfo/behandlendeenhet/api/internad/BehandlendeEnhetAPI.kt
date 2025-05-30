@@ -19,9 +19,6 @@ import org.slf4j.LoggerFactory
 
 const val ENHET_ID_PARAM = "enhetId"
 const val internadBehandlendeEnhetApiV2BasePath = "/api/internad/v2"
-const val internadBehandlendeEnhetApiV2PersonIdentPath = "/personident"
-const val internadBehandlendeEnhetApiV2PersonIdentHistorikkPath = "/personident/historikk"
-const val internadBehandlendeEnhetApiV2TilordningsenheterPath = "/tilordningsenheter/{$ENHET_ID_PARAM}"
 
 private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.behandlendeenhet.api.internad")
 
@@ -30,7 +27,7 @@ fun Route.registrerPersonApi(
     veilederTilgangskontrollClient: VeilederTilgangskontrollClient
 ) {
     route(internadBehandlendeEnhetApiV2BasePath) {
-        get(internadBehandlendeEnhetApiV2PersonIdentPath) {
+        get("/personident") {
             val callId = getCallId()
             val token = getBearerHeader()
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No Authorization header supplied")
@@ -54,7 +51,7 @@ fun Route.registrerPersonApi(
                 .run { call.respond(this) }
         }
 
-        get(internadBehandlendeEnhetApiV2PersonIdentHistorikkPath) {
+        get("/historikk") {
             val callId = getCallId()
             val token = getBearerHeader()
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No Authorization header supplied")
@@ -76,7 +73,7 @@ fun Route.registrerPersonApi(
                 .run { call.respond(TildelHistorikkResponseDTO(this)) }
         }
 
-        get(internadBehandlendeEnhetApiV2TilordningsenheterPath) {
+        get("/tilordningsenheter/{$ENHET_ID_PARAM}") {
             val callId = getCallId()
             val token = getBearerHeader()
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No Authorization header supplied")
