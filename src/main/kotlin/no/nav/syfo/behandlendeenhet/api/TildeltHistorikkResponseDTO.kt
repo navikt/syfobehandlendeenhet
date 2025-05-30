@@ -6,17 +6,17 @@ import no.nav.syfo.behandlendeenhet.EnhetService.Companion.SYSTEM_USER_IDENT
 import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
 import java.time.LocalDateTime
 
-data class TildelHistorikkResponseDTO(
-    val oppfolgingsenheter: List<TildelOppfolgingsenhetHistorikkDTO>,
+data class TildeltHistorikkResponseDTO(
+    val tildelteOppfolgingsenheter: List<TildeltOppfolgingsenhetHistorikkDTO>,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed class TildelOppfolgingsenhetHistorikkDTO {
+sealed class TildeltOppfolgingsenhetHistorikkDTO {
     abstract val createdAt: LocalDateTime
     abstract val veilederident: String
 
     companion object {
-        fun fromOppfolgingsenhet(oppfolgingsenhet: Oppfolgingsenhet): TildelOppfolgingsenhetHistorikkDTO {
+        fun fromOppfolgingsenhet(oppfolgingsenhet: Oppfolgingsenhet): TildeltOppfolgingsenhetHistorikkDTO {
             val isSystembruker = oppfolgingsenhet.veilederident == SYSTEM_USER_IDENT
             val isTildeltAvSystem = oppfolgingsenhet.enhet == null && isSystembruker
 
@@ -46,16 +46,16 @@ data class Tildelt(
     override val createdAt: LocalDateTime,
     override val veilederident: String,
     val enhet: EnhetDTO,
-) : TildelOppfolgingsenhetHistorikkDTO()
+) : TildeltOppfolgingsenhetHistorikkDTO()
 
 @JsonTypeName("TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_VEILEDER")
 data class TildeltTilbake(
     override val createdAt: LocalDateTime,
     override val veilederident: String,
-) : TildelOppfolgingsenhetHistorikkDTO()
+) : TildeltOppfolgingsenhetHistorikkDTO()
 
 @JsonTypeName("TILDELT_TILBAKE_TIL_GEOGRAFISK_ENHET_AV_SYSTEM")
 data class TildeltTilbakeAvSystem(
     override val createdAt: LocalDateTime,
     override val veilederident: String,
-) : TildelOppfolgingsenhetHistorikkDTO()
+) : TildeltOppfolgingsenhetHistorikkDTO()

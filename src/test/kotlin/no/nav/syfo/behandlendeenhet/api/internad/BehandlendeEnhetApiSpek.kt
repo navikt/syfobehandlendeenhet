@@ -80,7 +80,7 @@ class BehandlendeEnhetApiSpek : Spek({
     }
 
     val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath/personident"
-    val tildelhistorikkUrl = "$internadBehandlendeEnhetApiV2BasePath/historikk"
+    val tildelthistorikkUrl = "$internadBehandlendeEnhetApiV2BasePath/historikk"
     val oppfolgingsenhetTildelingerUrl = "$internadBehandlendeEnhetApiV2BasePath/oppfolgingsenhet-tildelinger"
     val tilordningsenheterUrl =
         "$internadBehandlendeEnhetApiV2BasePath/tilordningsenheter/{$ENHET_ID_PARAM}".replace(
@@ -222,11 +222,11 @@ class BehandlendeEnhetApiSpek : Spek({
         }
     }
 
-    describe("Get tildelingshistorikk for PersonIdent") {
+    describe("Get tildelthistorikk for PersonIdent") {
         val objectMapper = ObjectMapper()
         objectMapper.registerModule(JavaTimeModule())
 
-        it("Tildel til annen enhet av veileder") {
+        it("Tildelt til annen enhet av veileder") {
             testApplication {
                 repository.createOppfolgingsenhet(
                     personIdent = ARBEIDSTAKER_PERSONIDENT,
@@ -235,13 +235,13 @@ class BehandlendeEnhetApiSpek : Spek({
                 )
 
                 val client = setupApiAndClient()
-                val response = client.get(tildelhistorikkUrl) {
+                val response = client.get(tildelthistorikkUrl) {
                     bearerAuth(validToken)
                     header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                 }
 
                 response.status shouldBeEqualTo HttpStatusCode.OK
-                val historikk = response.body<TildelHistorikkResponseDTO>()
+                val historikk = response.body<TildeltHistorikkResponseDTO>()
 
                 val jsonStr = response.body<String>()
                 val expectedType = """
@@ -249,10 +249,10 @@ class BehandlendeEnhetApiSpek : Spek({
                 """.trimIndent()
                 jsonStr shouldContain expectedType
 
-                val oppfolgingsenheter = historikk.oppfolgingsenheter
-                oppfolgingsenheter.size shouldBeEqualTo 1
+                val tildelteOppfolgingsenheter = historikk.tildelteOppfolgingsenheter
+                tildelteOppfolgingsenheter.size shouldBeEqualTo 1
 
-                val tildelt = oppfolgingsenheter[0] as Tildelt
+                val tildelt = tildelteOppfolgingsenheter[0] as Tildelt
                 tildelt.veilederident shouldBeEqualTo VEILEDER_IDENT
                 tildelt.enhet.enhetId shouldBeEqualTo GEOGRAFISK_ENHET_NR
                 tildelt.enhet.navn shouldBeEqualTo ENHET_NAVN
@@ -268,13 +268,13 @@ class BehandlendeEnhetApiSpek : Spek({
                 )
 
                 val client = setupApiAndClient()
-                val response = client.get(tildelhistorikkUrl) {
+                val response = client.get(tildelthistorikkUrl) {
                     bearerAuth(validToken)
                     header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                 }
 
                 response.status shouldBeEqualTo HttpStatusCode.OK
-                val historikk = response.body<TildelHistorikkResponseDTO>()
+                val historikk = response.body<TildeltHistorikkResponseDTO>()
 
                 val jsonStr = response.body<String>()
                 val expectedType = """
@@ -282,10 +282,10 @@ class BehandlendeEnhetApiSpek : Spek({
                 """.trimIndent()
                 jsonStr shouldContain expectedType
 
-                val oppfolgingsenheter = historikk.oppfolgingsenheter
-                oppfolgingsenheter.size shouldBeEqualTo 1
+                val tildelteOppfolgingsenheter = historikk.tildelteOppfolgingsenheter
+                tildelteOppfolgingsenheter.size shouldBeEqualTo 1
 
-                val tildeltTilbake = oppfolgingsenheter[0] as TildeltTilbake
+                val tildeltTilbake = tildelteOppfolgingsenheter[0] as TildeltTilbake
                 tildeltTilbake.veilederident shouldBeEqualTo VEILEDER_IDENT
             }
         }
@@ -299,13 +299,13 @@ class BehandlendeEnhetApiSpek : Spek({
                 )
 
                 val client = setupApiAndClient()
-                val response = client.get(tildelhistorikkUrl) {
+                val response = client.get(tildelthistorikkUrl) {
                     bearerAuth(validToken)
                     header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                 }
 
                 response.status shouldBeEqualTo HttpStatusCode.OK
-                val historikk = response.body<TildelHistorikkResponseDTO>()
+                val historikk = response.body<TildeltHistorikkResponseDTO>()
 
                 val jsonStr = response.body<String>()
                 val expectedType = """
@@ -313,10 +313,10 @@ class BehandlendeEnhetApiSpek : Spek({
                 """.trimIndent()
                 jsonStr shouldContain expectedType
 
-                val oppfolgingsenheter = historikk.oppfolgingsenheter
-                oppfolgingsenheter.size shouldBeEqualTo 1
+                val tildelteOppfolgingsenheter = historikk.tildelteOppfolgingsenheter
+                tildelteOppfolgingsenheter.size shouldBeEqualTo 1
 
-                val tildeltTilbakeSystem = oppfolgingsenheter[0] as TildeltTilbakeAvSystem
+                val tildeltTilbakeSystem = tildelteOppfolgingsenheter[0] as TildeltTilbakeAvSystem
                 tildeltTilbakeSystem.veilederident shouldBeEqualTo SYSTEM_USER_IDENT
             }
         }
@@ -342,20 +342,20 @@ class BehandlendeEnhetApiSpek : Spek({
                 )
 
                 val client = setupApiAndClient()
-                val response = client.get(tildelhistorikkUrl) {
+                val response = client.get(tildelthistorikkUrl) {
                     bearerAuth(validToken)
                     header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT.value)
                 }
 
                 response.status shouldBeEqualTo HttpStatusCode.OK
-                val historikk = response.body<TildelHistorikkResponseDTO>()
+                val historikk = response.body<TildeltHistorikkResponseDTO>()
 
-                val oppfolgingsenheter = historikk.oppfolgingsenheter
-                oppfolgingsenheter.size shouldBeEqualTo 3
+                val tildelteOppfolgingsenheter = historikk.tildelteOppfolgingsenheter
+                tildelteOppfolgingsenheter.size shouldBeEqualTo 3
 
-                val tildeltTilbakeSystem = oppfolgingsenheter[0] as TildeltTilbakeAvSystem
-                val tildeltTilbake = oppfolgingsenheter[1] as TildeltTilbake
-                val tildelt = oppfolgingsenheter[2] as Tildelt
+                val tildeltTilbakeSystem = tildelteOppfolgingsenheter[0] as TildeltTilbakeAvSystem
+                val tildeltTilbake = tildelteOppfolgingsenheter[1] as TildeltTilbake
+                val tildelt = tildelteOppfolgingsenheter[2] as Tildelt
 
                 tildeltTilbake.createdAt shouldBeBefore tildeltTilbakeSystem.createdAt
                 tildelt.createdAt shouldBeBefore tildeltTilbake.createdAt
