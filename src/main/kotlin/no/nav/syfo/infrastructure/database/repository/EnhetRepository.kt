@@ -42,13 +42,16 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
         }
 
     override fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): POppfolgingsenhet? =
+        getOppfolgingsenhetHistorikkByPersonident(personIdent).firstOrNull()
+
+    override fun getOppfolgingsenhetHistorikkByPersonident(personIdent: PersonIdentNumber): List<POppfolgingsenhet> =
         database.connection.use { connection ->
             connection.prepareStatement(queryOppfolgingsenhetByPersonident)
                 .use {
                     it.setString(1, personIdent.value)
                     it.executeQuery().toList { toPOppfolgingsenhet() }
                 }
-        }.firstOrNull()
+        }
 
     override fun getActiveOppfolgingsenheter(): List<Pair<UUID, PersonIdentNumber>> =
         database.connection.use { connection ->

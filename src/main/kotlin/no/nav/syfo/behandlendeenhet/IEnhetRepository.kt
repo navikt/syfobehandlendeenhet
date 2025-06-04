@@ -15,6 +15,8 @@ interface IEnhetRepository {
 
     fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): POppfolgingsenhet?
 
+    fun getOppfolgingsenhetHistorikkByPersonident(personIdent: PersonIdentNumber): List<POppfolgingsenhet>
+
     fun getEnhetUsageForVeileder(veilederident: String): List<EnhetId>
 
     fun getActiveOppfolgingsenheter(): List<Pair<UUID, PersonIdentNumber>>
