@@ -42,6 +42,7 @@ spec:
         - application: syfooversikt
         - application: syfooversiktsrv
         - application: istilgangskontroll
+        - application: ismeroppfolging
         - application: syfomotebehov
           namespace: team-esyfo
     outbound:

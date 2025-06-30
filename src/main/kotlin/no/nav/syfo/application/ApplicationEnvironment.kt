@@ -49,21 +49,15 @@ data class Environment(
     val syfobehandlendeenhetDbUsername: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_USERNAME"),
     val syfobehandlendeenhetDbPassword: String = getEnvVar("NAIS_DATABASE_SYFOBEHANDLENDEENHET_SYFOBEHANDLENDEENHET_DB_PASSWORD"),
 
-    val ispersonoppgaveApplicationName: String = "ispersonoppgave",
     val syfomotebehovApplicationName: String = "syfomotebehov",
     val syfooversiktsrvApplicationName: String = "syfooversiktsrv",
-    val syfotilgangskontrollApplicationName: String = "syfo-tilgangskontroll",
     val istilgangskontrollApplicationName: String = "istilgangskontroll",
-    val meroppfolgingApplicationName: String = "meroppfolging-backend",
-    val esyfovarselApplicationName: String = "esyfovarsel",
+    val ismeroppfolgingApplicationName: String = "ismeroppfolging",
     val systemAPIAuthorizedConsumerApplicationNameList: List<String> = listOf(
-        ispersonoppgaveApplicationName,
         syfomotebehovApplicationName,
         syfooversiktsrvApplicationName,
-        syfotilgangskontrollApplicationName,
         istilgangskontrollApplicationName,
-        meroppfolgingApplicationName,
-        esyfovarselApplicationName,
+        ismeroppfolgingApplicationName,
     ),
 ) {
     fun jdbcUrl(): String {
