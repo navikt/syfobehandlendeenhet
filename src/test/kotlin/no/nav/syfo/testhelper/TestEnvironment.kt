@@ -61,24 +61,17 @@ fun testAppState() = ApplicationState(
     ready = true,
 )
 
-const val testIspersonoppgaveClientId = "ispersonoppgave-client-id"
 const val testIsdialogmoteClientId = "isdialogmote-client-id"
 const val testSyfomodiapersonClientId = "syfomodiaperson-client-id"
 const val testSyfomotebehovClientId = "syfomotebehov-client-id"
 const val testSyfooversiktsrvClientId = "syfooversiktsrv-client-id"
-const val testSyfotilgangskontrollClientId = "syfo-tilgangskontroll-client-id"
 const val testIstilgangskontrollClientId = "istilgangskontroll-client-id"
-const val testMeroppfolgingClientId = "meroppfolging-backend-client-id"
-const val testEsyfovarselClientId = "esyfovarsel-client-id"
+const val testIsMeroppfolgingClientId = "ismeroppfolging-client-id"
 
 val testAzureAppPreAuthorizedApps = listOf(
     PreAuthorizedClient(
         name = "dev-gcp:teamsykefravr:isdialogmote",
         clientId = testIsdialogmoteClientId,
-    ),
-    PreAuthorizedClient(
-        name = "dev-gcp:teamsykefravr:ispersonoppgave",
-        clientId = testIspersonoppgaveClientId,
     ),
     PreAuthorizedClient(
         name = "dev-fss:teamsykefravr:syfomodiaperson",
@@ -93,19 +86,11 @@ val testAzureAppPreAuthorizedApps = listOf(
         clientId = testSyfooversiktsrvClientId,
     ),
     PreAuthorizedClient(
-        name = "dev-fss:teamsykefravr:syfo-tilgangskontroll",
-        clientId = testSyfotilgangskontrollClientId,
-    ),
-    PreAuthorizedClient(
         name = "dev-gcp:teamsykefravr:istilgangskontroll",
         clientId = testIstilgangskontrollClientId,
     ),
     PreAuthorizedClient(
-        name = "dev-gcp:team-esyfo:meroppfolging-backend",
-        clientId = testMeroppfolgingClientId,
-    ),
-    PreAuthorizedClient(
-        name = "dev-gcp:team-esyfo:esyfovarsel",
-        clientId = testEsyfovarselClientId,
+        name = "dev-gcp:teamsykefravr:ismeroppfolging",
+        clientId = testIsMeroppfolgingClientId,
     ),
 )
