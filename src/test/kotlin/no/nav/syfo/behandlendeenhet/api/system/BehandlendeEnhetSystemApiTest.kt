@@ -33,6 +33,7 @@ class BehandlendeEnhetSystemApiTest {
     private val repository = EnhetRepository(externalMockEnvironment.database)
 
     private val behandlendeEnhetProducer = mockk<BehandlendeEnhetProducer>()
+    private val url = "$systemBehandlendeEnhetApiV2BasePath$systemdBehandlendeEnhetApiV2PersonIdentPath"
 
     init {
         justRun { behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(any(), any()) }
@@ -52,8 +53,6 @@ class BehandlendeEnhetSystemApiTest {
         }
         return client
     }
-
-    private val url = "$systemBehandlendeEnhetApiV2BasePath$systemdBehandlendeEnhetApiV2PersonIdentPath"
 
     class AuthorizedConsumerApplicationNameArgumentsProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext?): Stream<out Arguments?> {

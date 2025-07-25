@@ -1,7 +1,5 @@
 package no.nav.syfo.behandlendeenhet.api.internad
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -57,6 +55,20 @@ class BehandlendeEnhetApiTest {
     private val kafkaProducerMock = mockk<KafkaProducer<String, KBehandlendeEnhetUpdate>>(relaxed = true)
     private val behandlendeEnhetProducer = BehandlendeEnhetProducer(kafkaProducerMock)
 
+    private val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath/personident"
+    private val tildelthistorikkUrl = "$internadBehandlendeEnhetApiV2BasePath/historikk"
+    private val oppfolgingsenhetTildelingerUrl = "$internadBehandlendeEnhetApiV2BasePath/oppfolgingsenhet-tildelinger"
+    private val tilordningsenheterUrl =
+        "$internadBehandlendeEnhetApiV2BasePath/tilordningsenheter/{$ENHET_ID_PARAM}".replace(
+            "{$ENHET_ID_PARAM}",
+            GEOGRAFISK_ENHET_NR
+        )
+    private val validToken = generateJWT(
+        audience = externalMockEnvironment.environment.azureAppClientId,
+        issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
+        navIdent = VEILEDER_IDENT,
+    )
+
     private fun ApplicationTestBuilder.setupApiAndClient(): HttpClient {
         application {
             testApiModule(
@@ -81,20 +93,6 @@ class BehandlendeEnhetApiTest {
     fun afterEach() {
         database.dropData()
     }
-
-    private val behandlendeEnhetUrl = "$internadBehandlendeEnhetApiV2BasePath/personident"
-    private val tildelthistorikkUrl = "$internadBehandlendeEnhetApiV2BasePath/historikk"
-    private val oppfolgingsenhetTildelingerUrl = "$internadBehandlendeEnhetApiV2BasePath/oppfolgingsenhet-tildelinger"
-    private val tilordningsenheterUrl =
-        "$internadBehandlendeEnhetApiV2BasePath/tilordningsenheter/{$ENHET_ID_PARAM}".replace(
-            "{$ENHET_ID_PARAM}",
-            GEOGRAFISK_ENHET_NR
-        )
-    private val validToken = generateJWT(
-        audience = externalMockEnvironment.environment.azureAppClientId,
-        issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
-        navIdent = VEILEDER_IDENT,
-    )
 
     @Nested
     @DisplayName("Get BehandlendeEnhet for PersonIdent as veileder")
@@ -243,11 +241,6 @@ class BehandlendeEnhetApiTest {
     @Nested
     @DisplayName("Get tildelthistorikk for PersonIdent")
     inner class GetTildelthistorikkForPersonIdent {
-        private val objectMapper = ObjectMapper()
-
-        init {
-            objectMapper.registerModule(JavaTimeModule())
-        }
 
         @Test
         fun `Tildelt til annen enhet av veileder`() {
