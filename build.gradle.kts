@@ -5,7 +5,7 @@ version = "1.0.0"
 
 val confluentVersion = "7.9.0"
 val flywayVersion = "10.17.2"
-val hikariVersion = "5.1.0"
+val hikariVersion = "7.0.2"
 val jacksonDataTypeVersion = "2.18.3"
 val jedisVersion = "5.2.0"
 val kafkaVersion = "3.9.0"
