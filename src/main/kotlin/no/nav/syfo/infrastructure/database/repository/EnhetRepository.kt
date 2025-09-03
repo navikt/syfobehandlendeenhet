@@ -2,7 +2,6 @@ package no.nav.syfo.infrastructure.database.repository
 
 import no.nav.syfo.behandlendeenhet.IEnhetRepository
 import no.nav.syfo.domain.EnhetId
-import no.nav.syfo.domain.EnhetId.Companion.ENHETNR_NAV_UTLAND
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
@@ -58,20 +57,6 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
             connection.prepareStatement(queryActiveOppfolgingsenhet)
                 .use {
                     it.executeQuery().toList { Pair(UUID.fromString(getString(1)), PersonIdentNumber(getString(2))) }
-                }
-        }
-
-    override fun getActiveOppfolgingsenheterWithoutVeileder(): List<Triple<UUID, OffsetDateTime, PersonIdentNumber>> =
-        database.connection.use { connection ->
-            connection.prepareStatement(queryActiveOppfolgingsenhetWithoutVeileder)
-                .use {
-                    it.executeQuery().toList {
-                        Triple(
-                            first = UUID.fromString(getString(1)),
-                            second = getObject(2, OffsetDateTime::class.java),
-                            third = PersonIdentNumber(getString(3)),
-                        )
-                    }
                 }
         }
 
@@ -174,15 +159,6 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 NOT EXISTS (SELECT 1 FROM OPPFOLGINGSENHET o2 WHERE o1.personident = o2.personident AND o1.created_at < o2.created_at) AND
                 skjerming_checked_at < NOW() - INTERVAL '1 DAY'
                 LIMIT 500
-            """
-
-        private const val queryActiveOppfolgingsenhetWithoutVeileder =
-            """
-                SELECT uuid, created_at, personident
-                FROM OPPFOLGINGSENHET o1
-                WHERE oppfolgingsenhet IS NOT NULL AND oppfolgingsenhet != '$ENHETNR_NAV_UTLAND' AND
-                NOT EXISTS (SELECT 1 FROM OPPFOLGINGSENHET o2 WHERE o1.personident = o2.personident AND o1.created_at < o2.created_at) AND
-                veileder_checked_ok_at IS NULL
             """
 
         private const val queryUpdateSkjermingCheckedAt =

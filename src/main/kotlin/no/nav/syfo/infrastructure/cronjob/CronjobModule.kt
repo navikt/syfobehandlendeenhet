@@ -30,13 +30,6 @@ fun launchCronjobs(
             repository = repository,
         )
     )
-    cronjobs.add(
-        ReturnToSenderIfNoVeilederCronjob(
-            enhetService = enhetService,
-            repository = repository,
-            syfooversiktsrvClient = syfooversiktsrvClient,
-        )
-    )
 
     cronjobs.forEach {
         launchBackgroundTask(
