@@ -32,6 +32,10 @@ class EnhetService(
     private val behandlendeEnhetProducer: BehandlendeEnhetProducer,
 ) {
 
+    private val roeForFylke = mapOf(
+        "0600" to "0676",
+    )
+
     suspend fun arbeidstakersBehandlendeEnhet(
         callId: String,
         personIdentNumber: PersonIdentNumber,
@@ -137,16 +141,18 @@ class EnhetService(
         val mulige = mutableListOf<Enhet>()
         val overordnet = norgClient.getOverordnetEnhet(callId, currentEnhetId)
         if (overordnet != null) {
-            mulige.addAll(
-                norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr))
-                    .excludeCurrentEnhet(currentEnhetId)
-                    .map {
+            val roeEnhetId = roeForFylke.get(overordnet.enhetNr)
+            if (roeEnhetId != null && currentEnhetId.value != roeEnhetId) {
+                val norgEnhet = norgClient.getNorgEnhet(roeEnhetId)
+                if (norgEnhet != null) {
+                    mulige.add(
                         Enhet(
-                            enhetId = EnhetId(it.enhetNr),
-                            navn = it.navn,
+                            enhetId = EnhetId(norgEnhet.enhetNr),
+                            navn = norgEnhet.navn
                         )
-                    }
-            )
+                    )
+                }
+            }
         }
         return addNavUtlandAndSortAccordingToUsage(mulige, veilederident)
     }
