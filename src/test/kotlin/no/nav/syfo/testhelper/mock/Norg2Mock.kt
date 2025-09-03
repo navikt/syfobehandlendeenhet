@@ -8,7 +8,8 @@ import no.nav.syfo.testhelper.UserConstants.ENHET_ID
 
 const val GEOGRAFISK_ENHET_NR = "0101"
 const val GEOGRAFISK_ENHET_NR_2 = "0102"
-const val OVERORDNET_NR = "0200"
+const val OVERORDNET_NR = "0600"
+const val ROE_NR = "0676"
 const val UNDERORDNET_NR = "0103"
 const val ENHET_NAVN = "Enhet"
 const val ENHET_NAVN_2 = "Enhet2"
