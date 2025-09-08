@@ -34,7 +34,7 @@ import no.nav.syfo.testhelper.generateJWT
 import no.nav.syfo.testhelper.generator.generateTildelOppfolgingsenhetRequestDTO
 import no.nav.syfo.testhelper.mock.ENHET_NAVN
 import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR
-import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR_2
+import no.nav.syfo.testhelper.mock.ROE_NR
 import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
 import no.nav.syfo.testhelper.testApiModule
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
@@ -230,11 +230,9 @@ class BehandlendeEnhetApiTest {
             assertEquals(HttpStatusCode.OK, response.status)
             val behandlendeEnhetList = response.body<List<EnhetDTO>>()
 
-            assertEquals(3, behandlendeEnhetList.size)
+            assertEquals(2, behandlendeEnhetList.size)
             assertEquals(EnhetId.ENHETNR_NAV_UTLAND, behandlendeEnhetList[0].enhetId)
-            // UNDERORDNET_NR (0103) kommer foran GEOGRAFISK_ENHET_NR_2 (0102) fordi veileder har brukt 0103 en gang
-            assertEquals(UNDERORDNET_NR, behandlendeEnhetList[1].enhetId)
-            assertEquals(GEOGRAFISK_ENHET_NR_2, behandlendeEnhetList[2].enhetId)
+            assertEquals(ROE_NR, behandlendeEnhetList[1].enhetId)
         }
     }
 

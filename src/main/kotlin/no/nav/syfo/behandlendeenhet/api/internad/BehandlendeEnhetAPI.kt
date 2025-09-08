@@ -86,7 +86,18 @@ fun Route.registrerPersonApi(
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No enhetId supplied in request")
             val veilederident = token.getNAVIdent()
 
-            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(callId, EnhetId(enhetId), veilederident)
+            // optional header
+            val personident = personIdentHeader()?.let { personIdent ->
+                PersonIdentNumber(personIdent)
+            }
+
+            val tilordningsenheter = enhetService.getMuligeOppfolgingsenheter(
+                callId = callId,
+                token = token,
+                currentEnhetId = EnhetId(enhetId),
+                veilederident = veilederident,
+                personident = personident,
+            )
 
             call.respond(tilordningsenheter.map { it.toEnhetDTO() })
         }

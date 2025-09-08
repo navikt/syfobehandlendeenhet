@@ -16,7 +16,6 @@ import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerP
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.behandlendeenhet.domain.BehandlendeEnhet
 import no.nav.syfo.behandlendeenhet.domain.Enhet
-import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 import no.nav.syfo.infrastructure.database.repository.toOppfolgingsenhet
@@ -31,6 +30,10 @@ class EnhetService(
     private val repository: IEnhetRepository,
     private val behandlendeEnhetProducer: BehandlendeEnhetProducer,
 ) {
+
+    private val roeForFylke = mapOf(
+        "0600" to "0676",
+    )
 
     suspend fun arbeidstakersBehandlendeEnhet(
         callId: String,
@@ -131,29 +134,33 @@ class EnhetService(
 
     suspend fun getMuligeOppfolgingsenheter(
         callId: String,
+        token: Token,
         currentEnhetId: EnhetId,
         veilederident: String,
+        personident: PersonIdentNumber? = null,
     ): List<Enhet> {
         val mulige = mutableListOf<Enhet>()
         val overordnet = norgClient.getOverordnetEnhet(callId, currentEnhetId)
         if (overordnet != null) {
-            mulige.addAll(
-                norgClient.getUnderenheter(callId, EnhetId(overordnet.enhetNr))
-                    .excludeCurrentEnhet(currentEnhetId)
-                    .map {
+            val roeEnhetId = roeForFylke.get(overordnet.enhetNr)
+            if (roeEnhetId != null) {
+                norgClient.getNorgEnhet(roeEnhetId)?.let {
+                    mulige.add(
                         Enhet(
                             enhetId = EnhetId(it.enhetNr),
-                            navn = it.navn,
+                            navn = it.navn
                         )
-                    }
-            )
+                    )
+                }
+            }
         }
-        return addNavUtlandAndSortAccordingToUsage(mulige, veilederident)
+        if (personident != null) {
+            mulige.add(findGeografiskEnhet(callId, personident, token))
+        }
+        return addNavUtlandAndSortAccordingToUsage(mulige, veilederident).filter {
+            it.enhetId != currentEnhetId
+        }
     }
-
-    private fun List<NorgEnhet>.excludeCurrentEnhet(
-        currentEnhetId: EnhetId,
-    ) = this.filter { it.enhetNr != currentEnhetId.value }
 
     private fun addNavUtlandAndSortAccordingToUsage(enhetList: List<Enhet>, veilederident: String) =
         mutableListOf(Enhet(EnhetId(ENHETNR_NAV_UTLAND), ENHETNAVN_NAV_UTLAND)).apply {
