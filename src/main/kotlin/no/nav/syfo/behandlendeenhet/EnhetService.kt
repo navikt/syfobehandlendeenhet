@@ -18,7 +18,6 @@ import no.nav.syfo.behandlendeenhet.domain.BehandlendeEnhet
 import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.domain.EnhetId.Companion.VEST_VIKEN_ENHET_ID
 import no.nav.syfo.domain.EnhetId.Companion.VEST_VIKEN_ROE_ID
-import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 import no.nav.syfo.infrastructure.database.repository.toOppfolgingsenhet
