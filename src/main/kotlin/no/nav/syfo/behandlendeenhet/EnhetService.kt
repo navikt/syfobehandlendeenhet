@@ -18,11 +18,13 @@ import no.nav.syfo.behandlendeenhet.domain.BehandlendeEnhet
 import no.nav.syfo.behandlendeenhet.domain.Enhet
 import no.nav.syfo.domain.EnhetId.Companion.VEST_VIKEN_ENHET_ID
 import no.nav.syfo.domain.EnhetId.Companion.VEST_VIKEN_ROE_ID
+import no.nav.syfo.infrastructure.client.norg.domain.NorgEnhet
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 import no.nav.syfo.infrastructure.database.repository.toOppfolgingsenhet
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
+import kotlin.collections.filter
 
 class EnhetService(
     private val norgClient: NorgClient,
@@ -150,7 +152,7 @@ class EnhetService(
                     mulige.add(
                         Enhet(
                             enhetId = EnhetId(it.enhetNr),
-                            navn = it.navn
+                            navn = it.navn,
                         )
                     )
                 }
@@ -159,10 +161,12 @@ class EnhetService(
         if (personident != null) {
             mulige.add(findGeografiskEnhet(callId, personident, token))
         }
-        return addNavUtlandAndSortAccordingToUsage(mulige, veilederident).filter {
-            it.enhetId != currentEnhetId
-        }
+        return addNavUtlandAndSortAccordingToUsage(mulige, veilederident).excludeCurrentEnhet(currentEnhetId)
     }
+
+    private fun List<Enhet>.excludeCurrentEnhet(
+        currentEnhetId: EnhetId,
+    ) = this.filter { it.enhetId != currentEnhetId }
 
     private fun addNavUtlandAndSortAccordingToUsage(enhetList: List<Enhet>, veilederident: String) =
         mutableListOf(Enhet(EnhetId(ENHETNR_NAV_UTLAND), ENHETNAVN_NAV_UTLAND)).apply {
