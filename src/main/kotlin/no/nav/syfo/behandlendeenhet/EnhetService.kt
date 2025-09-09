@@ -16,6 +16,8 @@ import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerP
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.behandlendeenhet.domain.BehandlendeEnhet
 import no.nav.syfo.behandlendeenhet.domain.Enhet
+import no.nav.syfo.domain.EnhetId.Companion.VEST_VIKEN_ENHET_ID
+import no.nav.syfo.domain.EnhetId.Companion.VEST_VIKEN_ROE_ID
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
 import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
 import no.nav.syfo.infrastructure.database.repository.toOppfolgingsenhet
@@ -32,7 +34,7 @@ class EnhetService(
 ) {
 
     private val roeForFylke = mapOf(
-        "0600" to "0676",
+        VEST_VIKEN_ENHET_ID to VEST_VIKEN_ROE_ID,
     )
 
     suspend fun arbeidstakersBehandlendeEnhet(

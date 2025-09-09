@@ -15,6 +15,7 @@ import no.nav.syfo.behandlendeenhet.api.*
 import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.behandlendeenhet.kafka.KBehandlendeEnhetUpdate
 import no.nav.syfo.domain.EnhetId
+import no.nav.syfo.domain.EnhetId.Companion.VEST_VIKEN_ROE_ID
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import no.nav.syfo.testhelper.ExternalMockEnvironment
@@ -34,7 +35,6 @@ import no.nav.syfo.testhelper.generateJWT
 import no.nav.syfo.testhelper.generator.generateTildelOppfolgingsenhetRequestDTO
 import no.nav.syfo.testhelper.mock.ENHET_NAVN
 import no.nav.syfo.testhelper.mock.GEOGRAFISK_ENHET_NR
-import no.nav.syfo.testhelper.mock.ROE_NR
 import no.nav.syfo.testhelper.mock.UNDERORDNET_NR
 import no.nav.syfo.testhelper.testApiModule
 import no.nav.syfo.util.NAV_PERSONIDENT_HEADER
@@ -232,7 +232,7 @@ class BehandlendeEnhetApiTest {
 
             assertEquals(2, behandlendeEnhetList.size)
             assertEquals(EnhetId.ENHETNR_NAV_UTLAND, behandlendeEnhetList[0].enhetId)
-            assertEquals(ROE_NR, behandlendeEnhetList[1].enhetId)
+            assertEquals(VEST_VIKEN_ROE_ID, behandlendeEnhetList[1].enhetId)
         }
     }
 

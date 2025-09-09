@@ -87,6 +87,10 @@ fun Route.registrerPersonApi(
             val veilederident = token.getNAVIdent()
 
             // optional header
+            // tjenesten brukes både fra syfomodiaperson og syfooversikt. I det første tilfellet er man i kontekst
+            // av en konkret person og sender med personident som header (slik at man i noen tilfeller får
+            // geografisk enhet som alternativ i responsen). I det andre tilfellet tillates multiple
+            // select, så da gir det ikke mening å sende med en personident.
             val personident = personIdentHeader()?.let { personIdent ->
                 PersonIdentNumber(personIdent)
             }

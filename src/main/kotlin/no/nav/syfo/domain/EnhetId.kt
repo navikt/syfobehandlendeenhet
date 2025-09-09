@@ -14,5 +14,7 @@ data class EnhetId(val value: String) {
     companion object {
         const val ENHETNR_NAV_UTLAND = "0393"
         const val ENHETNAVN_NAV_UTLAND = "Nav utland"
+        const val VEST_VIKEN_ENHET_ID = "0600"
+        const val VEST_VIKEN_ROE_ID = "0676"
     }
 }
