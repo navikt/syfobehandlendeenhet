@@ -160,7 +160,6 @@ fun main() {
                 applicationState.ready = false
                 log.info("Application is stopping")
             }
-
         }
     )
 
