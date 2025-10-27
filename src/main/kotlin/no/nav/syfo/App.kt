@@ -156,6 +156,10 @@ fun main() {
                     syfooversiktsrvClient = syfooversiktsrvClient,
                 )
             }
+            monitor.subscribe(ApplicationStopping) {
+                applicationState.ready = false
+                log.info("Application is stopping")
+            }
         }
     )
 
