@@ -3,7 +3,6 @@ package no.nav.syfo.infrastructure.client
 import io.ktor.client.*
 import io.ktor.client.engine.*
 import io.ktor.client.engine.apache.*
-import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
@@ -26,17 +25,6 @@ val commonConfig: HttpClientConfig<out HttpClientEngineConfig>.() -> Unit = {
     expectSuccess = true
 }
 
-val defaultConfig: HttpClientConfig<CIOEngineConfig>.() -> Unit = {
-    this.commonConfig()
-    engine {
-        requestTimeout = 30000
-        endpoint {
-            keepAliveTime = 30000
-            connectTimeout = 30000
-        }
-    }
-}
-
 val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
     this.commonConfig()
     engine {
@@ -47,11 +35,11 @@ val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
 }
 
 fun httpClientDefault() = HttpClient(
-    engineFactory = CIO,
-    block = no.nav.syfo.infrastructure.client.defaultConfig
+    engineFactory = Apache,
+    block = commonConfig
 )
 
 fun httpClientProxy() = HttpClient(
     engineFactory = Apache,
-    block = no.nav.syfo.infrastructure.client.proxyConfig,
+    block = proxyConfig,
 )
