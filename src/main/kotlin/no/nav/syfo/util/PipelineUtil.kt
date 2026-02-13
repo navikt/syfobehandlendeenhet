@@ -3,9 +3,8 @@ package no.nav.syfo.util
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import io.ktor.util.pipeline.*
-import no.nav.syfo.application.api.authentication.Token
-import no.nav.syfo.application.api.authentication.getConsumerClientId
+import no.nav.syfo.api.authentication.Token
+import no.nav.syfo.api.authentication.getConsumerClientId
 
 fun ApplicationCall.getBearerHeader(): Token? =
     this.request.headers[HttpHeaders.Authorization]?.removePrefix("Bearer ")?.let { Token(it) }

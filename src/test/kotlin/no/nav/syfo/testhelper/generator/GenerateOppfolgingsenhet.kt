@@ -1,6 +1,6 @@
 package no.nav.syfo.testhelper.generator
 
-import no.nav.syfo.behandlendeenhet.api.TildelOppfolgingsenhetRequestDTO
+import no.nav.syfo.api.TildelOppfolgingsenhetRequestDTO
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_PERSONIDENT
 
 fun generateTildelOppfolgingsenhetRequestDTO(

@@ -1,7 +1,7 @@
 package no.nav.syfo.infrastructure.database.repository
 
-import no.nav.syfo.behandlendeenhet.domain.Enhet
-import no.nav.syfo.behandlendeenhet.domain.Oppfolgingsenhet
+import no.nav.syfo.domain.Enhet
+import no.nav.syfo.domain.Oppfolgingsenhet
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
 import java.time.OffsetDateTime

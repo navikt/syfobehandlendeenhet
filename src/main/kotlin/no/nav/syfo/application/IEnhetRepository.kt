@@ -1,0 +1,30 @@
+package no.nav.syfo.application
+
+import no.nav.syfo.domain.EnhetId
+import no.nav.syfo.domain.PersonIdentNumber
+import no.nav.syfo.infrastructure.database.repository.POppfolgingsenhet
+import java.util.UUID
+
+interface IEnhetRepository {
+    fun createOppfolgingsenhet(
+        personIdent: PersonIdentNumber,
+        enhetId: EnhetId?,
+        veilederident: String,
+    ): POppfolgingsenhet
+
+    fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): POppfolgingsenhet?
+
+    fun getOppfolgingsenhetHistorikkByPersonident(personIdent: PersonIdentNumber): List<POppfolgingsenhet>
+
+    fun getEnhetUsageForVeileder(veilederident: String): List<EnhetId>
+
+    fun getActiveOppfolgingsenheter(): List<Pair<UUID, PersonIdentNumber>>
+
+    fun updateSkjermingCheckedAt(oppfolgingsenhetUUID: UUID): Int
+
+    fun updateVeilederCheckedOkAt(oppfolgingsenhetUUID: UUID): Int
+
+    fun updatePersonident(nyPersonident: PersonIdentNumber, oldIdent: PersonIdentNumber): Int
+
+    fun deletePerson(personIdent: PersonIdentNumber): Int
+}

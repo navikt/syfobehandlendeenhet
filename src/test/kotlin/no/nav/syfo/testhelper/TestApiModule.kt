@@ -1,10 +1,10 @@
 package no.nav.syfo.testhelper
 
 import io.ktor.server.application.*
-import no.nav.syfo.application.api.apiModule
-import no.nav.syfo.behandlendeenhet.EnhetService
+import no.nav.syfo.api.apiModule
+import no.nav.syfo.application.EnhetService
 import no.nav.syfo.infrastructure.cache.ValkeyStore
-import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
+import no.nav.syfo.infrastructure.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.client.norg.NorgClient
 import no.nav.syfo.infrastructure.client.pdl.PdlClient

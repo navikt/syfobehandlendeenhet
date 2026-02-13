@@ -1,0 +1,229 @@
+package no.nav.syfo.application
+
+import no.nav.syfo.api.authentication.Token
+import no.nav.syfo.api.authentication.getNAVIdent
+import no.nav.syfo.infrastructure.kafka.BehandlendeEnhetProducer
+import no.nav.syfo.domain.BehandlendeEnhet
+import no.nav.syfo.domain.Enhet
+import no.nav.syfo.domain.EnhetId
+import no.nav.syfo.domain.Oppfolgingsenhet
+import no.nav.syfo.domain.PersonIdentNumber
+import no.nav.syfo.infrastructure.cache.ValkeyStore
+import no.nav.syfo.infrastructure.client.norg.NorgClient
+import no.nav.syfo.infrastructure.client.pdl.PdlClient
+import no.nav.syfo.infrastructure.client.pdl.domain.gradering
+import no.nav.syfo.infrastructure.client.pdl.domain.isKode6
+import no.nav.syfo.infrastructure.client.pdl.domain.isKode7
+import no.nav.syfo.infrastructure.client.pdl.domain.toArbeidsfordelingCriteriaDiskresjonskode
+import no.nav.syfo.infrastructure.client.skjermedepersonerpip.SkjermedePersonerPipClient
+import no.nav.syfo.infrastructure.database.repository.toOppfolgingsenhet
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+class EnhetService(
+    private val norgClient: NorgClient,
+    private val pdlClient: PdlClient,
+    private val valkeyStore: ValkeyStore,
+    private val skjermedePersonerPipClient: SkjermedePersonerPipClient,
+    private val repository: IEnhetRepository,
+    private val behandlendeEnhetProducer: BehandlendeEnhetProducer,
+) {
+
+    private val roeForFylke = mapOf(
+        EnhetId.VEST_VIKEN_ENHET_ID to EnhetId.VEST_VIKEN_ROE_ID,
+    )
+
+    suspend fun arbeidstakersBehandlendeEnhet(
+        callId: String,
+        personIdentNumber: PersonIdentNumber,
+        veilederToken: Token? = null,
+    ): BehandlendeEnhet {
+        val oppfolgingsenhet = getOppfolgingsenhet(personIdentNumber)
+        val geografiskEnhet = findGeografiskEnhet(callId, personIdentNumber, veilederToken)
+        return BehandlendeEnhet(
+            geografiskEnhet = geografiskEnhet,
+            oppfolgingsenhet = oppfolgingsenhet,
+        )
+    }
+
+    suspend fun arbeidstakersBehandlendeEnhetHistorikk(personIdentNumber: PersonIdentNumber): List<Oppfolgingsenhet> {
+        return repository.getOppfolgingsenhetHistorikkByPersonident(personIdentNumber).map {
+            it.toOppfolgingsenhet(
+                enhetNavn = getEnhetsnavn(it.oppfolgingsenhet?.let { EnhetId(it) })
+            )
+        }
+    }
+
+    suspend fun updateOppfolgingsenhet(
+        callId: String,
+        personIdent: PersonIdentNumber,
+        enhetId: EnhetId?,
+        veilederToken: Token? = null,
+    ): Oppfolgingsenhet? =
+        if (enhetId == null || validateForOppfolgingsenhet(callId, personIdent, veilederToken)) {
+            val geografiskEnhet = findGeografiskEnhet(
+                callId = callId,
+                personIdentNumber = personIdent,
+                veilederToken = veilederToken,
+            )
+            val newBehandlendeEnhet = if (enhetId != geografiskEnhet.enhetId) enhetId else null
+            val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
+            val navIdent = veilederToken?.getNAVIdent() ?: SYSTEM_USER_IDENT
+            if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
+                val pOppfolgingsenhet = repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, navIdent)
+                pOppfolgingsenhet.toOppfolgingsenhet(
+                    enhetNavn = getEnhetsnavn(newBehandlendeEnhet),
+                ).also {
+                    behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
+                }
+            } else {
+                null
+            }
+        } else {
+            log.warn("Attempt to update oppfolgingsenhet for person with skjerming or adressebeskyttelse")
+            null
+        }
+
+    private suspend fun findGeografiskEnhet(
+        callId: String,
+        personIdentNumber: PersonIdentNumber,
+        veilederToken: Token?,
+    ): Enhet {
+        val cacheKey = "$CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX${personIdentNumber.value}"
+        val cachedEnhet: Enhet? = valkeyStore.getObject(key = cacheKey)
+        return if (cachedEnhet != null) {
+            cachedEnhet
+        } else {
+            val geografiskTilknytning = pdlClient.geografiskTilknytning(
+                callId = callId,
+                personIdentNumber = personIdentNumber,
+            )
+            val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
+                callId = callId,
+                personIdentNumber = personIdentNumber,
+                veilederToken = veilederToken,
+            )
+
+            val graderingList = pdlClient.person(
+                callId = callId,
+                personIdentNumber = personIdentNumber,
+            )?.gradering()
+
+            val behandlendeEnhetFraNorg = norgClient.getArbeidsfordelingEnhet(
+                callId = callId,
+                diskresjonskode = graderingList?.toArbeidsfordelingCriteriaDiskresjonskode(),
+                geografiskTilknytning = geografiskTilknytning,
+                isEgenAnsatt = isEgenAnsatt,
+            )
+
+            val behandlendeEnhet = if (isEnhetUtvandret(behandlendeEnhetFraNorg)) {
+                getEnhetNAVUtland()
+            } else {
+                behandlendeEnhetFraNorg
+            }
+            valkeyStore.setObject(
+                key = cacheKey,
+                value = behandlendeEnhet,
+                expireSeconds = CACHE_GEOGRAFISKENHET_PERSONIDENT_EXPIRE_SECONDS,
+            )
+            behandlendeEnhet
+        }
+    }
+
+    suspend fun getMuligeOppfolgingsenheter(
+        callId: String,
+        token: Token,
+        currentEnhetId: EnhetId,
+        veilederident: String,
+        personident: PersonIdentNumber? = null,
+    ): List<Enhet> {
+        val mulige = mutableListOf<Enhet>()
+        val overordnet = norgClient.getOverordnetEnhet(callId, currentEnhetId)
+        if (overordnet != null) {
+            val roeEnhetId = roeForFylke.get(overordnet.enhetNr)
+            if (roeEnhetId != null) {
+                norgClient.getNorgEnhet(roeEnhetId)?.let {
+                    mulige.add(
+                        Enhet(
+                            enhetId = EnhetId(it.enhetNr),
+                            navn = it.navn,
+                        )
+                    )
+                }
+            }
+        }
+        if (personident != null) {
+            mulige.add(findGeografiskEnhet(callId, personident, token))
+        }
+        return addNavUtlandAndSortAccordingToUsage(mulige, veilederident).excludeCurrentEnhet(currentEnhetId)
+    }
+
+    private fun List<Enhet>.excludeCurrentEnhet(
+        currentEnhetId: EnhetId,
+    ) = this.filter { it.enhetId != currentEnhetId }
+
+    private fun addNavUtlandAndSortAccordingToUsage(enhetList: List<Enhet>, veilederident: String) =
+        mutableListOf(Enhet(EnhetId(EnhetId.ENHETNR_NAV_UTLAND), EnhetId.ENHETNAVN_NAV_UTLAND)).apply {
+            addAll(
+                repository.getEnhetUsageForVeileder(veilederident).mapNotNull { enhetId ->
+                    enhetList.find { it.enhetId == enhetId }
+                }
+            )
+            addAll(enhetList)
+        }.distinct()
+
+    suspend fun validateForOppfolgingsenhet(
+        callId: String,
+        personIdent: PersonIdentNumber,
+        veilederToken: Token? = null,
+    ): Boolean {
+        val isEgenAnsatt = skjermedePersonerPipClient.isSkjermet(
+            callId = callId,
+            personIdentNumber = personIdent,
+            veilederToken = veilederToken,
+        )
+        val graderingList = pdlClient.person(
+            callId = callId,
+            personIdentNumber = personIdent,
+        )?.gradering()
+
+        return !isEgenAnsatt && (graderingList == null || graderingList.none { it.isKode6() || it.isKode7() })
+    }
+
+    private suspend fun getOppfolgingsenhet(personIdent: PersonIdentNumber): Oppfolgingsenhet? {
+        return repository.getOppfolgingsenhetByPersonident(personIdent)?.let {
+            it.toOppfolgingsenhet(
+                enhetNavn = getEnhetsnavn(it.oppfolgingsenhet?.let { EnhetId(it) })
+            )
+        }
+    }
+
+    private suspend fun getEnhetsnavn(oppfolgingsenhet: EnhetId?) =
+        oppfolgingsenhet?.let {
+            if (it.isNavUtland()) {
+                EnhetId.ENHETNAVN_NAV_UTLAND
+            } else {
+                norgClient.getEnhetsnavn(it.value)
+            }
+        } ?: ENHETSNAVN_MANGLER
+
+    private fun isEnhetUtvandret(enhet: Enhet?): Boolean {
+        return enhet?.enhetId?.value == GEOGRAFISK_TILKNYTNING_UTVANDRET
+    }
+
+    private fun getEnhetNAVUtland(): Enhet {
+        return Enhet(
+            enhetId = EnhetId(EnhetId.ENHETNR_NAV_UTLAND),
+            navn = EnhetId.ENHETNAVN_NAV_UTLAND,
+        )
+    }
+
+    companion object {
+        private const val GEOGRAFISK_TILKNYTNING_UTVANDRET = "NOR"
+        private const val ENHETSNAVN_MANGLER = "Enhetsnavn mangler"
+        const val SYSTEM_USER_IDENT = "Z999999"
+        const val CACHE_GEOGRAFISKENHET_PERSONIDENT_KEY_PREFIX = "geografiskenhet-personident-"
+        const val CACHE_GEOGRAFISKENHET_PERSONIDENT_EXPIRE_SECONDS = 12 * 60 * 60L
+        private val log: Logger = LoggerFactory.getLogger(EnhetService::class.java)
+    }
+}

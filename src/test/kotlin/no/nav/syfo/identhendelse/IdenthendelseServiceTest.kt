@@ -1,6 +1,7 @@
 package no.nav.syfo.identhendelse
 
 import kotlinx.coroutines.runBlocking
+import no.nav.syfo.application.IdenthendelseService
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.EnhetId.Companion.ENHETNR_NAV_UTLAND
 import no.nav.syfo.infrastructure.cache.ValkeyStore

@@ -5,8 +5,8 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.syfo.behandlendeenhet.EnhetService
-import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
+import no.nav.syfo.application.EnhetService
+import no.nav.syfo.infrastructure.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.infrastructure.client.norg.NorgClient

@@ -8,8 +8,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.syfo.application.api.ForbiddenAccessVeilederException
-import no.nav.syfo.application.api.authentication.Token
+import no.nav.syfo.api.ForbiddenAccessVeilederException
+import no.nav.syfo.api.authentication.Token
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.client.httpClientDefault
 import no.nav.syfo.util.NAV_CALL_ID_HEADER

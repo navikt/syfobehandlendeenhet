@@ -1,6 +1,6 @@
 package no.nav.syfo.testhelper
 
-import no.nav.syfo.application.ApplicationState
+import no.nav.syfo.ApplicationState
 import no.nav.syfo.testhelper.mock.*
 
 class ExternalMockEnvironment private constructor() {

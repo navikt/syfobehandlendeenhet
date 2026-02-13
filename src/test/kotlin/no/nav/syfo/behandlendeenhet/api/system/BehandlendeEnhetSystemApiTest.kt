@@ -9,8 +9,10 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import io.mockk.justRun
 import io.mockk.mockk
-import no.nav.syfo.behandlendeenhet.api.BehandlendeEnhetResponseDTO
-import no.nav.syfo.behandlendeenhet.kafka.BehandlendeEnhetProducer
+import no.nav.syfo.api.BehandlendeEnhetResponseDTO
+import no.nav.syfo.api.system.systemBehandlendeEnhetApiV2BasePath
+import no.nav.syfo.api.system.systemdBehandlendeEnhetApiV2PersonIdentPath
+import no.nav.syfo.infrastructure.kafka.BehandlendeEnhetProducer
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import no.nav.syfo.testhelper.*
@@ -128,7 +130,7 @@ class BehandlendeEnhetSystemApiTest {
         @ParameterizedTest(name = "Post BehandlendeEnhet for PersonIdent which has oppfolgingsenhet as {0}")
         @ArgumentsSource(AuthorizedConsumerApplicationNameArgumentsProvider::class)
         fun `Post BehandlendeEnhet for PersonIdent which has oppfolgingsenhet`(
-            consumerApplicationName: String
+            consumerApplicationName: String,
         ) {
             val azp = testAzureAppPreAuthorizedApps.find { preAuthorizedClient ->
                 preAuthorizedClient.clientId.contains(consumerApplicationName)
@@ -172,7 +174,7 @@ class BehandlendeEnhetSystemApiTest {
         @ParameterizedTest(name = "should return NoContent if GeografiskTilknyning was not found for PersonIdent as {0}")
         @ArgumentsSource(AuthorizedConsumerApplicationNameArgumentsProvider::class)
         fun `should return NoContent if GeografiskTilknyning was not found for PersonIdent`(
-            consumerApplicationName: String
+            consumerApplicationName: String,
         ) {
             val azp = testAzureAppPreAuthorizedApps.find { preAuthorizedClient ->
                 preAuthorizedClient.clientId.contains(consumerApplicationName)

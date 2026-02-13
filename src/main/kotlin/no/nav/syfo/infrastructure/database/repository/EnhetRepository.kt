@@ -1,6 +1,6 @@
 package no.nav.syfo.infrastructure.database.repository
 
-import no.nav.syfo.behandlendeenhet.IEnhetRepository
+import no.nav.syfo.application.IEnhetRepository
 import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.PersonIdentNumber
 import no.nav.syfo.infrastructure.database.DatabaseInterface
