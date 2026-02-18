@@ -3,8 +3,8 @@ package no.nav.syfo.testhelper.mock
 import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.syfo.application.api.authentication.Token
-import no.nav.syfo.application.api.authentication.getNAVIdent
+import no.nav.syfo.api.authentication.Token
+import no.nav.syfo.api.authentication.getNAVIdent
 import no.nav.syfo.infrastructure.client.veiledertilgang.TilgangDTO
 import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient.Companion.ACCESS_TO_BRUKERE_PATH
 import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrollClient.Companion.ACCESS_TO_SYFO_PATH
@@ -36,7 +36,8 @@ suspend fun MockRequestHandleScope.tilgangskontrollResponse(request: HttpRequest
         }
         requestUrl.endsWith(ACCESS_TO_BRUKERE_PATH) -> {
             val personidenter = request.receiveBody<List<String>>()
-            val personerWhereTilgangOk = personidenter.filter { !(it == ARBEIDSTAKER_ADRESSEBESKYTTET.value || it == ARBEIDSTAKER_EGENANSATT.value) }
+            val personerWhereTilgangOk =
+                personidenter.filter { !(it == ARBEIDSTAKER_ADRESSEBESKYTTET.value || it == ARBEIDSTAKER_EGENANSATT.value) }
             respond(personerWhereTilgangOk)
         }
         else -> error("Unhandled path $requestUrl")

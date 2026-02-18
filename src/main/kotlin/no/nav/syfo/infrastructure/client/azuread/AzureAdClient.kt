@@ -7,9 +7,9 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import no.nav.syfo.application.api.authentication.Token
-import no.nav.syfo.application.api.authentication.getConsumerClientId
-import no.nav.syfo.application.api.authentication.getNAVIdent
+import no.nav.syfo.api.authentication.Token
+import no.nav.syfo.api.authentication.getConsumerClientId
+import no.nav.syfo.api.authentication.getNAVIdent
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import org.slf4j.LoggerFactory
 

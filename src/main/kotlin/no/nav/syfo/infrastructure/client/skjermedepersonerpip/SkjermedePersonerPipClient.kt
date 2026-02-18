@@ -6,7 +6,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.syfo.application.api.authentication.Token
+import no.nav.syfo.api.authentication.Token
 import no.nav.syfo.infrastructure.cache.ValkeyStore
 import no.nav.syfo.infrastructure.client.azuread.AzureAdClient
 import no.nav.syfo.domain.PersonIdentNumber

@@ -1,10 +1,10 @@
 package no.nav.syfo.infrastructure.cronjob
 
-import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.application.Environment
-import no.nav.syfo.application.launchBackgroundTask
-import no.nav.syfo.behandlendeenhet.EnhetService
-import no.nav.syfo.behandlendeenhet.IEnhetRepository
+import no.nav.syfo.ApplicationState
+import no.nav.syfo.Environment
+import no.nav.syfo.launchBackgroundTask
+import no.nav.syfo.application.EnhetService
+import no.nav.syfo.application.IEnhetRepository
 import no.nav.syfo.infrastructure.client.syfooversiktsrv.SyfooversiktsrvClient
 import no.nav.syfo.infrastructure.clients.leaderelection.LeaderPodClient
 

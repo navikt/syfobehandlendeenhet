@@ -1,7 +1,7 @@
 package no.nav.syfo.infrastructure.cronjob
 
-import no.nav.syfo.behandlendeenhet.EnhetService
-import no.nav.syfo.behandlendeenhet.IEnhetRepository
+import no.nav.syfo.application.EnhetService
+import no.nav.syfo.application.IEnhetRepository
 import org.slf4j.LoggerFactory
 import java.util.*
 
