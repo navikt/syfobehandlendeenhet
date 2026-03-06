@@ -19,7 +19,6 @@ val micrometerRegistryVersion = "1.12.13"
 val postgresVersion = "42.7.10"
 val postgresEmbeddedVersion = "2.2.2"
 val postgresRuntimeVersion = "17.6.0"
-val junitVersion = "5.12.0"
 
 plugins {
     kotlin("jvm") version "2.3.10"
@@ -107,7 +106,7 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
 }
 
 kotlin {
