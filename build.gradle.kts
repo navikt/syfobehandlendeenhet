@@ -7,9 +7,10 @@ val confluentVersion = "8.1.1"
 val flywayVersion = "11.19.0"
 val hikariVersion = "7.0.2"
 val jacksonDataTypeVersion = "2.21.1"
+val jacksonDatabindVersion = "3.1.0"
 val jedisVersion = "7.3.0"
 val kafkaVersion = "4.2.0"
-val ktorVersion = "3.3.3"
+val ktorVersion = "3.4.1"
 val logbackVersion = "1.5.32"
 val logstashEncoderVersion = "9.0"
 val mockkVersion = "1.14.9"
@@ -18,6 +19,7 @@ val micrometerRegistryVersion = "1.12.13"
 val postgresVersion = "42.7.10"
 val postgresEmbeddedVersion = "2.2.2"
 val postgresRuntimeVersion = "17.6.0"
+val junitVersion = "5.12.0"
 
 plugins {
     kotlin("jvm") version "2.3.10"
@@ -58,6 +60,7 @@ dependencies {
 
     // (De-)serialization
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDataTypeVersion")
+    implementation("tools.jackson.core:jackson-databind:$jacksonDatabindVersion")
 
     // Database
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
@@ -104,6 +107,7 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
 }
 
 kotlin {
