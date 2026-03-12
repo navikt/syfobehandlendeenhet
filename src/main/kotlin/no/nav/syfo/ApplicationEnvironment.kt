@@ -53,11 +53,15 @@ data class Environment(
     val syfooversiktsrvApplicationName: String = "syfooversiktsrv",
     val istilgangskontrollApplicationName: String = "istilgangskontroll",
     val ismeroppfolgingApplicationName: String = "ismeroppfolging",
+    val isaktivitetskravApplicationName: String = "isaktivitetskrav",
+    val isdialogmotekandidatApplicationName: String = "isdialogmotekandidat",
     val systemAPIAuthorizedConsumerApplicationNameList: List<String> = listOf(
         syfomotebehovApplicationName,
         syfooversiktsrvApplicationName,
         istilgangskontrollApplicationName,
         ismeroppfolgingApplicationName,
+        isaktivitetskravApplicationName,
+        isdialogmotekandidatApplicationName,
     ),
 ) {
     fun jdbcUrl(): String {

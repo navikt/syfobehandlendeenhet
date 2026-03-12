@@ -33,13 +33,12 @@ fun Route.registrerSystemApi(
             }
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No $NAV_PERSONIDENT_HEADER supplied in request header")
 
-            enhetService.arbeidstakersBehandlendeEnhet(
+            val behandlendeEnhet = enhetService.arbeidstakersBehandlendeEnhet(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
                 veilederToken = null,
             )
-                .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) }
-                .run { call.respond(this) }
+            call.respond(BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(behandlendeEnhet))
         }
         post(systemdBehandlendeEnhetApiV2PersonIdentPath) {
             val callId = getCallId()
