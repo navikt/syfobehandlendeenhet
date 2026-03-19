@@ -43,8 +43,6 @@ spec:
         - application: syfooversiktsrv
         - application: istilgangskontroll
         - application: ismeroppfolging
-        - application: isaktivitetskrav
-        - application: isdialogmotekandidat
         - application: syfomotebehov
           namespace: team-esyfo
     outbound:
