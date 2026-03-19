@@ -53,7 +53,7 @@ fun Route.registrerPersonApi(
                 personIdentNumber = personIdentNumber,
                 veilederToken = token,
             )
-            call.respond(BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(behandlendeEnhet) )
+            call.respond(BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(behandlendeEnhet))
         }
 
         get("/historikk") {
