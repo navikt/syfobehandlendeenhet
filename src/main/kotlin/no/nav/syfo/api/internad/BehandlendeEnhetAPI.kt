@@ -48,12 +48,14 @@ fun Route.registrerPersonApi(
                 callId = callId,
                 token = token,
             )
-            val behandlendeEnhet = enhetService.arbeidstakersBehandlendeEnhet(
+
+            enhetService.arbeidstakersBehandlendeEnhet(
                 callId = callId,
                 personIdentNumber = personIdentNumber,
                 veilederToken = token,
             )
-            call.respond(BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(behandlendeEnhet))
+                .let { BehandlendeEnhetResponseDTO.fromBehandlendeEnhet(it) }
+                .run { call.respond(this) }
         }
 
         get("/historikk") {
