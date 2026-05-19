@@ -28,7 +28,6 @@ import no.nav.syfo.infrastructure.database.repository.EnhetRepository
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.*
-import java.util.concurrent.TimeUnit
 
 const val applicationPort = 8080
 
