@@ -103,7 +103,6 @@ class VeilederTilgangskontrollClient(
                 response.body<TilgangDTO>().fullTilgang
             } else {
                 response.body<TilgangDTO>().erGodkjent
-
             }
         } catch (e: ResponseException) {
             if (e.response.status == HttpStatusCode.Forbidden) {
