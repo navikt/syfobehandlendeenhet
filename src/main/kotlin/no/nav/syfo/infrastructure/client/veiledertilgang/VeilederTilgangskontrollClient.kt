@@ -30,10 +30,12 @@ class VeilederTilgangskontrollClient(
     suspend fun throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
         callId: String,
         token: Token,
+        requireFullAccess: Boolean = false
     ) {
         val hasAccess = isVeilederGrantedAccessToSYFOWithOBO(
             callId = callId,
             token = token,
+            requireFullAccess = requireFullAccess
         )
         if (!hasAccess) {
             throw ForbiddenAccessVeilederException()
@@ -83,6 +85,7 @@ class VeilederTilgangskontrollClient(
     private suspend fun isVeilederGrantedAccessToSYFOWithOBO(
         callId: String,
         token: Token,
+        requireFullAccess: Boolean = false,
     ): Boolean {
         val oboToken = azureAdClient.getOnBehalfOfToken(
             scopeClientId = clientId,
@@ -96,7 +99,12 @@ class VeilederTilgangskontrollClient(
                 accept(ContentType.Application.Json)
             }
             COUNT_CALL_TILGANGSKONTROLL_SYFO_SUCCESS.increment()
-            response.body<TilgangDTO>().erGodkjent
+            return if (requireFullAccess) {
+                response.body<TilgangDTO>().fullTilgang
+            } else {
+                response.body<TilgangDTO>().erGodkjent
+
+            }
         } catch (e: ResponseException) {
             if (e.response.status == HttpStatusCode.Forbidden) {
                 COUNT_CALL_TILGANGSKONTROLL_SYFO_FORBIDDEN.increment()

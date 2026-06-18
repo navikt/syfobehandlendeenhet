@@ -38,6 +38,7 @@ import no.nav.syfo.testhelper.UserConstants.ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.OTHER_ENHET_ID
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
+import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_WRITE_ACCESS
 import no.nav.syfo.testhelper.dropData
 import no.nav.syfo.testhelper.generateJWT
 import no.nav.syfo.testhelper.generator.generateTildelOppfolgingsenhetRequestDTO
@@ -702,6 +703,24 @@ class BehandlendeEnhetApiTest {
                         bearerAuth(validToken)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(requestDTO.copy(personidenter = listOf(ARBEIDSTAKER_EGENANSATT.value)))
+                    }
+                    assertEquals(HttpStatusCode.Forbidden, response.status)
+                }
+            }
+
+            @Test
+            fun `should return status Forbidden when veileder does not have write access`() {
+                val noWriteToken = generateJWT(
+                    audience = externalMockEnvironment.environment.azureAppClientId,
+                    issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
+                    navIdent = VEILEDER_IDENT_NO_WRITE_ACCESS,
+                )
+                testApplication {
+                    val client = setupApiAndClient()
+                    val response = client.post(oppfolgingsenhetTildelingerUrl) {
+                        bearerAuth(noWriteToken)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(requestDTO)
                     }
                     assertEquals(HttpStatusCode.Forbidden, response.status)
                 }

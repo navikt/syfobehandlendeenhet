@@ -116,6 +116,12 @@ fun Route.registrerPersonApi(
             val token = call.getBearerHeader()
                 ?: throw IllegalArgumentException("Failed to check tilgang to brukere for veileder. No Authorization header supplied")
 
+            veilederTilgangskontrollClient.throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
+                callId = callId,
+                token = token,
+                requireFullAccess = true
+            )
+
             val tildelOppfolgingsenhetRequest = call.receive<TildelOppfolgingsenhetRequestDTO>()
 
             val personsWithVeilederAccess: List<String> =
