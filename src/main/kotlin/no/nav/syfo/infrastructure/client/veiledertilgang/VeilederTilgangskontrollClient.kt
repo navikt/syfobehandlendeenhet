@@ -30,7 +30,7 @@ class VeilederTilgangskontrollClient(
     suspend fun throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
         callId: String,
         token: Token,
-        requireFullAccess: Boolean = false
+        requireFullAccess: Boolean
     ) {
         val hasAccess = isVeilederGrantedAccessToSYFOWithOBO(
             callId = callId,
@@ -85,7 +85,7 @@ class VeilederTilgangskontrollClient(
     private suspend fun isVeilederGrantedAccessToSYFOWithOBO(
         callId: String,
         token: Token,
-        requireFullAccess: Boolean = false,
+        requireFullAccess: Boolean,
     ): Boolean {
         val oboToken = azureAdClient.getOnBehalfOfToken(
             scopeClientId = clientId,
