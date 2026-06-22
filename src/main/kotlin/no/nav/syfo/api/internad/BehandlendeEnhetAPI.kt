@@ -47,6 +47,7 @@ fun Route.registrerPersonApi(
             veilederTilgangskontrollClient.throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
                 callId = callId,
                 token = token,
+                requireFullAccess = false
             )
             val behandlendeEnhet = enhetService.arbeidstakersBehandlendeEnhet(
                 callId = callId,
@@ -69,6 +70,7 @@ fun Route.registrerPersonApi(
             veilederTilgangskontrollClient.throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
                 callId = callId,
                 token = token,
+                requireFullAccess = false
             )
 
             enhetService.arbeidstakersBehandlendeEnhetHistorikk(
@@ -86,6 +88,7 @@ fun Route.registrerPersonApi(
             veilederTilgangskontrollClient.throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
                 callId = callId,
                 token = token,
+                requireFullAccess = false
             )
             val enhetId = call.parameters[ENHET_ID_PARAM]
                 ?: throw IllegalArgumentException("Could not retrieve BehandlendeEnhet: No enhetId supplied in request")
@@ -115,6 +118,12 @@ fun Route.registrerPersonApi(
             val callId = call.getCallId()
             val token = call.getBearerHeader()
                 ?: throw IllegalArgumentException("Failed to check tilgang to brukere for veileder. No Authorization header supplied")
+
+            veilederTilgangskontrollClient.throwExceptionIfVeilederWithoutAccessToSYFOWithOBO(
+                callId = callId,
+                token = token,
+                requireFullAccess = true
+            )
 
             val tildelOppfolgingsenhetRequest = call.receive<TildelOppfolgingsenhetRequestDTO>()
 

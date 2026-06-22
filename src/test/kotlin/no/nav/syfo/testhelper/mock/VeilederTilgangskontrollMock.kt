@@ -11,6 +11,7 @@ import no.nav.syfo.infrastructure.client.veiledertilgang.VeilederTilgangskontrol
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_ADRESSEBESKYTTET
 import no.nav.syfo.testhelper.UserConstants.ARBEIDSTAKER_EGENANSATT
 import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_ACCESS
+import no.nav.syfo.testhelper.UserConstants.VEILEDER_IDENT_NO_WRITE_ACCESS
 
 val tilgangFalse = TilgangDTO(
     erGodkjent = false,
@@ -18,6 +19,7 @@ val tilgangFalse = TilgangDTO(
 
 val tilgangTrue = TilgangDTO(
     erGodkjent = true,
+    fullTilgang = true,
 )
 
 suspend fun MockRequestHandleScope.tilgangskontrollResponse(request: HttpRequestData): HttpResponseData {
@@ -28,10 +30,10 @@ suspend fun MockRequestHandleScope.tilgangskontrollResponse(request: HttpRequest
             val token = Token(request.headers[HttpHeaders.Authorization]?.removePrefix("Bearer ")!!)
             val navIdent = token.getNAVIdent()
 
-            return if (navIdent == VEILEDER_IDENT_NO_ACCESS) {
+            if (navIdent == VEILEDER_IDENT_NO_ACCESS) {
                 respond(tilgangFalse)
             } else {
-                respond(tilgangTrue)
+                respond(tilgangTrue.copy(fullTilgang = navIdent != VEILEDER_IDENT_NO_WRITE_ACCESS))
             }
         }
         requestUrl.endsWith(ACCESS_TO_BRUKERE_PATH) -> {
