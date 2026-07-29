@@ -55,7 +55,7 @@ class PdlClient(
                 val errorMessage =
                     "No Geografisk Tilknytning was found in response from PDL: No data was found in response"
                 log.error("Error while requesting person from PersonDataLosningen: $errorMessage")
-                throw throw RuntimeException(errorMessage)
+                throw RuntimeException(errorMessage)
             } else {
                 COUNT_CALL_PDL_GT_SUCCESS.increment()
                 return pdlPersonResponse.data.hentGeografiskTilknytning?.geografiskTilknytning()
@@ -153,8 +153,12 @@ class PdlClient(
                 val pdlIdenterResponse = response.body<PdlIdenterResponse>()
                 return if (!pdlIdenterResponse.errors.isNullOrEmpty()) {
                     COUNT_CALL_PDL_IDENTER_FAIL.increment()
-                    pdlIdenterResponse.errors.forEach {
-                        log.error("Error while requesting IdentList from PersonDataLosningen: ${it.errorMessage()}")
+                    pdlIdenterResponse.errors.forEach { error ->
+                        if (error.isOfTypeNotFound()) {
+                            log.warn("Error while requesting ident from PersonDataLosningen: ${error.errorMessage()}")
+                        } else {
+                            log.error("Error while requesting ident from PersonDataLosningen: ${error.errorMessage()}")
+                        }
                     }
                     null
                 } else {

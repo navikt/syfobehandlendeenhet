@@ -28,7 +28,7 @@ class IdenthendelseConsumerService(
                 kafkaConsumer.commitSync()
             }
         } catch (ex: Exception) {
-            log.error("Error running kafka consumer for pdl-aktor, unsubscribing and waiting $DELAY_ON_ERROR_SECONDS seconds for retry", ex)
+            log.warn("Error running kafka consumer for pdl-aktor, unsubscribing and waiting $DELAY_ON_ERROR_SECONDS seconds for retry", ex)
             kafkaConsumer.unsubscribe()
             delay(DELAY_ON_ERROR_SECONDS.seconds)
         }
@@ -36,7 +36,7 @@ class IdenthendelseConsumerService(
 
     companion object {
         private const val POLL_DURATION_SECONDS = 10L
-        private const val DELAY_ON_ERROR_SECONDS = 60L
+        private const val DELAY_ON_ERROR_SECONDS = 10L
         private val log: Logger = LoggerFactory.getLogger("no.nav.syfo.identhendelse")
     }
 }
