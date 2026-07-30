@@ -7,7 +7,9 @@ data class PdlError(
     val locations: List<PdlErrorLocation>,
     val path: List<String>?,
     val extensions: PdlErrorExtension,
-) : Serializable
+) : Serializable {
+    fun isOfTypeNotFound() = this.extensions.code == "not_found"
+}
 
 data class PdlErrorLocation(
     val line: Int?,
