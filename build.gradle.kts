@@ -18,7 +18,7 @@ val nimbusJoseJwtVersion = "10.9.1"
 val micrometerRegistryVersion = "1.17.0"
 val postgresVersion = "42.7.13"
 val postgresEmbeddedVersion = "2.2.2"
-val postgresRuntimeVersion = "17.6.0"
+val postgresRuntimeVersion = "18.4.0"
 
 plugins {
     kotlin("jvm") version "2.4.10"
