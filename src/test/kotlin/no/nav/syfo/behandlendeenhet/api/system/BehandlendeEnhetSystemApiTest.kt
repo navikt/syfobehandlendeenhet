@@ -38,7 +38,7 @@ class BehandlendeEnhetSystemApiTest {
     private val url = "$systemBehandlendeEnhetApiV2BasePath$systemdBehandlendeEnhetApiV2PersonIdentPath"
 
     init {
-        justRun { behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(any(), any()) }
+        justRun { behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(any(), any(), any(), any()) }
     }
 
     private fun ApplicationTestBuilder.setupApiAndClient(): HttpClient {

@@ -5,4 +5,6 @@ import java.time.OffsetDateTime
 data class KBehandlendeEnhetUpdate(
     val personident: String,
     val updatedAt: OffsetDateTime,
+    val behandlendeEnhetFra: String,
+    val behandlendeEnhetTil: String,
 )
