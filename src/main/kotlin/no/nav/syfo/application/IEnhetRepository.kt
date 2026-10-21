@@ -10,6 +10,8 @@ interface IEnhetRepository {
         personIdent: PersonIdentNumber,
         enhetId: EnhetId?,
         veilederident: String,
+        behandlendeEnhetFra: EnhetId? = null,
+        behandlendeEnhetTil: EnhetId? = null,
     ): POppfolgingsenhet
 
     fun getOppfolgingsenhetByPersonident(personIdent: PersonIdentNumber): POppfolgingsenhet?

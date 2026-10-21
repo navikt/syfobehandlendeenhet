@@ -12,6 +12,8 @@ data class POppfolgingsenhet(
     val uuid: UUID,
     val personident: String,
     val oppfolgingsenhet: String?,
+    val behandlendeEnhetFra: String?,
+    val behandlendeEnhetTil: String?,
     val veilederident: String,
     val createdAt: OffsetDateTime,
 )

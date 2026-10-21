@@ -70,11 +70,26 @@ class EnhetService(
             val currentOppfolgingsenhet = getOppfolgingsenhet(personIdent)
             val navIdent = veilederToken?.getNAVIdent() ?: SYSTEM_USER_IDENT
             if (newBehandlendeEnhet != null || currentOppfolgingsenhet != null) {
-                val pOppfolgingsenhet = repository.createOppfolgingsenhet(personIdent, newBehandlendeEnhet, navIdent)
+                val behandlendeEnhetFra =
+                    currentOppfolgingsenhet?.enhet?.enhetId ?: geografiskEnhet.enhetId
+                val behandlendeEnhetTil = newBehandlendeEnhet ?: geografiskEnhet.enhetId
+
+                val pOppfolgingsenhet = repository.createOppfolgingsenhet(
+                    personIdent = personIdent,
+                    enhetId = newBehandlendeEnhet,
+                    veilederident = navIdent,
+                    behandlendeEnhetFra = behandlendeEnhetFra,
+                    behandlendeEnhetTil = behandlendeEnhetTil,
+                )
                 pOppfolgingsenhet.toOppfolgingsenhet(
                     enhetNavn = getEnhetsnavn(newBehandlendeEnhet),
                 ).also {
-                    behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(it, it.createdAt)
+                    behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(
+                        it,
+                        it.createdAt,
+                        behandlendeEnhetFra,
+                        behandlendeEnhetTil,
+                    )
                 }
             } else {
                 null

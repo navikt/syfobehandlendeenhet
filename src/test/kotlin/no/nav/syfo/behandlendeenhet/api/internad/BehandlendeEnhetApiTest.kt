@@ -511,7 +511,78 @@ class BehandlendeEnhetApiTest {
                 assertEquals(0, responseDTO.errors.size)
                 assertTrue(responseDTO.tildelinger.all { it.oppfolgingsenhet == ENHET_ID })
 
+                val firstPersonHistory = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT)
+                val secondPersonHistory = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT_2)
+                assertEquals(GEOGRAFISK_ENHET_NR, firstPersonHistory?.behandlendeEnhetFra)
+                assertEquals(ENHET_ID, firstPersonHistory?.behandlendeEnhetTil)
+                assertEquals(OTHER_ENHET_ID, secondPersonHistory?.behandlendeEnhetFra)
+                assertEquals(ENHET_ID, secondPersonHistory?.behandlendeEnhetTil)
+
                 verify(exactly = 2) { kafkaProducerMock.send(any()) }
+            }
+        }
+
+        @Test
+        fun `Records effective unit when switching to and from an oppfolgingsenhet`() {
+            repository.createOppfolgingsenhet(
+                personIdent = ARBEIDSTAKER_PERSONIDENT,
+                enhetId = EnhetId(OTHER_ENHET_ID),
+                veilederident = VEILEDER_IDENT,
+            )
+
+            testApplication {
+                val client = setupApiAndClient()
+
+                val setOppfolgingsenhetRequest = generateTildelOppfolgingsenhetRequestDTO(
+                    personidenter = listOf(ARBEIDSTAKER_PERSONIDENT.value),
+                    oppfolgingsenhet = ENHET_ID,
+                )
+                val setResponse = client.post(oppfolgingsenhetTildelingerUrl) {
+                    bearerAuth(validToken)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(setOppfolgingsenhetRequest)
+                }
+                assertEquals(HttpStatusCode.OK, setResponse.status)
+
+                val setHistory = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT)
+                assertEquals(ENHET_ID, setHistory?.oppfolgingsenhet)
+                assertEquals(OTHER_ENHET_ID, setHistory?.behandlendeEnhetFra)
+                assertEquals(ENHET_ID, setHistory?.behandlendeEnhetTil)
+                verify(exactly = 1) {
+                    kafkaProducerMock.send(
+                        match {
+                            it.value().behandlendeEnhetFra == OTHER_ENHET_ID &&
+                                it.value().behandlendeEnhetTil == ENHET_ID
+                        }
+                    )
+                }
+
+                val clearOppfolgingsenhetRequest = generateTildelOppfolgingsenhetRequestDTO(
+                    personidenter = listOf(ARBEIDSTAKER_PERSONIDENT.value),
+                    oppfolgingsenhet = GEOGRAFISK_ENHET_NR,
+                )
+                val clearResponse = client.post(oppfolgingsenhetTildelingerUrl) {
+                    bearerAuth(validToken)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(clearOppfolgingsenhetRequest)
+                }
+                assertEquals(HttpStatusCode.OK, clearResponse.status)
+
+                val history = repository.getOppfolgingsenhetHistorikkByPersonident(ARBEIDSTAKER_PERSONIDENT)
+                val clearedHistory = history.first()
+                assertNull(clearedHistory.oppfolgingsenhet)
+                assertEquals(ENHET_ID, clearedHistory.behandlendeEnhetFra)
+                assertEquals(GEOGRAFISK_ENHET_NR, clearedHistory.behandlendeEnhetTil)
+                assertEquals(OTHER_ENHET_ID, history[1].behandlendeEnhetFra)
+                assertEquals(ENHET_ID, history[1].behandlendeEnhetTil)
+                verify(exactly = 1) {
+                    kafkaProducerMock.send(
+                        match {
+                            it.value().behandlendeEnhetFra == ENHET_ID &&
+                                it.value().behandlendeEnhetTil == GEOGRAFISK_ENHET_NR
+                        }
+                    )
+                }
             }
         }
 
@@ -547,6 +618,13 @@ class BehandlendeEnhetApiTest {
                 val otherPerson = responseDTO.tildelinger.first { it.personident == ARBEIDSTAKER_PERSONIDENT_3.value }
                 assertEquals(ENHET_ID, firstPerson.oppfolgingsenhet)
                 assertNull(otherPerson.oppfolgingsenhet)
+
+                val firstPersonHistory = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT)
+                val otherPersonHistory = repository.getOppfolgingsenhetByPersonident(ARBEIDSTAKER_PERSONIDENT_3)
+                assertEquals(GEOGRAFISK_ENHET_NR, firstPersonHistory?.behandlendeEnhetFra)
+                assertEquals(ENHET_ID, firstPersonHistory?.behandlendeEnhetTil)
+                assertEquals(GEOGRAFISK_ENHET_NR, otherPersonHistory?.behandlendeEnhetFra)
+                assertEquals(ENHET_ID, otherPersonHistory?.behandlendeEnhetTil)
 
                 verify(exactly = 2) { kafkaProducerMock.send(any()) }
             }

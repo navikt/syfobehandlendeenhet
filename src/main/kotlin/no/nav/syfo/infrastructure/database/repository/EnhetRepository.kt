@@ -15,6 +15,8 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
         personIdent: PersonIdentNumber,
         enhetId: EnhetId?,
         veilederident: String,
+        behandlendeEnhetFra: EnhetId?,
+        behandlendeEnhetTil: EnhetId?,
     ): POppfolgingsenhet =
         database.connection.use { connection ->
             val now = OffsetDateTime.now()
@@ -23,8 +25,10 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 it.setString(2, personIdent.value)
                 it.setString(3, enhetId?.value)
                 it.setString(4, veilederident)
-                it.setObject(5, now)
-                it.setObject(6, now)
+                it.setString(5, behandlendeEnhetFra?.value)
+                it.setString(6, behandlendeEnhetTil?.value)
+                it.setObject(7, now)
+                it.setObject(8, now)
                 it.executeQuery().toList { toPOppfolgingsenhet() }
             }.also {
                 connection.commit()
@@ -88,6 +92,8 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
             uuid = UUID.fromString(getString("uuid")),
             personident = getString("personident"),
             oppfolgingsenhet = getString("oppfolgingsenhet"),
+            behandlendeEnhetFra = getString("behandlende_enhet_fra"),
+            behandlendeEnhetTil = getString("behandlende_enhet_til"),
             veilederident = getString("veilederident"),
             createdAt = getObject("created_at", OffsetDateTime::class.java),
         )
@@ -128,9 +134,11 @@ class EnhetRepository(private val database: DatabaseInterface) : IEnhetRepositor
                 personident,
                 oppfolgingsenhet,
                 veilederident,
+                behandlende_enhet_fra,
+                behandlende_enhet_til,
                 created_at,
                 skjerming_checked_at
-                ) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?)
+                ) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING *
             """
 
