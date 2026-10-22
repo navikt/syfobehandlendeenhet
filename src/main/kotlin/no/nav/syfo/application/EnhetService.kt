@@ -87,8 +87,6 @@ class EnhetService(
                     behandlendeEnhetProducer.sendBehandlendeEnhetUpdate(
                         it,
                         it.createdAt,
-                        behandlendeEnhetFra,
-                        behandlendeEnhetTil,
                     )
                 }
             } else {

@@ -1,6 +1,5 @@
 package no.nav.syfo.infrastructure.kafka
 
-import no.nav.syfo.domain.EnhetId
 import no.nav.syfo.domain.Oppfolgingsenhet
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -14,8 +13,6 @@ class BehandlendeEnhetProducer(
     fun sendBehandlendeEnhetUpdate(
         oppfolgingsenhet: Oppfolgingsenhet,
         updatedAt: OffsetDateTime,
-        behandlendeEnhetFra: EnhetId,
-        behandlendeEnhetTil: EnhetId,
     ) {
         val key = UUID.nameUUIDFromBytes(oppfolgingsenhet.personident.value.toByteArray()).toString()
         try {
@@ -26,8 +23,6 @@ class BehandlendeEnhetProducer(
                     KBehandlendeEnhetUpdate(
                         oppfolgingsenhet.personident.value,
                         updatedAt,
-                        behandlendeEnhetFra.value,
-                        behandlendeEnhetTil.value,
                     ),
                 )
             ).also { it.get() }

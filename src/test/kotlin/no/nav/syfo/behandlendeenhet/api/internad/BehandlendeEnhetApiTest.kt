@@ -548,14 +548,6 @@ class BehandlendeEnhetApiTest {
                 assertEquals(ENHET_ID, setHistory?.oppfolgingsenhet)
                 assertEquals(OTHER_ENHET_ID, setHistory?.behandlendeEnhetFra)
                 assertEquals(ENHET_ID, setHistory?.behandlendeEnhetTil)
-                verify(exactly = 1) {
-                    kafkaProducerMock.send(
-                        match {
-                            it.value().behandlendeEnhetFra == OTHER_ENHET_ID &&
-                                it.value().behandlendeEnhetTil == ENHET_ID
-                        }
-                    )
-                }
 
                 val clearOppfolgingsenhetRequest = generateTildelOppfolgingsenhetRequestDTO(
                     personidenter = listOf(ARBEIDSTAKER_PERSONIDENT.value),
@@ -575,14 +567,8 @@ class BehandlendeEnhetApiTest {
                 assertEquals(GEOGRAFISK_ENHET_NR, clearedHistory.behandlendeEnhetTil)
                 assertEquals(OTHER_ENHET_ID, history[1].behandlendeEnhetFra)
                 assertEquals(ENHET_ID, history[1].behandlendeEnhetTil)
-                verify(exactly = 1) {
-                    kafkaProducerMock.send(
-                        match {
-                            it.value().behandlendeEnhetFra == ENHET_ID &&
-                                it.value().behandlendeEnhetTil == GEOGRAFISK_ENHET_NR
-                        }
-                    )
-                }
+
+                verify(exactly = 2) { kafkaProducerMock.send(any()) }
             }
         }
 
