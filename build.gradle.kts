@@ -3,7 +3,7 @@ import com.adarshr.gradle.testlogger.theme.ThemeType
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val confluentVersion = "8.3.0"
+val confluentVersion = "8.4.0"
 val flywayVersion = "13.12.1"
 val hikariVersion = "7.1.0"
 val jacksonDataTypeVersion = "2.22.4"
@@ -36,7 +36,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-    implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
@@ -73,30 +73,18 @@ dependencies {
         exclude(group = "log4j")
     }
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion", excludeLog4j)
+    constraints {
+        implementation("at.yawk.lz4:lz4-java") {
+            version {
+                require("1.11.4")
+            }
+        }
+    }
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion", excludeLog4j)
     constraints {
-        implementation("org.apache.avro:avro") {
-            because("io.confluent:kafka-schema-registry:$confluentVersion -> https://www.cve.org/CVERecord?id=CVE-2023-39410")
+        implementation("com.google.guava:guava") {
             version {
-                require("1.12.1")
-            }
-        }
-        implementation("org.apache.commons:commons-compress") {
-            because("org.apache.commons:commons-compress:1.22 -> https://www.cve.org/CVERecord?id=CVE-2012-2098")
-            version {
-                require("1.28.0")
-            }
-        }
-        implementation("org.bitbucket.b_c:jose4j") {
-            because("io.confluent:kafka-schema-registry:$confluentVersion -> https://github.com/advisories/GHSA-6qvw-249j-h44c")
-            version {
-                require("0.9.6")
-            }
-        }
-        implementation("commons-beanutils:commons-beanutils") {
-            because("io.confluent:kafka-schema-registry:$confluentVersion -> https://www.cve.org/CVERecord?id=CVE-2025-48734")
-            version {
-                require("1.11.0")
+                require("33.8.0-jre")
             }
         }
     }
