@@ -58,7 +58,7 @@ class PdlClient(
                 throw RuntimeException(errorMessage)
             } else {
                 COUNT_CALL_PDL_GT_SUCCESS.increment()
-                return pdlPersonResponse.data.hentGeografiskTilknytning?.geografiskTilknytning()
+                return pdlPersonResponse.data.geografiskTilknytning()
                     ?: throw GeografiskTilknytningNotFoundException()
             }
         } catch (e: ResponseException) {

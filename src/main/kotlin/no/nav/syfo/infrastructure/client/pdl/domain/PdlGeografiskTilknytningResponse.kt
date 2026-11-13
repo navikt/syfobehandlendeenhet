@@ -3,6 +3,7 @@ package no.nav.syfo.infrastructure.client.pdl.domain
 import no.nav.syfo.infrastructure.client.pdl.GeografiskTilknytning
 import no.nav.syfo.infrastructure.client.pdl.GeografiskTilknytningType
 import java.io.Serializable
+import java.time.LocalDateTime
 
 data class PdlGeografiskTilknytningResponse(
     val data: PdlHentGeografiskTilknytning?,
@@ -11,6 +12,7 @@ data class PdlGeografiskTilknytningResponse(
 
 data class PdlHentGeografiskTilknytning(
     val hentGeografiskTilknytning: PdlGeografiskTilknytning?,
+    val hentPerson: PdlPerson? = null,
 ) : Serializable
 
 data class PdlGeografiskTilknytning(
@@ -25,6 +27,33 @@ enum class PdlGeografiskTilknytningType {
     KOMMUNE,
     UTLAND,
     UDEFINERT,
+}
+
+fun PdlHentGeografiskTilknytning.geografiskTilknytning(): GeografiskTilknytning? {
+    val gt = hentGeografiskTilknytning ?: return null
+    val geografiskTilknytning = gt.geografiskTilknytning() ?: return null
+    val bostedsadresse = hentPerson?.bostedsadresse?.nyesteAdresse { it.gyldigFraOgMed }
+
+    if (gt.gtKommune == null || gt.gtKommune != bostedsadresse?.ukjentBosted?.bostedskommune) {
+        return geografiskTilknytning
+    }
+
+    val oppholdsadresse = hentPerson.oppholdsadresse?.nyesteAdresse { it.gyldigFraOgMed }
+    return if (oppholdsadresse?.oppholdAnnetSted == "paaSvalbard") {
+        GeografiskTilknytning(
+            type = GeografiskTilknytningType.KOMMUNE,
+            value = "2100", // Svalbard
+        )
+    } else {
+        geografiskTilknytning
+    }
+}
+
+private fun <T> List<T>.nyesteAdresse(gyldigFraOgMed: (T) -> LocalDateTime?): T? {
+    val datoer = mapNotNull(gyldigFraOgMed)
+    if (datoer.size != size) return null
+    val nyesteDato = datoer.maxOrNull() ?: return null
+    return singleOrNull { gyldigFraOgMed(it) == nyesteDato }
 }
 
 fun PdlGeografiskTilknytning.geografiskTilknytning(): GeografiskTilknytning? {

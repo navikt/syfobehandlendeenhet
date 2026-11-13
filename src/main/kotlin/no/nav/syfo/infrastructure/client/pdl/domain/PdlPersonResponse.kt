@@ -2,6 +2,7 @@ package no.nav.syfo.infrastructure.client.pdl.domain
 
 import no.nav.syfo.infrastructure.client.norg.domain.ArbeidsfordelingCriteriaDiskresjonskode
 import java.io.Serializable
+import java.time.LocalDateTime
 
 data class PdlPersonResponse(
     val errors: List<PdlError>?,
@@ -14,6 +15,22 @@ data class PdlHentPerson(
 
 data class PdlPerson(
     val adressebeskyttelse: List<Adressebeskyttelse>?,
+    val bostedsadresse: List<Bostedsadresse>? = null,
+    val oppholdsadresse: List<Oppholdsadresse>? = null,
+) : Serializable
+
+data class Bostedsadresse(
+    val gyldigFraOgMed: LocalDateTime?,
+    val ukjentBosted: UkjentBosted?,
+) : Serializable
+
+data class UkjentBosted(
+    val bostedskommune: String?,
+) : Serializable
+
+data class Oppholdsadresse(
+    val gyldigFraOgMed: LocalDateTime?,
+    val oppholdAnnetSted: String?,
 ) : Serializable
 
 data class Adressebeskyttelse(

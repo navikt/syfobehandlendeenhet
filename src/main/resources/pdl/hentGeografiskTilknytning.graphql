@@ -5,4 +5,16 @@ query($ident: ID!) {
         gtBydel
         gtLand
     }
+    hentPerson(ident: $ident) {
+        bostedsadresse(historikk: false) {
+            gyldigFraOgMed
+            ukjentBosted {
+                bostedskommune
+            }
+        }
+        oppholdsadresse(historikk: false) {
+            gyldigFraOgMed
+            oppholdAnnetSted
+        }
+    }
 }
